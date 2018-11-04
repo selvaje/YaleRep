@@ -15,6 +15,8 @@ export INDIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/M
 export EQUI7=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/EQUI7
 export equi7=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/equi7/dem
 
+# file in  $EQUI7  from   https://github.com/TUW-GEO/Equi7Grid/tree/master/equi7grid/grids 
+
 # shp extent ll ur 
 
 export CT

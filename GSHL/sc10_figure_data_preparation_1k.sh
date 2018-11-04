@@ -8,6 +8,7 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 
+
 # sbatch   /gpfs/home/fas/sbsc/ga254/scripts/GSHL/sc10_figure_data_preparation_1k.sh
 
 DIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL

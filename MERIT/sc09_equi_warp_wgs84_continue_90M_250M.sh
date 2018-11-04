@@ -1,19 +1,19 @@
 #!/bin/bash
 #SBATCH -p day
-#SBATCH -n 1 -c 20  -N 1  
+#SBATCH -n 1 -c 12  -N 1  
 #SBATCH -t 24:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc09_equi_warp_wgs84_continue_90M.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc09_equi_warp_wgs84_continue_90M.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc09_equi_warp_wgs84_continue_90M_250M.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc09_equi_warp_wgs84_continue_90M_250M.sh.%J.err
 #SBATCH --mem-per-cpu=2000
 
 # intensity exposition range variance elongation azimuth extend width 
 
-# for TOPO in deviation multirough stdev aspect dx dxx dxy dy dyy pcurv roughness slope tcurv tpi tri vrm tci spi convergence ; do for RESN in 0.10 0.25 ; do sbatch --export=TOPO=$TOPO,RESN=$RESN    /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc09_equi_warp_wgs84_continue_90M.sh ; done 
+# for TOPO in deviation multirough stdev aspect dx dxx dxy dy dyy pcurv roughness slope tcurv tpi tri vrm tci spi convergence ; do for RESN in 0.10 0.25 ; do sbatch --export=TOPO=$TOPO,RESN=$RESN    /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc09_equi_warp_wgs84_continue_90M_250M.sh ; done ; done 
 
-# sbatch  --export=TOPO=dx,RESN=0.10 /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc09_equi_warp_wgs84_continue_90M.sh
-# sbatch  --export=TOPO=dx,RESN=0.25 /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc09_equi_warp_wgs84_continue_90M.sh
+# sbatch  --export=TOPO=dx,RESN=0.10 /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc09_equi_warp_wgs84_continue_90M_250M.sh
+# sbatch  --export=TOPO=dx,RESN=0.25 /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc09_equi_warp_wgs84_continue_90M_250M.sh
 
 echo "############################################################"
 sstat  -j   $SLURM_JOB_ID.batch   --format=JobID,MaxVMSize
@@ -83,12 +83,21 @@ fi
 ' _ 
 
 if [ $RESN = "1.00" ] ; then 
-gdalbuildvrt  $RAM/${TOPO}_1KMbilinear_MERIT.vrt  $MERIT/$TOPO/tiles/???????_E7_${RESN}.tif
-gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -a_nodata -9999  $RAM/${TOPO}_1KMbilinear_MERIT.vrt   $MERIT/final1km/${TOPO}_1KMbilinear_MERIT.tif
+gdalbuildvrt -overwrite -srcnodata -9999 -vrtnodata -9999   $RAM/${TOPO}_1KMbilinear_MERIT.vrt  $MERIT/$TOPO/tiles/???????_E7_${RESN}.tif
+gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND   -a_nodata -9999  $RAM/${TOPO}_1KMbilinear_MERIT.vrt   $MERIT/final1km/${TOPO}_1KMbilinear_MERIT.tif
 rm -f $RAM/${TOPO}_1KMbilinear_MERIT.vrt 
 fi 
 
+if [ $RESN = "0.25" ] ; then 
+gdalbuildvrt -overwrite -srcnodata -9999 -vrtnodata -9999   $RAM/${TOPO}_250Mbilinear_MERIT.vrt  $MERIT/$TOPO/tiles/???????_E7_${RESN}.tif
+gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -a_nodata -9999 -co BIGTIFF=YES       $RAM/${TOPO}_250Mbilinear_MERIT.vrt   $MERIT/final250m/${TOPO}_250Mbilinear_MERITf.tif
+gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -a_nodata 0 -ot Byte  -scale   $RAM/${TOPO}_250Mbilinear_MERIT.vrt   $MERIT/final250m/${TOPO}_250Mbilinear_MERITb.tif
+rm -f $RAM/${TOPO}_250Mbilinear_MERIT.vrt 
 fi 
+
+fi 
+
+exit 
 
 ################################################################################################################################
 

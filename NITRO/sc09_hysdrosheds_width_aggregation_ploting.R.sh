@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH -p scavenge
+#SBATCH -p week
 #SBATCH -n 1 -c 1  -N 1  
-#SBATCH -t 24:00:00
+#SBATCH -t 168:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc08_hysdrosheds_width_aggregation_ploting.R.%J.out
@@ -118,6 +118,7 @@ R --vanilla --no-readline   -q  <<'EOF'
 library(ggplot2)
 library(car)
 library(quantreg)
+library(mblm)
 
 table=read.table("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NITRO/GRWL/FLO1K_qav_grwl_1km_new.txt")
 colnames(table)[1] = "Q"  # FLO1K
@@ -132,11 +133,15 @@ x <- table$Q[table$Q > 200 ]
 x=log(x)
 y=log(y)
 
+ts_fit <- mblm(x  ~ y  ,  repeated = FALSE ) 
+
+
 df <- data.frame(x = x, y = y,
    d = densCols(x, y, colramp = colorRampPalette(rev(rainbow(10, end = 4/6))))   )
    p <- ggplot( data = df   , aes(x = x, , y = y)) + 
       geom_point(aes(x, y, col = d), size = 0.4) +
-      geom_smooth(method = "lm", se = FALSE , color = "black"  )  + 
+      geom_smooth(method = "lm", se = FALSE , color = "black") +
+      geom_abline(intercept = coef(ts_fit)[1], slope = coef(ts_fit)[2] , color = "red"  ) +
       geom_quantile(quantiles = 0.5) +
       geom_quantile(quantiles = 0.25) +
       geom_quantile(quantiles = 0.75) +
@@ -145,7 +150,7 @@ df <- data.frame(x = x, y = y,
       labs(y = "ln(W-GRWL) (m)")  + 
       theme_bw()
   print(p)
-  ggsave("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NITRO/GRWL/Q_FLO1K_vs_W_GRWL_logQ100.png")
+  ggsave("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NITRO/GRWL/Q_FLO1K_vs_W_GRWL_logQ200_F.png")
 
 Qreg75=rq( y ~ x , tau=0.75)
 Qreg25=rq( y ~ x , tau=0.25)
@@ -180,7 +185,7 @@ df <- data.frame(x = x, y = y,
       labs(y = "W-GRWL (m)")  + 
       theme_bw()
 print(p)
-ggsave("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NITRO/GRWL/Q_FLO1K_vs_W_GRWL_Q100.png")
+ggsave("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NITRO/GRWL/Q_FLO1K_vs_W_GRWL_Q200_F.png")
 
 save.image("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NITRO/GRWL/Q_FLO1K_vs_W_GRWL.R")
 

@@ -2,19 +2,19 @@
 #SBATCH -p scavenge 
 #SBATCH -n 1 -c 1 -N 1 
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc10_plotDerv_levelplot_equi7.R.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc10_plotDerv_levelplot_equi7.R.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc10_plotDerv_levelplot_equi7_for_annex.R.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc10_plotDerv_levelplot_equi7_for_annex.R.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
-#SBATCH -J sc10_plotDerv_levelplot_equi7.R.sh
+#SBATCH -J sc10_plotDerv_levelplot_equi7_for_annex.R.sh
 
-# bash /gpfs/home/fas/sbsc/ga254/scripts/NED_MERIT/sc10_plotDerv_levelplot_equi7.R.sh
+# bash /gpfs/home/fas/sbsc/ga254/scripts/NED_MERIT/sc10_plotDerv_levelplot_equi7_for_annex.R.sh
 
 module load Apps/R/3.3.2-generic
 
 cd /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NED_MERIT/
 
-# gdal_translate -projwin  7500000 5100000 7520000 5081600   /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/equi7/dem/NA/NA_072_048.tif /tmp/test.tif 
+# gdal_translate -projwin  7500000 5100000 7520000 5081600   /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/equi7/dem/NA/NA_066_048.tif /tmp/test.tif 
 #  ( 7500000 , 7520000 , 5081600 , 5100000 ) 
 
 R  --vanilla --no-readline   -q  <<EOF
@@ -35,27 +35,27 @@ library(gridExtra)
 #  x pixel number 120
 #  y pixel number 81
 
-e = extent ( 7500000 , 7520000 , 5081600 , 5100000 ) 
+e = extent ( 6790000 , 6810000 ,  5300000 , 5318400 ) 
 
-elev_M = raster ("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/equi7/dem/NA/NA_072_048.tif") 
+elev_M = raster ("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/equi7/dem/NA/NA_066_048.tif") 
 elev_M = crop   (elev_M , e)
 
-elev_N = raster ("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NED/input_tif/NA_072_048.tif") 
+elev_N = raster ("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NED/input_tif/NA_066_048.tif") 
 elev_N = crop   (elev_N , e)
 #  MERIT minus NED  ... positive values are due to not pefect correction of the tree hight 
-elev_dif = raster ("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NED_MERIT/input_tif/tiles/NA_072_048_dif.tif")  
+elev_dif = raster ("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NED_MERIT/input_tif/tiles/NA_066_048_dif.tif")  
 elev_dif = crop   (elev_dif , e)
 
 
 for ( dir in c("input_tif","roughness","tri","tpi","vrm","tci","spi","slope","pcurv","tcurv","dx","dy","dxx","dyy","dxy","convergence")) { 
-     raster  <- raster(paste0( dir,"/tiles/","/NA_072_048.tif") ) 
+     raster  <- raster(paste0( dir,"/tiles/","/NA_066_048.tif") ) 
         raster = crop (raster , e)
         raster[raster == -9999 ] <- NA
  	assign(paste0(dir) , raster  )
 }
 
 for ( dir in c("Ew","Nw","sin","cos")) { 
-        raster  <- raster(paste0("aspect/tiles/NA_072_048_",dir,".tif") ) 
+        raster  <- raster(paste0("aspect/tiles/NA_066_048_",dir,".tif") ) 
         raster = crop (raster , e)        
         raster[raster == -9999 ] <- NA
  	assign(paste0(dir) , raster  )
@@ -71,7 +71,7 @@ cols=colR(n)
 options(scipen=10)
 trunc <- function(x, ..., prec = 0) base::trunc(x * 10^prec, ...) / 10^prec
 
-pdf(paste0("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NED_MERIT/figure/derivative_all_var_plot_equi7.pdf") , width=6, height=7.5   )
+pdf(paste0("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NED_MERIT/figure/derivative_all_var_plot_equi7_for_annex.pdf") , width=6, height=7.5   )
 par (oma=c(2,2,2,1) , mar=c(0.4,0.5,1,1.9) , cex.lab=0.5 , cex=0.6 , cex.axis=0.4  ,   mfrow=c(6,4) ,  xpd=NA    )
 
 for ( dir in c("elev_M","elev_N","elev_cor","elev_dif","input_tif","roughness","tri","tpi","vrm","tci","spi","cos","sin","slope","Ew","Nw","pcurv","tcurv","dx","dy","dxx","dyy","dxy","convergence")){
