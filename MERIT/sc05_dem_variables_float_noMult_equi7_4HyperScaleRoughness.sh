@@ -51,36 +51,36 @@ mv $RAM/${filename}_00.tif  $RAM/${filename}_0.tif
 fi
 
 singularity exec /gpfs/home/fas/sbsc/ga254/scripts/MERIT/UbuntuWB.simg  bash <<EOF
-/WBT/whitebox_tools  -r=MultiscaleRoughness  -v --wd="$RAM"  --dem=${filename}_0.tif --out_mag=${filename}_roug_mag.tif  --out_scale=${filename}_roug_sca.tif --min_scale=1 --max_scale=2000 --step=3
+/WBT/whitebox_tools  -r=MultiscaleRoughness  -v --wd="$RAM"  --dem=${filename}_0.tif --out_mag=${filename}_rough-magnitute.tif  --out_scale=${filename}_rough-scale.tif --min_scale=1 --max_scale=2000 --step=3
 EOF
 
 # cp $RAM/${filename}_roug_mag.tif   $SCRATCH/multirough/tiles/${filename}_roug_notmask.tif 
 
-for PAR in mag sca ; do 
-pksetmask -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND  -m $RAM/$filename.tif -nodata -9999 -msknodata -9999 -i $RAM/${filename}_roug_$PAR.tif -o  $RAM/${filename}_roug_${PAR}_msk.tif 
+for PAR in rough-magnitute rough-magnitute-scale   ; do
+pksetmask -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND  -m $RAM/$filename.tif -nodata -9999 -msknodata -9999 -i $RAM/${filename}_$PAR.tif -o  $RAM/${filename}_${PAR}_msk.tif 
 
 # to mask    #   -32768  of some files 
 if [ $filename = "AS_006_042" ] || [ $filename = "AS_006_048" ] || [ $filename = "AS_006_054" ] || [ $filename = "EU_078_012" ] || [ $filename = "EU_078_006" ] ; then 
-pksetmask -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND  -m $RAM/${filename}_roug_$PAR.tif -nodata -32768 -msknodata -9999 -i $RAM/${filename}_roug_${PAR}_msk.tif -o  $RAM/${filename}_roug_${PAR}_msk2.tif 
-mv  $RAM/${filename}_roug_${PAR}_msk2.tif   $RAM/${filename}_roug_${PAR}_msk.tif 
+pksetmask -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND  -m $RAM/${filename}_$PAR.tif -nodata -32768 -msknodata -9999 -i $RAM/${filename}_${PAR}_msk.tif -o  $RAM/${filename}_${PAR}_msk2.tif 
+mv  $RAM/${filename}_${PAR}_msk2.tif   $RAM/${filename}_${PAR}_msk.tif 
 fi 
 
-rm -f  $RAM/${filename}_roug_${PAR}.tif    
-gdal_translate   -projwin $( getCorners4Gtranslate $file  )     -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND   $RAM/${filename}_roug_${PAR}_msk.tif  $SCRATCH/multirough/tiles/${filename}_roug_${PAR}.tif 
-rm -f  $RAM/${filename}_roug_${PAR}_msk.tif 
+rm -f  $RAM/${filename}_${PAR}.tif    
+gdal_translate   -projwin $( getCorners4Gtranslate $file  )     -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND   $RAM/${filename}_${PAR}_msk.tif  $SCRATCH/${PAR}/tiles/${PAR}_100M_MERIT_${filename}.tif 
+rm -f  $RAM/${filename}_${PAR}_msk.tif 
 done 
 
-exit 
 
 singularity exec /gpfs/home/fas/sbsc/ga254/scripts/MERIT/UbuntuWB.simg  bash <<EOF
-/WBT/whitebox_tools -r=MaxElevationDeviation  -v --wd="$RAM"  --dem=${filename}_0.tif --out_mag=${filename}_devi_mag.tif   --out_scale=${filename}_devi_sca.tif  --min_scale=1 --max_scale=5000 --step=3
+/WBT/whitebox_tools -r=MaxElevationDeviation  -v --wd="$RAM"  --dem=${filename}_0.tif --out_mag=${filename}_dev-magnitute.tif --out_scale=${filename}_dev-scale.tif --min_scale=1 --max_scale=2000 --step=3
 EOF
 
-for PAR in mag sca ; do 
-pksetmask -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND  -m $RAM/$filename.tif -nodata -9999 -msknodata -9999 -i  $RAM/${filename}_devi_$PAR.tif -o  $RAM/${filename}_devi_${PAR}_msk.tif 
-rm -f  $RAM/${filename}_devi_${PAR}.tif    
-gdal_translate   -projwin $( getCorners4Gtranslate $file  )     -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND   $RAM/${filename}_devi_${PAR}_msk.tif  $SCRATCH/deviation/tiles/${filename}_devi_${PAR}.tif 
-rm -f  $RAM/${filename}_devi_${PAR}_msk.tif 
+
+for PAR in  dev-magnitute dev-scale   ; do 
+pksetmask -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND  -m $RAM/$filename.tif -nodata -9999 -msknodata -9999 -i  $RAM/${filename}_$PAR.tif -o  $RAM/${filename}_${PAR}_msk.tif 
+rm -f  $RAM/${filename}_${PAR}.tif    
+gdal_translate   -projwin $( getCorners4Gtranslate $file  )     -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND   $RAM/${filename}_${PAR}_msk.tif  $SCRATCH/${PAR}/tiles/${PAR}_100M_MERIT_${filename}.tif 
+rm -f  $RAM/${filename}_${PAR}_msk.tif 
 done 
 
 
