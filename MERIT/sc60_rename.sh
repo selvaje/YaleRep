@@ -28,6 +28,8 @@ for TOPO in multirough ; do for file in $TOPO/tiles/??_???_???_roug_mag.tif ; do
 for TOPO in multirough ; do for file in $TOPO/tiles/??_???_???_roug_sca.tif ; do filename=$(basename $file _roug_sca.tif) ;  mv $file multirough/tiles/rough-scale_100M_MERIT_$filename.tif     ; done ; done
 
 
+for TOPO in forms  ; do for file in $TOPO/tiles/??_???_???.tif ; do filename=$(basename $file .tif) ; echo  mv $file geom/tiles/geom_100M_MERIT_$filename.tif ; done ; done
+
 
 
 cd  

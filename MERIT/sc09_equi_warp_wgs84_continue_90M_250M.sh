@@ -10,7 +10,7 @@
 
 # warp equi7 to wgs84 for 90m and 250m, save intermediate tif in scratch then cp to project by getting the mean in case of overalliping 
 
-# for TOPO in elev-stdev aspect aspect-sine aspect-cosine northness easthness dx dxx dxy dy dyy pcurv roughness slope tcurv tpi tri vrm cti spi convergence ; do for RESN in 90 250  ; do sbatch --export=TOPO=$TOPO,RESN=$RESN    /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc09_equi_warp_wgs84_continue_90M_250M.sh ; done ; done 
+# for TOPO in dev-magnitute dev-scale rough-magnitute rough-scale elev-stdev aspect aspect-sine aspect-cosine northness easthness dx dxx dxy dy dyy pcurv roughness slope tcurv tpi tri vrm cti spi convergence ; do for RESN in 90 250  ; do sbatch --export=TOPO=$TOPO,RESN=$RESN    /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc09_equi_warp_wgs84_continue_90M_250M.sh ; done ; done 
 
 # sbatch  --export=TOPO=dx,RESN=0.10 /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc09_equi_warp_wgs84_continue_90M_250M.sh
 # sbatch  --export=TOPO=dx,RESN=0.25 /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc09_equi_warp_wgs84_continue_90M_250M.sh
@@ -35,11 +35,11 @@ if [ $RESN = "1.00" ] ; then export RES="0.00833333333333333333333333333" ; expo
 export RESN
 
 
-if [ $TOPO != "aspect" ]   &&  [ $TOPO != "deviation" ] &&  [ $TOPO != "multirough" ]  ; then 
+if [ $TOPO != "geom" ]  ; then 
 
 for CT in  AF AN AS EU NA OC SA ; do 
 export CT 
-if [ ! -f $SCRATCH/$TOPO/tiles/all_${CT}_tif.vrt ] ; then gdalbuildvrt  -overwrite    $SCRATCH/$TOPO/tiles/all_${CT}_tif.vrt   $SCRATCH/$TOPO/tiles/${TOPO}_100M_MERIT_${CT}_???_???.tif ; fi 
+if [ ! -f $SCRATCH/$TOPO/tiles/all_${CT}_tif.vrt ] ; then gdalbuildvrt  -overwrite   -srcnodata -99999  -vrtnodata -9999    $SCRATCH/$TOPO/tiles/all_${CT}_tif.vrt   $SCRATCH/$TOPO/tiles/${TOPO}_100M_MERIT_${CT}_???_???.tif ; fi 
 
 # warp each single equi7 tile to wgs84 
 
@@ -48,7 +48,9 @@ file=$1
 filename=$(basename $file _dem.tif)
 geostring=$(getCorners4Gwarp $file)
 
-gdalwarp  --config GDAL_CACHEMAX 1500 -overwrite -wm 1500   -overwrite -overwrite  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -r bilinear -srcnodata -9999 -dstnodata -9999 -tr ${RES} ${RES} -te $geostring  -s_srs  $EQUI/${CT}/PROJ/EQUI7_V13_${CT}_PROJ_ZONE.prj -t_srs $EQUI/${CT}/GEOG/EQUI7_V13_${CT}_GEOG_ZONE.prj $SCRATCH/$TOPO/tiles/all_${CT}_tif.vrt $RAM/${TOPO}_${CT}_${filename}_${RESN}.tif
+if [ $TOPO = "aspect" ] || [ $TOPO = "rough-scale" ] || [ $TOPO = "dev-scale" ]  ; then ALG=near ; else ALG=bilinear ; fi 
+
+gdalwarp  --config GDAL_CACHEMAX 1500 -overwrite -wm 1500   -overwrite -overwrite  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -r $ALG -srcnodata -9999 -dstnodata -9999 -tr ${RES} ${RES} -te $geostring  -s_srs  $EQUI/${CT}/PROJ/EQUI7_V13_${CT}_PROJ_ZONE.prj -t_srs $EQUI/${CT}/GEOG/EQUI7_V13_${CT}_GEOG_ZONE.prj $SCRATCH/$TOPO/tiles/all_${CT}_tif.vrt $RAM/${TOPO}_${CT}_${filename}_${RESN}.tif
 
 pksetmask  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -m $EQUI/$CT/GEOG/EQUI7_V13_${CT}_GEOG_ZONE_KM${ERES}.tif  -msknodata 0 -nodata -9999 -i $RAM/${TOPO}_${CT}_${filename}_${RESN}.tif  -o $RAM/${TOPO}_${CT}_${filename}_msk_${RESN}.tif
 rm -f $RAM/${TOPO}_${CT}_${filename}_${RESN}.tif
@@ -72,11 +74,12 @@ gdalbuildvrt  -overwrite  -separate  $RAM/${TOPO}_CT_${filename}_${RESN}.vrt  $S
 BAND=$(pkinfo -nb -i  $RAM/${TOPO}_CT_${filename}_${RESN}.vrt     | awk \'{ print $2 }\' ) 
 
 if [ $BAND -eq 1 ] ; then 
-gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND  $RAM/${TOPO}_CT_${filename}_${RESN}.vrt $SCRATCH/${TOPO}/tiles/${TOPO}_${RESN}M_MERIT_${filename}.tif ;  rm -f $RAM/${TOPO}_CT_${filename}_${RESN}.vrt 
+gdal_translate -a_nodata -9999 -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND  $RAM/${TOPO}_CT_${filename}_${RESN}.vrt $SCRATCH/${TOPO}/tiles/${TOPO}_${RESN}M_MERIT_${filename}.tif ;  rm -f $RAM/${TOPO}_CT_${filename}_${RESN}.vrt 
 else 
 echo start statporfile
-pkstatprofile -nodata -9999 -of GTiff  -f mean -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -i $RAM/${TOPO}_CT_${filename}_${RESN}.vrt -o $MERIT/$TOPO/tiles/${filename}_E7_tmp_${RESN}.tif
-gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND  $MERIT/$TOPO/tiles/${filename}_E7_tmp_${RESN}.tif   $SCRATCH/$TOPO/tiles/${TOPO}_${RESN}M_MERIT_${filename}.tif  
+if [ $TOPO = "aspect" ] || [ $TOPO = "rough-scale" ] || [ $TOPO = "dev-scale" ]  ; then ALG=max ; else ALG=mean ; fi 
+pkstatprofile  -nodata -9999 -of GTiff -f $ALG  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -i $RAM/${TOPO}_CT_${filename}_${RESN}.vrt -o $MERIT/$TOPO/tiles/${filename}_E7_tmp_${RESN}.tif
+gdal_translate -a_nodata -9999    -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND  $MERIT/$TOPO/tiles/${filename}_E7_tmp_${RESN}.tif   $SCRATCH/$TOPO/tiles/${TOPO}_${RESN}M_MERIT_${filename}.tif  
 rm -f $RAM/${TOPO}_CT_${filename}_${RESN}.vrt  $MERIT/$TOPO/tiles/${filename}_E7_tmp_${RESN}.tif
 fi 
 
@@ -86,170 +89,56 @@ rm -f  $SCRATCH/$TOPO/tiles/${TOPO}_??_???????_90.tif
 
 fi 
 
-exit 
 
-# probably below not usefull anymore 
+###############  geom  ###########################
 
-
-
-
-#########################  sin cos   #######################################################################################################
-
-if [ $TOPO = "aspect"   ] ; then 
-for FUN in sin cos Ew Nw ; do
-export FUN
+if [  $TOPO = "geom" ]  ; then 
 
 for CT in  AF AN AS EU NA OC SA ; do 
-export CT   
+export CT 
+if [ ! -f $SCRATCH/$TOPO/tiles/all_${CT}_tif.vrt ] ; then gdalbuildvrt  -srcnodata 0 -vrtnodata 0  -overwrite    $SCRATCH/$TOPO/tiles/all_${CT}_tif.vrt   $SCRATCH/$TOPO/tiles/${TOPO}_100M_MERIT_${CT}_???_???.tif ; fi 
 
-if [ ! -f $SCRATCH/$TOPO/tiles/all_${CT}_${FUN}_tif.vrt ] ; then gdalbuildvrt  -overwrite    $SCRATCH/$TOPO/tiles/all_${CT}_${FUN}_tif.vrt   $SCRATCH/$TOPO/tiles/${CT}_???_???_$FUN.tif  ; fi 
+# warp each single equi7 tile to wgs84 
 
-# warp each single equi7 tile to wgs84
-for file in $(cat $EQUI/${CT}/GEOG/EQUI7_V13_${CT}_GEOG_TILEMERIT.txt)  ; do echo $MERIT/input_tif/$file ; done  |  xargs -n 1 -P $P  bash -c $'
+for file in $(cat $EQUI/${CT}/GEOG/EQUI7_V13_${CT}_GEOG_TILEMERIT.txt)  ; do echo $MERIT/input_tif/$file ; done  | xargs -n 1 -P $P bash -c $'
 file=$1 
 filename=$(basename $file _dem.tif)
 geostring=$(getCorners4Gwarp $file)
 
-echo processing $RAM/${TOPO}_${CT}_${FUN}_${filename}_${RESN}.tif
+gdalwarp  --config GDAL_CACHEMAX 1500 -overwrite -wm 1500   -overwrite -overwrite  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -r near -srcnodata 0  -dstnodata 0 -tr ${RES} ${RES} -te $geostring  -s_srs  $EQUI/${CT}/PROJ/EQUI7_V13_${CT}_PROJ_ZONE.prj -t_srs $EQUI/${CT}/GEOG/EQUI7_V13_${CT}_GEOG_ZONE.prj $SCRATCH/$TOPO/tiles/all_${CT}_tif.vrt $RAM/${TOPO}_${CT}_${filename}_${RESN}.tif
 
-gdalwarp -overwrite --config GDAL_CACHEMAX 1000 -overwrite -wm 1000 -co COMPRESS=DEFLATE -co ZLEVEL=9 -ot Float32 -wt Float32  -co INTERLEAVE=BAND -r bilinear -srcnodata -9999 -dstnodata -9999 -tr ${RES} ${RES} -te $geostring  -s_srs  $EQUI/${CT}/PROJ/EQUI7_V13_${CT}_PROJ_ZONE.prj -t_srs $EQUI/${CT}/GEOG/EQUI7_V13_${CT}_GEOG_ZONE.prj $SCRATCH/$TOPO/tiles/all_${CT}_${FUN}_tif.vrt $RAM/${TOPO}_${CT}_${FUN}_${filename}_${RESN}.tif
-
-pksetmask  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -m $EQUI/$CT/GEOG/EQUI7_V13_${CT}_GEOG_ZONE_KM${RESN}.tif  -msknodata 0 -nodata -9999 -i $RAM/${TOPO}_${CT}_${FUN}_${filename}_${RESN}.tif  -o $RAM/${TOPO}_${CT}_${FUN}_${filename}_msk_${RESN}.tif
-rm -f $RAM/${TOPO}_${CT}_${FUN}_${filename}_${RESN}.tif
-
-MAX=$(pkstat -max -i $RAM/${TOPO}_${CT}_${FUN}_${filename}_msk_${RESN}.tif  | awk \'{ print $2 }\'  )
-if [ $MAX = "-9999"  ] ; then 
-rm -f $RAM/${TOPO}_${CT}_${FUN}_${filename}_msk_${RESN}.tif 
-else 
-echo cp  ${TOPO}_${CT}_${FUN}_${filename}_${RESN}.tif  to final destination   $SCRATCH/$TOPO/tiles/
-mv $RAM/${TOPO}_${CT}_${FUN}_${filename}_msk_${RESN}.tif  $SCRATCH/$TOPO/tiles/${TOPO}_${CT}_${FUN}_${filename}_${RESN}.tif ; rm -f  $RAM/${TOPO}_${CT}_${FUN}_${filename}_msk_${RESN}.tif
-fi 
-' _ 
-done 
-
-# cp to final dir  or get mean of the overlapping tiles 
-ls  $MERIT/input_tif/*_dem.tif   | xargs -n 1 -P $P  bash -c $'
-file=$1
-filename=$(basename $file _dem.tif)
-gdalbuildvrt  -overwrite  -separate  $RAM/${TOPO}_CT_${FUN}_${filename}_${RESN}.vrt  $SCRATCH/$TOPO/tiles/${TOPO}_??_${FUN}_${filename}_${RESN}.tif
-BAND=$(pkinfo -nb -i  $RAM/${TOPO}_CT_${FUN}_${filename}_${RESN}.vrt     | awk \'{ print $2 }\' ) 
-if [ $BAND -eq 1 ] ; then
-gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND  $RAM/${TOPO}_CT_${FUN}_${filename}_${RESN}.vrt $MERIT/$TOPO/tiles/${filename}_E7_${FUN}_${RESN}.tif ;  rm -f $RAM/${TOPO}_CT_${FUN}_${filename}_${RESN}.vrt 
-else
-echo start statporfile
-pkstatprofile -nodata -9999 -of GTiff  -f mean -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -i $RAM/${TOPO}_CT_${FUN}_${filename}_${RESN}.vrt -o $MERIT/$TOPO/tiles/${filename}_E7_${FUN}_tmp_${RESN}.tif
-gdal_translate  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND  $MERIT/$TOPO/tiles/${filename}_E7_${FUN}_tmp_${RESN}.tif   $MERIT/$TOPO/tiles/${filename}_E7_${FUN}_${RESN}.tif
-rm -f $RAM/${TOPO}_CT_${FUN}_${filename}_${RESN}.vrt  $MERIT/$TOPO/tiles/${filename}_E7_${FUN}_tmp_${RESN}.tif
-fi
-' _ 
-
-
-done
-
-
-############################# only aspect  ####################################### 
-
-
-for CT in  AF AN AS EU NA OC SA ; do 
-export CT   
-
-if [ ! -f $SCRATCH/$TOPO/tiles/all_${CT}_tif.vrt ] ; then gdalbuildvrt  -overwrite    $SCRATCH/$TOPO/tiles/all_${CT}_tif.vrt   $SCRATCH/$TOPO/tiles/${CT}_???_???.tif  ; fi 
-
-# warp each single equi7 tile to wgs84
-for file in $(cat $EQUI/${CT}/GEOG/EQUI7_V13_${CT}_GEOG_TILEMERIT.txt)  ; do echo $MERIT/input_tif/$file ; done  |  xargs -n 1 -P $P  bash -c $'
-file=$1 
-filename=$(basename $file _dem.tif)
-geostring=$(getCorners4Gwarp $file)
-
-echo processing $RAM/${TOPO}_${CT}_${filename}_${RESN}.tif
-
-gdalwarp -overwrite --config GDAL_CACHEMAX 1000 -overwrite -wm 1000 -co COMPRESS=DEFLATE -co ZLEVEL=9 -ot Float32 -wt Float32  -co INTERLEAVE=BAND -r near -srcnodata -9999 -dstnodata -9999 -tr ${RES} ${RES} -te $geostring  -s_srs  $EQUI/${CT}/PROJ/EQUI7_V13_${CT}_PROJ_ZONE.prj -t_srs $EQUI/${CT}/GEOG/EQUI7_V13_${CT}_GEOG_ZONE.prj $SCRATCH/$TOPO/tiles/all_${CT}_tif.vrt $RAM/${TOPO}_${CT}_${filename}_${RESN}.tif
-
-pksetmask  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -m $EQUI/$CT/GEOG/EQUI7_V13_${CT}_GEOG_ZONE_KM${RESN}.tif  -msknodata 0 -nodata -9999 -i $RAM/${TOPO}_${CT}_${filename}_${RESN}.tif  -o $RAM/${TOPO}_${CT}_${filename}_msk_${RESN}.tif
+pksetmask  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -m $EQUI/$CT/GEOG/EQUI7_V13_${CT}_GEOG_ZONE_KM${ERES}.tif  -msknodata 0 -nodata 0 -i $RAM/${TOPO}_${CT}_${filename}_${RESN}.tif  -o $RAM/${TOPO}_${CT}_${filename}_msk_${RESN}.tif
 rm -f $RAM/${TOPO}_${CT}_${filename}_${RESN}.tif
 
 MAX=$(pkstat -max -i $RAM/${TOPO}_${CT}_${filename}_msk_${RESN}.tif  | awk \'{ print $2 }\'  )
 if [ $MAX = "-9999"  ] ; then 
 rm -f $RAM/${TOPO}_${CT}_${filename}_msk_${RESN}.tif 
 else 
-echo cp  ${TOPO}_${CT}_${filename}_${RESN}.tif  to final destination   $SCRATCH/$TOPO/tiles/
 mv $RAM/${TOPO}_${CT}_${filename}_msk_${RESN}.tif  $SCRATCH/$TOPO/tiles/${TOPO}_${CT}_${filename}_${RESN}.tif ; rm -f  $RAM/${TOPO}_${CT}_${filename}_msk_${RESN}.tif
 fi 
 ' _ 
 done 
 
+
 # cp to final dir  or get mean of the overlapping tiles 
-ls  $MERIT/input_tif/*_dem.tif   | xargs -n 1 -P $P  bash -c $'
-file=$1
-filename=$(basename $file _dem.tif)
-gdalbuildvrt  -overwrite  -separate  $RAM/${TOPO}_CT_${filename}_${RESN}.vrt  $SCRATCH/$TOPO/tiles/${TOPO}_??_${filename}_${RESN}.tif
-BAND=$(pkinfo -nb -i  $RAM/${TOPO}_CT_${filename}_${RESN}.vrt     | awk \'{ print $2 }\' ) 
-if [ $BAND -eq 1 ] ; then
-gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND  $RAM/${TOPO}_CT_${filename}_${RESN}.vrt $MERIT/$TOPO/tiles/${filename}_E7_${RESN}.tif ;  rm -f $RAM/${TOPO}_CT_${filename}_${RESN}.vrt 
-else
-echo start statporfile
-pkstatprofile -nodata -9999 -of GTiff  -f mean -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -i $RAM/${TOPO}_CT_${filename}_${RESN}.vrt -o $MERIT/$TOPO/tiles/${filename}_E7_tmp_${RESN}.tif
-gdal_translate  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND  $MERIT/$TOPO/tiles/${filename}_E7_tmp_${RESN}.tif   $MERIT/$TOPO/tiles/${filename}_E7_${RESN}.tif
-rm -f $RAM/${TOPO}_CT_${filename}_${RESN}.vrt  $MERIT/$TOPO/tiles/${filename}_E7_tmp_${RESN}.tif
-fi
-' _ 
-
-fi  # close the aspect if 
-
-
-#########################################################################################################
-
-
-if [ $TOPO = "deviation" ] || [ $TOPO = "multirough" ]  ; then 
-
-if [ $TOPO = "deviation" ]   ; then   TOPON=devi ; fi 
-if [ $TOPO = "multirough" ]  ; then   TOPON=roug ; fi 
-
-for FUN in mag sca ; do
-export FUN
-
-for CT in  AF AN AS EU NA OC SA ; do 
-export CT   
-
-if [ ! -f $SCRATCH/$TOPO/tiles/all_${CT}_${FUN}_tif.vrt ] ; then gdalbuildvrt  -overwrite  $SCRATCH/$TOPO/tiles/all_${CT}_${FUN}_tif.vrt   $SCRATCH/$TOPO/tiles/${CT}_???_???_${TOPON}_$FUN.tif ; fi 
-
-# warp each single equi7 tile to wgs84
-for file in $(cat $EQUI/${CT}/GEOG/EQUI7_V13_${CT}_GEOG_TILEMERIT.txt)  ; do echo $MERIT/input_tif/$file ; done | xargs -n 1 -P $P bash -c $'
+ls  $MERIT/input_tif/*_dem.tif    | xargs -n 1 -P $P  bash -c $'
 file=$1 
 filename=$(basename $file _dem.tif)
-geostring=$(getCorners4Gwarp $file)
 
-gdalwarp -overwrite --config GDAL_CACHEMAX 1000 -overwrite -wm 1000 -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -r bilinear -srcnodata -9999 -dstnodata -9999 -tr ${RES} ${RES} -te $geostring  -s_srs  $EQUI/${CT}/PROJ/EQUI7_V13_${CT}_PROJ_ZONE.prj -t_srs $EQUI/${CT}/GEOG/EQUI7_V13_${CT}_GEOG_ZONE.prj $SCRATCH/$TOPO/tiles/all_${CT}_${FUN}_tif.vrt $RAM/${TOPO}_${CT}_${FUN}_${filename}_${RESN}.tif
+gdalbuildvrt  -overwrite  -separate  $RAM/${TOPO}_CT_${filename}_${RESN}.vrt  $SCRATCH/$TOPO/tiles/${TOPO}_??_${filename}_${RESN}.tif
+BAND=$(pkinfo -nb -i  $RAM/${TOPO}_CT_${filename}_${RESN}.vrt     | awk \'{ print $2 }\' ) 
 
-pksetmask -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -m $EQUI/$CT/GEOG/EQUI7_V13_${CT}_GEOG_ZONE_KM${RESN}.tif -msknodata 0 -nodata -9999 -i $RAM/${TOPO}_${CT}_${FUN}_${filename}_${RESN}.tif -o $RAM/${TOPO}_${CT}_${FUN}_${filename}_msk_${RESN}.tif
-rm -f $RAM/${TOPO}_${CT}_${FUN}_${filename}_${RESN}.tif
-
-MAX=$(pkstat -max -i $RAM/${TOPO}_${CT}_${FUN}_${filename}_msk_${RESN}.tif  | awk \'{ print $2 }\'  )
-if [ $MAX = "-9999"  ] ; then 
-rm -f $RAM/${TOPO}_${CT}_${FUN}_${filename}_msk_${RESN}.tif 
+if [ $BAND -eq 1 ] ; then 
+gdal_translate -a_nodata 0 -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND  $RAM/${TOPO}_CT_${filename}_${RESN}.vrt $SCRATCH/${TOPO}/tiles/${TOPO}_${RESN}M_MERIT_${filename}.tif ;  rm -f $RAM/${TOPO}_CT_${filename}_${RESN}.vrt 
 else 
-mv $RAM/${TOPO}_${CT}_${FUN}_${filename}_msk_${RESN}.tif  $SCRATCH/$TOPO/tiles/${TOPO}_${CT}_${FUN}_${filename}_${RESN}.tif ; rm -f  $RAM/${TOPO}_${CT}_${FUN}_${filename}_msk_${RESN}.tif
-fi 
-' _ 
-done 
-
-# cp to final dir  or get mean of the overlapping tiles 
-ls  $MERIT/input_tif/*_dem.tif   | xargs -n 1 -P $P  bash -c $'
-file=$1
-filename=$(basename $file _dem.tif)  
-gdalbuildvrt  -overwrite  -separate  $RAM/${TOPO}_CT_${FUN}_${filename}_${RESN}.vrt  $SCRATCH/$TOPO/tiles/${TOPO}_??_${FUN}_${filename}_${RESN}.tif
-BAND=$(pkinfo -nb -i  $RAM/${TOPO}_CT_${FUN}_${filename}_${RESN}.vrt     | awk \'{ print $2 }\' ) 
-if [ $BAND -eq 1 ] ; then
-gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND  $RAM/${TOPO}_CT_${FUN}_${filename}_${RESN}.vrt $MERIT/$TOPO/tiles/${filename}_E7_${FUN}_${RESN}.tif ;  rm -f $RAM/${TOPO}_CT_${FUN}_${filename}_${RESN}.vrt 
-else
 echo start statporfile
-pkstatprofile -nodata -9999 -of GTiff  -f mean -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -i $RAM/${TOPO}_CT_${FUN}_${filename}_${RESN}.vrt -o $MERIT/$TOPO/tiles/${filename}_E7_${FUN}_tmp_${RESN}.tif
-gdal_translate  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND  $MERIT/$TOPO/tiles/${filename}_E7_${FUN}_tmp_${RESN}.tif   $MERIT/$TOPO/tiles/${filename}_E7_${FUN}_${RESN}.tif
-rm -f $RAM/${TOPO}_CT_${FUN}_${filename}_${RESN}.vrt  $MERIT/$TOPO/tiles/${filename}_E7_${FUN}_tmp_${RESN}.tif
-fi
+pkstatprofile -a_nodata 0 -of GTiff  -f max -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -i $RAM/${TOPO}_CT_${filename}_${RESN}.vrt -o $MERIT/$TOPO/tiles/${filename}_E7_tmp_${RESN}.tif
+gdal_translate -a_nodata 0   -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND  $MERIT/$TOPO/tiles/${filename}_E7_tmp_${RESN}.tif   $SCRATCH/$TOPO/tiles/${TOPO}_${RESN}M_MERIT_${filename}.tif  
+rm -f $RAM/${TOPO}_CT_${filename}_${RESN}.vrt  $MERIT/$TOPO/tiles/${filename}_E7_tmp_${RESN}.tif
+fi 
+
 ' _ 
 
-done
-fi
+rm -f  $SCRATCH/$TOPO/tiles/${TOPO}_??_???????_90.tif 
 
-
+fi 

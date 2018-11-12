@@ -56,7 +56,7 @@ EOF
 
 # cp $RAM/${filename}_roug_mag.tif   $SCRATCH/multirough/tiles/${filename}_roug_notmask.tif 
 
-for PAR in rough-magnitute rough-magnitute-scale   ; do
+for PAR in rough-magnitute rough-scale   ; do
 pksetmask -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND  -m $RAM/$filename.tif -nodata -9999 -msknodata -9999 -i $RAM/${filename}_$PAR.tif -o  $RAM/${filename}_${PAR}_msk.tif 
 
 # to mask    #   -32768  of some files 
@@ -69,6 +69,7 @@ rm -f  $RAM/${filename}_${PAR}.tif
 gdal_translate   -projwin $( getCorners4Gtranslate $file  )     -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND   $RAM/${filename}_${PAR}_msk.tif  $SCRATCH/${PAR}/tiles/${PAR}_100M_MERIT_${filename}.tif 
 rm -f  $RAM/${filename}_${PAR}_msk.tif 
 done 
+
 
 
 singularity exec /gpfs/home/fas/sbsc/ga254/scripts/MERIT/UbuntuWB.simg  bash <<EOF

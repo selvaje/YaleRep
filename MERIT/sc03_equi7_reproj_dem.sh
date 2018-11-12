@@ -19,6 +19,8 @@ export equi7=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/M
 
 # shp extent ll ur 
 
+echo afdad
+
 export CT
 echo $CT  $xmin $ymin $xmax $ymax
 #  -te      xmin ymin xmax ymax 
