@@ -43,7 +43,7 @@ echo file   $file
 # ls *.tif | xargs -n 1 -P 8 bash -c $' gdal_edit.py -a_ullr $(getCorners4Gtranslate $1 | awk \'{  printf ("%.0f %.0f %.0f %.0f " ,  $1 , $2 , $3 , $4 ) }\' )  $1  ' _
 # rm  $INDIR/all_tif_shp.* 
 
-# gdalbuildvrt   -overwrite  -tr 0.000833333333333333 0.000833333333333333  $INDIR/all_tif.vrt   $INDIR/*.tif 
+# gdalbuildvrt -srcnodata -9999 -vrtnodata -9999      -overwrite  -tr 0.000833333333333333 0.000833333333333333  $INDIR/all_tif.vrt   $INDIR/*.tif 
 # gdaltindex  $INDIR/all_tif_shp.shp   $INDIR/*.tif 
 
 # Size is 432000, 174000

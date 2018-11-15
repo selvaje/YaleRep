@@ -27,7 +27,26 @@
 # vpd (Vapor Pressure Deficit) 
 # pdsi (Palmer Drought Severity Index) 
 
-for VAR in aet def pet ppt q soil srad swe tmax tmin vap ws vpd pdsi    ; do  
+# for VAR in aet def pet ppt q soil srad swe  vap ws vpd pdsi    ; do  
+# export VAR 
+# mkdir -p  /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/TERRACLIMATE/$VAR 
+# cd /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/TERRACLIMATE/$VAR 
+# for YEAR in $( seq 1958 2017 ) ; do 
+# wget -nc -c -nd https://climate.northwestknowledge.net/TERRACLIMATE-DATA/TerraClimate_${VAR}_$YEAR.nc 
+# export YEAR
+# echo 01 02 03 04 05 06 07 08 09 10 11 12 | xargs -n 1 -P 12 bash -c $' 
+# MM=$1
+# gdal_translate -a_srs EPSG:4326  -b $MM  -co COMPRESS=DEFLATE -co ZLEVEL=9  -co INTERLEAVE=BAND   /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/TERRACLIMATE/$VAR/TerraClimate_${VAR}_${YEAR}.nc /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/TERRACLIMATE/$VAR/${VAR}_${YEAR}_${MM}.tif 
+
+# ' _ 
+# rm  -f   /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/TERRACLIMATE/$VAR/TerraClimate_${VAR}_${YEAR}.nc 
+# done  
+
+# done 
+
+## min and max have a subdataset 
+
+for VAR in tmax tmin  ; do  
 export VAR 
 mkdir -p  /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/TERRACLIMATE/$VAR 
 cd /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/TERRACLIMATE/$VAR 
@@ -36,7 +55,7 @@ wget -nc -c -nd https://climate.northwestknowledge.net/TERRACLIMATE-DATA/TerraCl
 export YEAR
 echo 01 02 03 04 05 06 07 08 09 10 11 12 | xargs -n 1 -P 12 bash -c $' 
 MM=$1
-gdal_translate -a_srs EPSG:4326  -b $MM  -co COMPRESS=DEFLATE -co ZLEVEL=9  -co INTERLEAVE=BAND   /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/TERRACLIMATE/$VAR/TerraClimate_${VAR}_${YEAR}.nc /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/TERRACLIMATE/$VAR/${VAR}_${YEAR}_${MM}.tif 
+gdal_translate -a_srs EPSG:4326  -b $MM  -co COMPRESS=DEFLATE -co ZLEVEL=9  -co INTERLEAVE=BAND  NETCDF:"TerraClimate_${VAR}_${YEAR}.nc":${VAR}  /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/TERRACLIMATE/$VAR/${VAR}_${YEAR}_${MM}.tif 
 
 ' _ 
 rm  -f   /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/TERRACLIMATE/$VAR/TerraClimate_${VAR}_${YEAR}.nc 

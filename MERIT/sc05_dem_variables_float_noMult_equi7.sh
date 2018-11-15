@@ -1,20 +1,21 @@
 #!/bin/bash
 #SBATCH -p day 
 #SBATCH -n 1 -c 1 -N 1  
-#SBATCH -t 10:00:00
+#SBATCH -t 24:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc05_dem_variables_float_noMult_equi7.sh.%A_%a.out
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc05_dem_variables_float_noMult_equi7.sh.%A_%a.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc05_dem_variables_float_noMult_equi7.sh
-#SBATCH --array=1-850
+#SBATCH --array=1-806
 
-# 850    number of files 
+# 806    number of files 
 # bash    /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc05_dem_variables_float_noMult_equi7.sh
 # sbatch  /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc05_dem_variables_float_noMult_equi7.sh  
 
 module load Apps/GRASS/7.3-beta
 
+# 
 # file=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/equi7/dem/EU/EU_048_000.tif
 
 file=$(ls /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/equi7/dem/??/??_???_???.tif | head -n $SLURM_ARRAY_TASK_ID | tail -1 )
@@ -42,52 +43,56 @@ gdal_edit.py  -a_nodata -9999 $RAM/${filename}_0.tif
 
 pkfilter -nodata -9999 -co COMPRESS=DEFLATE -co ZLEVEL=9 -ot Float32 -of GTiff  -dx 3 -dy 3 -f stdev  -i  $RAM/${filename}_0.tif -o $RAM/stdev_${filename}_0.tif
 gdal_translate   -srcwin 8 8 6000 6000  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND   $RAM/stdev_${filename}_0.tif $RAM/stdev_${filename}_crop.tif     
-pksetmask   -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -m $RAM/$filename.tif  -msknodata -9999 -nodata -9999 -i $RAM/stdev_${filename}_crop.tif  -o $SCRATCH/stdev/tiles/${filename}.tif  
+pksetmask   -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -m $RAM/$filename.tif  -msknodata -9999 -nodata -9999 -i $RAM/stdev_${filename}_crop.tif  -o $MERIT/elev-stdev/tiles/elev-stdev_100M_MERIT_${filename}.tif  
 rm -f $RAM/stdev_${filename}_crop.tif $RAM/stdev_${filename}_0.tif 
 
 # echo slope with $file
 
 #  to consider xy in degree and z in meters
-gdaldem slope     -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND   $RAM/${filename}_0.tif   $RAM/slope_${filename}_0.tif 
+gdaldem slope -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND   $RAM/${filename}_0.tif   $RAM/slope_${filename}_0.tif 
 gdal_translate   -srcwin 8 8 6000 6000  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND   $RAM/slope_${filename}_0.tif $RAM/slope_${filename}_crop.tif     
-pksetmask   -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -m $RAM/$filename.tif  -msknodata -9999 -nodata -9999 -i $RAM/slope_${filename}_crop.tif  -o $SCRATCH/slope/tiles/${filename}.tif  
+pksetmask   -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -m $RAM/$filename.tif  -msknodata -9999 -nodata -9999 -i $RAM/slope_${filename}_crop.tif  -o $MERIT/slope/tiles/slope_100M_MERIT_${filename}.tif  
 rm -f $RAM/slope_${filename}_crop.tif $RAM/slope_${filename}_0.tif
 
 echo  aspect  with file $file 
 
 gdaldem aspect   -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND $RAM/${filename}_0.tif   $RAM/aspect_${filename}_0.tif 
 gdal_translate   -srcwin 8 8 6000 6000  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND   $RAM/aspect_${filename}_0.tif $RAM/aspect_${filename}_crop.tif
-pksetmask   -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -m $RAM/$filename.tif  -msknodata -9999 -nodata -9999 -i $RAM/aspect_${filename}_crop.tif  -o $SCRATCH/aspect/tiles/${filename}.tif
+pksetmask   -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -m $RAM/$filename.tif  -msknodata -9999 -nodata -9999 -i $RAM/aspect_${filename}_crop.tif  -o $MERIT/aspect/tiles/aspect_100M_MERIT_${filename}.tif
 rm -f $RAM/aspect_${filename}_crop.tif $RAM/aspect_${filename}_0.tif
 
 echo sin and cos of slope and aspect $file 
 
-gdal_calc.py  --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9  --co=INTERLEAVE=BAND -A $SCRATCH/aspect/tiles/${filename}.tif --calc="(sin(A.astype(float) * 3.141592 / 180))" --outfile   $SCRATCH/aspect/tiles/${filename}_sin.tif --overwrite --type=Float32
-gdal_calc.py  --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9  --co=INTERLEAVE=BAND -A $SCRATCH/aspect/tiles/${filename}.tif --calc="(cos(A.astype(float) * 3.141592 / 180))" --outfile   $SCRATCH/aspect/tiles/${filename}_cos.tif --overwrite --type=Float32
-gdal_calc.py  --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9  --co=INTERLEAVE=BAND -A $SCRATCH/slope/tiles/${filename}.tif  --calc="(sin(A.astype(float) * 3.141592 / 180))" --outfile   $SCRATCH/slope/tiles/${filename}_sin.tif  --overwrite --type=Float32
-gdal_calc.py  --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9  --co=INTERLEAVE=BAND -A $SCRATCH/slope/tiles/${filename}.tif  --calc="(cos(A.astype(float) * 3.141592 / 180))" --outfile   $SCRATCH/slope/tiles/${filename}_cos.tif  --overwrite --type=Float32
+
+
+
+gdal_calc.py  --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9  --co=INTERLEAVE=BAND -A $MERIT/aspect/tiles/aspect_100M_MERIT_${filename}.tif --calc="(sin(A.astype(float) * 3.141592 / 180))" --outfile   $MERIT/aspect-sine/tiles/aspect-sine_100M_MERIT_${filename}.tif --overwrite --type=Float32
+gdal_calc.py  --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9  --co=INTERLEAVE=BAND -A $MERIT/aspect/tiles/aspect_100M_MERIT_${filename}.tif --calc="(cos(A.astype(float) * 3.141592 / 180))" --outfile   $MERIT/aspect-cosine/tiles/aspect-cosine_100M_MERIT_${filename}.tif --overwrite --type=Float32
+
+# gdal_calc.py  --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9  --co=INTERLEAVE=BAND -A $MERIT/slope/tiles/${filename}.tif  --calc="(sin(A.astype(float) * 3.141592 / 180))" --outfile   $SCRATCH/slope/tiles/${filename}_sin.tif  --overwrite --type=Float32
+# gdal_calc.py  --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9  --co=INTERLEAVE=BAND -A $MERIT/slope/tiles/${filename}.tif  --calc="(cos(A.astype(float) * 3.141592 / 180))" --outfile   $SCRATCH/slope/tiles/${filename}_cos.tif  --overwrite --type=Float32
 
 echo   Ew  Nw   median  
 
-gdal_calc.py --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9 --co=INTERLEAVE=BAND -A $SCRATCH/slope/tiles/${filename}.tif -B $SCRATCH/aspect/tiles/${filename}_sin.tif --calc="((sin(A.astype(float) * 3.141592 / 180)) * B.astype(float))" --outfile  $SCRATCH/aspect/tiles/${filename}_Ew.tif --overwrite --type=Float32
-gdal_calc.py --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9 --co=INTERLEAVE=BAND -A $SCRATCH/slope/tiles/${filename}.tif -B $SCRATCH/aspect/tiles/${filename}_cos.tif --calc="((sin(A.astype(float) * 3.141592 / 180)) * B.astype(float))" --outfile  $SCRATCH/aspect/tiles/${filename}_Nw.tif --overwrite --type=Float32
+gdal_calc.py --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9 --co=INTERLEAVE=BAND -A $MERIT/slope/tiles/slope_100M_MERIT_${filename}.tif -B $MERIT/aspect-sine/tiles/aspect-sine_100M_MERIT_${filename}.tif --calc="((sin(A.astype(float) * 3.141592 / 180)) * B.astype(float))" --outfile  $MERIT/easthness/tiles/easthness_100M_MERIT_${filename}.tif --overwrite --type=Float32
+gdal_calc.py --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9 --co=INTERLEAVE=BAND -A $MERIT/slope/tiles/slope_100M_MERIT_${filename}.tif -B $MERIT/aspect-cosine/tiles/aspect-cosine_100M_MERIT_${filename}.tif  --calc="((sin(A.astype(float) * 3.141592 / 180)) * B.astype(float))" --outfile  $MERIT/northness/tiles/northness_100M_MERIT_${filename}.tif --overwrite --type=Float32
 
 echo  generate a Terrain Ruggedness Index TRI  with file   $file 
 gdaldem TRI -co COMPRESS=DEFLATE -co ZLEVEL=9  -co INTERLEAVE=BAND  $RAM/${filename}_0.tif   $RAM/tri_${filename}_0.tif
 gdal_translate   -srcwin 8 8 6000 6000  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND   $RAM/tri_${filename}_0.tif $RAM/tri_${filename}_crop.tif
-pksetmask   -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -m $RAM/$filename.tif  -msknodata -9999 -nodata -9999 -i $RAM/tri_${filename}_crop.tif -o $SCRATCH/tri/tiles/${filename}.tif
+pksetmask   -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -m $RAM/$filename.tif  -msknodata -9999 -nodata -9999 -i $RAM/tri_${filename}_crop.tif -o $MERIT/tri/tiles/tri_100M_MERIT_${filename}.tif
 rm -f $RAM/tri_${filename}_crop.tif $RAM/tri_${filename}_0.tif
 
 echo  generate a Topographic Position Index TPI  with file  $filename.tif
 gdaldem TPI -co COMPRESS=DEFLATE -co ZLEVEL=9  -co INTERLEAVE=BAND  $RAM/${filename}_0.tif   $RAM/tpi_${filename}_0.tif
 gdal_translate   -srcwin 8 8 6000 6000  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND   $RAM/tpi_${filename}_0.tif $RAM/tpi_${filename}_crop.tif
-pksetmask   -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -m $RAM/$filename.tif  -msknodata -9999 -nodata -9999 -i $RAM/tpi_${filename}_crop.tif -o $SCRATCH/tpi/tiles/${filename}.tif
+pksetmask   -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -m $RAM/$filename.tif  -msknodata -9999 -nodata -9999 -i $RAM/tpi_${filename}_crop.tif -o $MERIT/tpi/tiles/tpi_100M_MERIT_${filename}.tif
 rm -f $RAM/tpi_${filename}_crop.tif $RAM/tpi_${filename}_0.tif
 
 echo  generate roughness   with file   $filename.tif
 gdaldem roughness -co COMPRESS=DEFLATE -co ZLEVEL=9  -co INTERLEAVE=BAND  $RAM/${filename}_0.tif   $RAM/roughness_${filename}_0.tif
 gdal_translate   -srcwin 8 8 6000 6000  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND   $RAM/roughness_${filename}_0.tif $RAM/roughness_${filename}_crop.tif
-pksetmask   -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -m $RAM/$filename.tif  -msknodata -9999 -nodata -9999 -i $RAM/roughness_${filename}_crop.tif -o $SCRATCH/roughness/tiles/${filename}.tif
+pksetmask   -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -m $RAM/$filename.tif  -msknodata -9999 -nodata -9999 -i $RAM/roughness_${filename}_crop.tif -o $MERIT/roughness/tiles/roughness_100M_MERIT_${filename}.tif
 rm -f $RAM/roughness_${filename}_crop.tif $RAM/roughness_${filename}_0.tif
 
 
@@ -99,15 +104,15 @@ echo  generate TCI   with file   $filename.tif
 # ln(α / tan(β)) where α is the cumulative upslope area draining through a point per unit contour length and tan(β) is the local slope angle.
 
 
-echo  generate tci with file $filename.tif
-gdal_calc.py --overwrite --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9 --co=INTERLEAVE=BAND  -B $SCRATCH/slope/tiles/${filename}.tif -A $MERIT/equi7/upa/${filename:0:2}/${filename}.tif  --outfile=$SCRATCH/tci/tiles/${filename}_tmp.tif    --calc="( log  (      A.astype(float) / (tan(  B.astype(float) * 3.141592 / 180) + 0.01 ) )  )"
-pksetmask   -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -m   $SCRATCH/slope/tiles/${filename}.tif   -msknodata -9999 -nodata -9999 -i $SCRATCH/tci/tiles/${filename}_tmp.tif  -o $SCRATCH/tci/tiles/${filename}.tif
-rm  $SCRATCH/tci/tiles/${filename}_tmp.tif
+echo  generate cti with file $filename.tif
+gdal_calc.py --overwrite --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9 --co=INTERLEAVE=BAND  -B $MERIT/slope/tiles/slope_100M_MERIT_${filename}.tif -A $MERIT/equi7/upa/${filename:0:2}/${filename}.tif  --outfile=$MERIT/cti/tiles/${filename}_tmp.tif    --calc="( log  (      A.astype(float) / (tan(  B.astype(float) * 3.141592 / 180) + 0.01 ) )  )"
+pksetmask   -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -m   $MERIT/slope/tiles/slope_100M_MERIT_${filename}.tif   -msknodata -9999 -nodata -9999 -i $MERIT/cti/tiles/${filename}_tmp.tif  -o $MERIT/cti/tiles/cti_100M_MERIT_${filename}.tif
+rm  $MERIT/cti/tiles/${filename}_tmp.tif
 
 echo  generate spi with file $filename.tif
-gdal_calc.py --overwrite --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9 --co=INTERLEAVE=BAND  -B $SCRATCH/slope/tiles/${filename}.tif -A $MERIT/equi7/upa/${filename:0:2}/${filename}.tif --outfile=$SCRATCH/spi/tiles/${filename}_tmp.tif   --calc="(    A.astype(float) *  (tan(  B.astype(float) * 3.141592 / 180) + 0.01 )  )"
-pksetmask   -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -m   $SCRATCH/slope/tiles/${filename}.tif   -msknodata -9999 -nodata -9999 -i $SCRATCH/spi/tiles/${filename}_tmp.tif  -o $SCRATCH/spi/tiles/${filename}.tif
-rm  $SCRATCH/spi/tiles/${filename}_tmp.tif
+gdal_calc.py --overwrite --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9 --co=INTERLEAVE=BAND  -B $MERIT/slope/tiles/slope_100M_MERIT_${filename}.tif -A $MERIT/equi7/upa/${filename:0:2}/${filename}.tif --outfile=$MERIT/spi/tiles/${filename}_tmp.tif   --calc="(    A.astype(float) *  (tan(  B.astype(float) * 3.141592 / 180) + 0.01 )  )"
+pksetmask   -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -m   $MERIT/slope/tiles/slope_100M_MERIT_${filename}.tif   -msknodata -9999 -nodata -9999 -i $MERIT/spi/tiles/${filename}_tmp.tif  -o $MERIT/spi/tiles/spi_100M_MERIT_${filename}.tif
+rm  $MERIT/spi/tiles/${filename}_tmp.tif
 
 # ###############  VRM  ########################################
 
@@ -150,46 +155,46 @@ r.mask  raster=$filename   --o
 
 # r.vector.ruggedness 
 r.colors -r map=vrm_${filename}  
-r.out.gdal -c  -f -m  createopt="COMPRESS=DEFLATE,ZLEVEL=9,PROFILE=GeoTIFF,INTERLEAVE=BAND" format=GTiff type=Float32  nodata=-9999  input=vrm_${filename}  output=$SCRATCH/vrm/tiles/${filename}.tif  --o
-gdal_edit.py  -a_nodata -9999 $SCRATCH/vrm/tiles/${filename}.tif
-rm -f $SCRATCH/vrm/tiles/${filename}.tif.aux.xml
+r.out.gdal -c  -f -m  createopt="COMPRESS=DEFLATE,ZLEVEL=9,PROFILE=GeoTIFF,INTERLEAVE=BAND" format=GTiff type=Float32  nodata=-9999  input=vrm_${filename}  output=$MERIT/vrm/tiles/vrm_100M_MERIT_${filename}.tif  --o
+gdal_edit.py  -a_nodata -9999 $MERIT/vrm/tiles/vrm_100M_MERIT_${filename}.tif 
+rm -f  $MERIT/vrm/tiles/vrm_100M_MERIT_${filename}.tif.aux.xml
 
 # r.geomorphon forms 
 r.colors -r map=forms_${filename} 
 r.out.gdal -c -f -m createopt="COMPRESS=DEFLATE,ZLEVEL=9,PROFILE=GeoTIFF,INTERLEAVE=BAND" format=GTiff type=Byte nodata=0 input=forms_$filename  output=$RAM/${filename}.tif  --o 
 
 pkcreatect  -min 0 -max 10   > $RAM/color${filename}.txt
-pkcreatect   -co COMPRESS=DEFLATE -co ZLEVEL=9   -ct  $RAM/color${filename}.txt   -i $RAM/${filename}.tif  -o $SCRATCH/forms/tiles/${filename}.tif  
-gdal_edit.py  -a_nodata 0  $SCRATCH/forms/tiles/${filename}.tif 
+pkcreatect   -co COMPRESS=DEFLATE -co ZLEVEL=9   -ct  $RAM/color${filename}.txt   -i $RAM/${filename}.tif  -o $MERIT/geom/tiles/geom_100M_MERIT_${filename}.tif  
+gdal_edit.py  -a_nodata 0  $MERIT/geom/tiles/geom_100M_MERIT_${filename}.tif  
 rm $RAM/${filename}.tif   $RAM/color${filename}.txt
 
-# r.geomorphon intensity
+# r.geomorphon intensity # for now not computed 
 
-for geo in intensity exposition range variance elongation azimuth extend width ; do               
-r.colors -r map=${geo}_${filename}
-r.out.gdal -c -f -m createopt="COMPRESS=DEFLATE,ZLEVEL=9,PROFILE=GeoTIFF,INTERLEAVE=BAND" format=GTiff type=Float32 nodata=-9999  input=${geo}_$filename  output=$SCRATCH/${geo}/tiles/${filename}.tif  --o 
-gdal_edit.py  -a_nodata -9999  $SCRATCH/${geo}/tiles/${filename}.tif
-rm -f $SCRATCH/${geo}/tiles/${filename}.tif.aux.xml
-done 
+# for geo in intensity exposition range variance elongation azimuth extend width ; do               
+# r.colors -r map=${geo}_${filename}
+# r.out.gdal -c -f -m createopt="COMPRESS=DEFLATE,ZLEVEL=9,PROFILE=GeoTIFF,INTERLEAVE=BAND" format=GTiff type=Float32 nodata=-9999  input=${geo}_$filename  output=$MERIT/${geo}/tiles/${geo}_100M_MERIT_${filename}.tif  --o 
+# gdal_edit.py  -a_nodata -9999  $MERIT/${geo}/tiles/${geo}_100M_MERIT_${filename}.tif 
+# rm -f $MERIT/${geo}/tiles/${geo}_100M_MERIT_${filename}.tif.aux.xml
+# done 
 
 # r.slope.aspect 
 for var in  dx dxx dy dyy dxy tcurv pcurv ; do  
 r.colors -r map=${var}_${filename} 
-r.out.gdal -c -f  -m     createopt="COMPRESS=DEFLATE,ZLEVEL=9,PROFILE=GeoTIFF,INTERLEAVE=BAND" format=GTiff  type=Float32   nodata=-9999  input=${var}_$filename       output=$SCRATCH/${var}/tiles/${filename}.tif   --o
-gdal_edit.py  -a_nodata -9999 $SCRATCH/${var}/tiles/${filename}.tif 
-rm -f $SCRATCH/${var}/tiles/${filename}.tif.aux.xml
+r.out.gdal -c -f  -m     createopt="COMPRESS=DEFLATE,ZLEVEL=9,PROFILE=GeoTIFF,INTERLEAVE=BAND" format=GTiff  type=Float32   nodata=-9999  input=${var}_$filename       output=$MERIT/${var}/tiles/${var}_100M_MERIT_${filename}.tif   --o
+gdal_edit.py  -a_nodata -9999 $MERIT/${var}/tiles/${var}_100M_MERIT_${filename}.tif  
+rm -f  $MERIT/${var}/tiles/${var}_100M_MERIT_${filename}.tif.aux.xml
 done 
 
 # r.convergence 
 r.colors -r map=conv_${filename}  
-r.out.gdal -c -m  -f  createopt="COMPRESS=DEFLATE,ZLEVEL=9,PROFILE=GeoTIFF,INTERLEAVE=BAND" format=GTiff type=Float32  nodata=-9999  input=conv_${filename}  output=$SCRATCH/convergence/tiles/${filename}.tif  --o
-gdal_edit.py  -a_nodata -9999 $SCRATCH/convergence/tiles/${filename}.tif
-rm -f $SCRATCH/convergence/tiles/${filename}.tif.aux.xml
+r.out.gdal -c -m  -f  createopt="COMPRESS=DEFLATE,ZLEVEL=9,PROFILE=GeoTIFF,INTERLEAVE=BAND" format=GTiff type=Float32  nodata=-9999  input=conv_${filename}  output=$MERIT/convergence/tiles/convergence_100M_MERIT_${filename}.tif  --o
+gdal_edit.py  -a_nodata -9999 $MERIT/convergence/tiles/convergence_100M_MERIT_${filename}.tif 
+rm -f  $MERIT/convergence/tiles/convergence_100M_MERIT_${filename}.tif.aux.xml
 
 
 ##############################
 
-rm -rf $RAM/loc_$filename   $RAM/${filename}.tif.aux.xml   $RAM/${filename}.tif   $RAM/$filename.vrt   $RAM/${filename}_0.tif 
+rm -rf $RAM/loc_$filename   $RAM/*.tif.aux.xml   $RAM/${filename}.tif   $RAM/$filename.vrt   $RAM/${filename}_0.tif 
 
 
 
