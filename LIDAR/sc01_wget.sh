@@ -1,10 +1,10 @@
 #!/bin/bash
 #SBATCH -p day
-#SBATCH -n 1 -c 12  -N 1  
+#SBATCH -n 1 -c 18  -N 1  
 #SBATCH -t 24:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc01_wget.sh.sh.%J.out
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc01_wget.sh.%J.out
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc01_wget.sh.%J.err
 
 # sbatch /gpfs/home/fas/sbsc/ga254/scripts/LIDAR/sc01_wget.sh  
@@ -35,154 +35,67 @@ export DIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/LID
 export EQUI7=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/EQUI7
 export SC=/gpfs/loomis/scratch60/fas/sbsc/ga254/grace0/dataproces/LIDAR/input
 
-export FOLD
+export FOLD # =MT05_05Lorang  # =ME07_Snyder
 
 mkdir $SC/$FOLD
-
-cd $SC/$FOLD
-
-if [ FOLD = "ME07_Snyder" ]    ; then export  EPSG=26919 ; fi 
-if [ FOLD = "NH09_Finkelman" ] ; then export  EPSG=26919 ; fi 
-if [ FOLD = "MT05_05Lorang" ]  ; then export  EPSG=26912 ; fi 
-if [ FOLD = "ID09_Lloyd" ]     ; then export  EPSG=26911 ; fi 
-if [ FOLD = "OR07_MalheurNF" ] ; then export  EPSG=26911 ; fi 
-if [ FOLD = "ILC09_ClearCrk" ] ; then export  EPSG=26911 ; fi 
+mkdir $SC/$FOLD/las
+mkdir $SC/$FOLD/laz 
 
 
-# wget --cut-dirs=4  -nv   -r -np -R "index.html*" https://cloud.sdsc.edu/v1/AUTH_opentopography/PC_Bulk/${FOLD}
 
-singularity exec /gpfs/home/fas/sbsc/ga254/scripts/LIDAR/Ubuntu_pktools_gdal2.simg  bash <<'EOF'    
-echo $SC
-ls   $SC/${FOLD}/cloud.sdsc.edu/*.laz  | xargs -n 1  -P 12 bash -c $' file=$1 ; filename=$(basename $file .laz )  ; echo unlaszip $file  ;  laszip -i $file  -o    $SC/$FOLD/$filename.las  ' _ 
-rm -r   $SC/${FOLD}/cloud.sdsc.edu
+if [ FOLD="ME07_Snyder" ]    ; then export  EPSG=26919 ; fi 
+if [ FOLD="NH09_Finkelman" ] ; then export  EPSG=26919 ; fi 
+if [ FOLD="MT05_05Lorang" ]  ; then export  EPSG=26912 ; fi 
+if [ FOLD="ID09_Lloyd" ]     ; then export  EPSG=26911 ; fi 
+if [ FOLD="OR07_MalheurNF" ] ; then export  EPSG=26911 ; fi 
+if [ FOLD="ILC09_ClearCrk" ] ; then export  EPSG=26911 ; fi 
 
-echo start to create DTM 
-pklas2img -co COMPRESS=DEFLATE -co ZLEVEL=9  $(for file in *.las; do echo " -i "$file;done)  -o $SC/${FOLD}/dtm.tif -a_srs EPSG:$EPSG -fir all -comp percentile -min   -n z -dx 100 -dy 100 -ot Float32 
-pkfilterdem -f promorph -dim 3 -dim 11 -i  $SC/${FOLD}/dtm.tif  -o $SC/${FOLD}/dtm_morpho.tif
+cd $SC/$FOLD/laz
+# download the html list 
+# wget -A .html  https://cloud.sdsc.edu/v1/AUTH_opentopography/PC_Bulk/${FOLD} 
+# grep .laz  $SC/$FOLD/laz/$FOLD  | awk -F '"'  '{ print $4 }'  > $SC/$FOLD/${FOLD}_lazlist.txt 
+# rm -f $SC/$FOLD/laz/${FOLD}
 
-echo start to create DSM
-pklas2img -co COMPRESS=DEFLATE -co ZLEVEL=9  $(for file in *.las; do echo " -i "$file;done)  -o $sc/${FOLD}/dsm.tif -a_srs EPSG:$EPSG -fir all -comp percentile -perc 95 -n z -dx 100 -dy 100 -ot Float32
-sleep 60 
+# for file in $( cat $SC/$FOLD/${FOLD}_lazlist.txt) ; do
+# wget    https://cloud.sdsc.edu/v1/AUTH_opentopography/PC_Bulk/${FOLD}/$file
+# done 
 
-EOF
+# singularity exec /gpfs/home/fas/sbsc/ga254/scripts/LIDAR/Ubuntu_pktools_gdal2.simg  bash <<'EOF'    
+# echo $SC
+# #3  find $SC/${FOLD}/laz -name "*.laz" | xargs -n 1  -P 18 bash -c $' file=$1 ; filename=$(basename $file .laz ) ; if [ ! -f $SC/$FOLD/las/$filename.las  ] ; then  echo unlaszip $file ; laszip -i $file  -o $SC/$FOLD/las/$filename.las  ; fi   ' _ 
+# ### rm -r   $SC/${FOLD}/cloud.sdsc.edu
 
-gdalwarp -tap -co COMPRESS=DEFLATE -co ZLEVEL=9 -tr 100 100 -s_srs EPSG:$EPSG -t_srs "$EQUI7/grids/NA/PROJ/EQUI7_V13_NA_PROJ_ZONE.prj" -r bilinear $SC/$FOLD/dsm.tif        $DIR/../equi/${FOLD}_dsm.tif -overwrite
-gdalwarp -tap -co COMPRESS=DEFLATE -co ZLEVEL=9 -tr 100 100 -s_srs EPSG:$EPSG -t_srs "$EQUI7/grids/NA/PROJ/EQUI7_V13_NA_PROJ_ZONE.prj" -r bilinear $SC/$FOLD/dtm_morpho.tif $DIR/../equi/${FOLD}_dtm.tif -overwrite 
+# echo start to create DTM
+
+# pklas2img   -nodata -9999  -co COMPRESS=DEFLATE -co ZLEVEL=9  $(find  $SC/$FOLD/las/ -name "*.las" -type f -exec echo "-i"  '{}' \;)  -o $SC/${FOLD}/dtm.tif -a_srs EPSG:$EPSG -fir all -comp percentile -min   -n z -dx 100 -dy 100 -ot Float32 
+
+# echo filterdem 
+# pkfilterdem -nodata -9999  -f promorph  -dim 3 -dim 11  -i  $SC/${FOLD}/dtm.tif  -o $SC/${FOLD}/dtm_morpho.tif
+
+# echo start to create DSM
+# pklas2img   -nodata -9999  -co COMPRESS=DEFLATE -co ZLEVEL=9  $(find  $SC/$FOLD/las/ -name "*.las" -type f -exec echo "-i"  '{}' \;)  -o $SC/${FOLD}/dsm.tif -a_srs EPSG:$EPSG -fir all -comp percentile -perc 95 -n z -dx 100 -dy 100 -ot Float32
+# sleep 60
+
+# EOF
+
+echo start to warp 
+
+gdalwarp -tap -co COMPRESS=DEFLATE -co ZLEVEL=9 -tr 100 100 -s_srs EPSG:$EPSG -t_srs "$EQUI7/grids/NA/PROJ/EQUI7_V13_NA_PROJ_ZONE.prj" -r bilinear $SC/$FOLD/dsm.tif $DIR/../equi/${FOLD}_dsm.tif -overwrite
+gdalwarp -tap -co COMPRESS=DEFLATE -co ZLEVEL=9 -tr 100 100 -s_srs EPSG:$EPSG -t_srs "$EQUI7/grids/NA/PROJ/EQUI7_V13_NA_PROJ_ZONE.prj" -r bilinear $SC/$FOLD/dtm.tif $DIR/../equi/${FOLD}_dtm.tif -overwrite 
+
+rm -f    $DIR/../equi/${FOLD}_dsm_shp.* 
+gdaltindex   $DIR/../equi/${FOLD}_dsm_shp.shp    $DIR/../equi/${FOLD}_dsm.tif 
+
+gdalwarp -tap -co COMPRESS=DEFLATE -co ZLEVEL=9 -tr 0.0008333333333333 0.0008333333333333   -s_srs EPSG:$EPSG -t_srs EPSG:4326 -r bilinear $SC/$FOLD/dsm.tif        $DIR/../equi/${FOLD}_dsm_wgs84.tif -overwrite
+gdalwarp -tap -co COMPRESS=DEFLATE -co ZLEVEL=9 -tr 0.0008333333333333 0.0008333333333333   -s_srs EPSG:$EPSG -t_srs EPSG:4326 -r bilinear $SC/$FOLD/dtm.tif        $DIR/../equi/${FOLD}_dtm_wgs84.tif -overwrite 
+
+rm -f      $DIR/../equi/${FOLD}_dsm_wgs84_shp.* 
+gdaltindex $DIR/../equi/${FOLD}_dsm_wgs84_shp.shp    $DIR/../equi/${FOLD}_dsm_wgs84.tif 
 
 exit 
 
-
-
-
-
-
-
-
-
 wget --cut-dirs=3   -r -np -R "index.html*" https://cloud.sdsc.edu/v1/AUTH_opentopography/PC_Bulk/NH09_Finkelman/
-cd ~/tmp/lidar/cloud.sdsc.edu/NH09_Finkelman
-for file in *.laz ; do filename=$(basename $file .laz )  ;  laszip -i $file    -o $filename.las ; rm $file ; done
-
-pklas2img  -co COMPRESS=DEFLATE -co ZLEVEL=9   $(for file in *.las; do echo " -i "$file;done)    -o dtm.tif -a_srs 'epsg:26919' -fir all -comp min -n z -dx 90 -dy 90  -ot Float32 
-pklas2img  -co COMPRESS=DEFLATE -co ZLEVEL=9   $(for file in *.las; do echo " -i "$file;done)    -o dsm.tif -a_srs 'epsg:26919' -fir all -comp max -n z -dx 90 -dy 90  -ot Float32
-
-gdalwarp -tap  -co COMPRESS=DEFLATE -co ZLEVEL=9 -tr 0.000833333333333 0.000833333333333 -t_srs EPSG:4326 -r bilinear    dsm.tif dsm_wgs84.tif -overwrite 
-gdalwarp -tap  -co COMPRESS=DEFLATE -co ZLEVEL=9 -tr 0.000833333333333 0.000833333333333 -t_srs EPSG:4326 -r bilinear    dtm.tif dtm_wgs84.tif -overwrite 
-
-gdal_translate  -srcwin 10 10 125 60   -co COMPRESS=DEFLATE -co ZLEVEL=9  dtm_wgs84.tif dtm_wgs84_crop.tif
-gdal_translate  -srcwin 10 10 125 60   -co COMPRESS=DEFLATE -co ZLEVEL=9  dsm_wgs84.tif dsm_wgs84_crop.tif
-
-
-
-
-
 wget --cut-dirs=3   -r -np -R "index.html*" https://cloud.sdsc.edu/v1/AUTH_opentopography/PC_Bulk/MT05_05Lorang/
-
-cd  ~/tmp/lidar/cloud.sdsc.edu/MT05_05Lorang
-for file in *.laz ; do filename=$(basename $file .laz )  ;  laszip -i $file    -o $filename.las ; rm $file ; done
-
-pklas2img  -co COMPRESS=DEFLATE -co ZLEVEL=9   $(for file in *.las; do echo " -i "$file;done)    -o dtm.tif -a_srs 'epsg:26911' -fir all -comp min -n z -dx 90 -dy 90  -ot Float32 
-pklas2img  -co COMPRESS=DEFLATE -co ZLEVEL=9   $(for file in *.las; do echo " -i "$file;done)    -o dsm.tif -a_srs 'epsg:26911' -fir all -comp max -n z -dx 90 -dy 90  -ot Float32
-
-gdal_translate  -srcwin 10 10 145 99    -co COMPRESS=DEFLATE -co ZLEVEL=9  dtm_wgs84.tif dtm_wgs84_crop.tif 
-
-
-
-
-
 wget --cut-dirs=3   -r -np -R "index.html*"  https://cloud.sdsc.edu/v1/AUTH_opentopography/PC_Bulk/ID09_Lloyd/
-cd ~/tmp/lidar/cloud.sdsc.edu/ID09_Lloyd
-for file in *.laz ; do filename=$(basename $file .laz )  ;  laszip -i $file    -o $filename.las ; rm $file ; done
-
-pklas2img  -co COMPRESS=DEFLATE -co ZLEVEL=9   $(for file in *.las; do echo " -i "$file;done)    -o dtm.tif -a_srs 'epsg:26911' -fir all -comp min -n z -dx 90 -dy 90  -ot Float32 
-pklas2img  -co COMPRESS=DEFLATE -co ZLEVEL=9   $(for file in *.las; do echo " -i "$file;done)    -o dsm.tif -a_srs 'epsg:26911' -fir all -comp max -n z -dx 90 -dy 90  -ot Float32
-
-gdalwarp -tap  -co COMPRESS=DEFLATE -co ZLEVEL=9 -tr 0.000833333333333 0.000833333333333 -t_srs EPSG:4326 -r bilinear    dsm.tif dsm_wgs84.tif -overwrite 
-gdalwarp -tap  -co COMPRESS=DEFLATE -co ZLEVEL=9 -tr 0.000833333333333 0.000833333333333 -t_srs EPSG:4326 -r bilinear    dtm.tif dtm_wgs84.tif -overwrite 
-
-gdal_translate  -srcwin 280  10  100 38     -co COMPRESS=DEFLATE -co ZLEVEL=9  dtm_wgs84.tif  dtm_wgs84_crop.tif
-gdal_translate  -srcwin 280  10  100 38     -co COMPRESS=DEFLATE -co ZLEVEL=9  dsm_wgs84.tif  dsm_wgs84_crop.tif
-
-# gdal_translate  -co COMPRESS=DEFLATE -co ZLEVEL=9  -projwin  $(getCorners4Gtranslate dsm_wgs84.tif )       /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/input_tif/all_tif.vrt  merit.tif 
-
-
-
-
-
-
 wget --cut-dirs=3   -r -np -R "index.html*"  https://cloud.sdsc.edu/v1/AUTH_opentopography/PC_Bulk/OR07_MalheurNF/ 
-
-cd ~/tmp/lidar/cloud.sdsc.edu/OR07_MalheurNF/ 
-
-for file in *.laz ; do filename=$(basename $file .laz )  ;  laszip -i $file    -o $filename.las ; rm $file ; done
-
-pklas2img  -co COMPRESS=DEFLATE -co ZLEVEL=9   $(for file in *.las; do echo " -i "$file;done)    -o dtm.tif -a_srs 'epsg:26911' -fir all -comp min -n z -dx 90 -dy 90  -ot Float32 
-pklas2img  -co COMPRESS=DEFLATE -co ZLEVEL=9   $(for file in *.las; do echo " -i "$file;done)    -o dsm.tif -a_srs 'epsg:26911' -fir all -comp max -n z -dx 90 -dy 90  -ot Float32
-
-gdalwarp -tap  -co COMPRESS=DEFLATE -co ZLEVEL=9 -tr 0.000833333333333 0.000833333333333 -t_srs EPSG:4326 -r bilinear    dsm.tif dsm_wgs84.tif -overwrite 
-gdalwarp -tap  -co COMPRESS=DEFLATE -co ZLEVEL=9 -tr 0.000833333333333 0.000833333333333 -t_srs EPSG:4326 -r bilinear    dtm.tif dtm_wgs84.tif -overwrite 
-
-gdal_translate  -srcwin 40  146 100 50     -co COMPRESS=DEFLATE -co ZLEVEL=9  dtm_wgs84.tif  dtm_wgs84_crop.tif
-gdal_translate  -srcwin 40  146 100 50     -co COMPRESS=DEFLATE -co ZLEVEL=9  dsm_wgs84.tif  dsm_wgs84_crop.tif
-
-
-
-# http://opentopo.sdsc.edu/datasetMetadata.jsp?otCollectionID=OT.122015.26917.1
-
-
-# Coordinates System: 
-#     Horizontal: NAD83 (2011), UTM Zone 17N [EPSG: 26917] 
-#     Vertical: NAVD88 (GEOID 12a) [EPSG: 5703] 
-
 wget --cut-dirs=3   -r -np -R "index.html*"  https://cloud.sdsc.edu/v1/AUTH_opentopography/PC_Bulk/SC14_CZO/Part1/
-
-
-cd ~/tmp/lidar/cloud.sdsc.edu/
-
-for file in *.laz ; do filename=$(basename $file .laz )  ;  laszip -i $file    -o $filename.las ; rm $file ; done
-
-ls  *.laz | xargs -n 1 -P 3 bash -c $' file=$1 ;  filename=$(basename $file .laz )  ;  laszip -i $file    -o $filename.las ; rm $file  ' _
-
-
-pklas2img  -co COMPRESS=DEFLATE -co ZLEVEL=9   $(for file in *.las; do echo " -i "$file;done)    -o dtm.tif -a_srs 'epsg:26917' -fir all -comp min -n z -dx 90 -dy 90  -ot Float32 
-pklas2img  -co COMPRESS=DEFLATE -co ZLEVEL=9   $(for file in *.las; do echo " -i "$file;done)    -o dsm.tif -a_srs 'epsg:26917' -fir all -comp max -n z -dx 90 -dy 90  -ot Float32
-
-pklas2img  -co COMPRESS=DEFLATE -co ZLEVEL=9   $(for file in *.las; do echo " -i "$file;done)    -o dsm.tif -a_srs 'epsg:26917' -fir all -comp percentile  -perc 95  -n z -dx 90 -dy 90  -ot Float32
-pklas2img  -co COMPRESS=DEFLATE -co ZLEVEL=9   $(for file in *.las; do echo " -i "$file;done)    -o dtm.tif -a_srs 'epsg:26917' -fir all -comp percentile  -perc 5  -n z -dx 90 -dy 90  -ot Float32
-
-gdalwarp -tap  -co COMPRESS=DEFLATE -co ZLEVEL=9 -tr 0.000833333333333 0.000833333333333 -t_srs EPSG:4326 -r bilinear    dsm.tif dsm_wgs84.tif -overwrite 
-gdalwarp -tap  -co COMPRESS=DEFLATE -co ZLEVEL=9 -tr 0.000833333333333 0.000833333333333 -t_srs EPSG:4326 -r bilinear    dtm.tif dtm_wgs84.tif -overwrite 
-
-gdal_translate  -srcwin 40  146 100 50     -co COMPRESS=DEFLATE -co ZLEVEL=9  dtm_wgs84.tif  dtm_wgs84_crop.tif
-gdal_translate  -srcwin 40  146 100 50     -co COMPRESS=DEFLATE -co ZLEVEL=9  dsm_wgs84.tif  dsm_wgs84_crop.tif
-
-
-# merge the differnt dsm and dtm 
-
-
-gdalbuildvrt  dsm.vrt Part1/dsm.tif   Part2/dsm.tif Part3/dsm.tif Part4/dsm.tif Part5/dsm.tif 
-gdalwarp -tap  -co COMPRESS=DEFLATE -co ZLEVEL=9 -tr 0.000833333333333 0.000833333333333 -t_srs EPSG:4326 -r bilinear dsm.vrt  dsm_wgs84.tif -overwrite 
-
-gdalbuildvrt  dtm.vrt Part1/dtm.tif   Part2/dtm.tif Part3/dtm.tif Part4/dtm.tif Part5/dtm.tif 
-gdalwarp -tap  -co COMPRESS=DEFLATE -co ZLEVEL=9 -tr 0.000833333333333 0.000833333333333 -t_srs EPSG:4326 -r bilinear dtm.vrt  dtm_wgs84.tif -overwrite 
-
