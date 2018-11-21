@@ -6,17 +6,22 @@ tile=NA_078_036
 
 export tile 
 
-# gdal_translate -projwin  $( getCorners4Gtranslate /gpfs/loomis/scratch60/fas/sbsc/ga254/grace0/dataproces/MERIT_BK/forms/tiles/${tile}.tif )     NED/forms/tiles/${tile}.tif /tmp/${tile}_tmp.tif 
-# gdal_edit.py    -a_ullr     $( getCorners4Gtranslate /gpfs/loomis/scratch60/fas/sbsc/ga254/grace0/dataproces/MERIT_BK/forms/tiles/${tile}.tif )    /tmp/${tile}_tmp.tif 
+ gdal_translate -projwin     $( getCorners4Gtranslate $PR/MERIT/geom/tiles/geom_100M_MERIT_NA_078_036.tif )     NED/forms/tiles/${tile}.tif /tmp/${tile}_tmp.tif 
+ gdal_edit.py    -a_ullr     $( getCorners4Gtranslate $PR/MERIT/geom/tiles/geom_100M_MERIT_NA_078_036.tif )    /tmp/${tile}_tmp.tif 
 
-# gdal_translate -srcwin 0 0 3000 3000 /tmp/${tile}_tmp.tif   /tmp/${tile}.tif 
-# gdal_translate -srcwin 0 0 3000 3000 /gpfs/loomis/scratch60/fas/sbsc/ga254/grace0/dataproces/MERIT_BK/forms/tiles/${tile}.tif    /dev/shm/${tile}.tif 
+ gdal_translate -srcwin 0 0 3000 3000 /tmp/${tile}_tmp.tif   /tmp/${tile}.tif 
+ gdal_translate -srcwin 0 0 3000 3000 $PR/MERIT/geom/tiles/geom_100M_MERIT_NA_078_036.tif    /dev/shm/${tile}.tif 
 
 # pkdiff  -nodata 0  -cm  -ref   /tmp/$tile.tif  -i  /dev/shm/${tile}.tif    -cmo NED_MERIT/confusion/${tile}.txt
 
 # pkstat  -nodata 0  -hist2d -i   /tmp/$tile.tif  -i /dev/shm/${tile}.tif |  awk '{ if (NF==3) print   }'   > NED_MERIT/confusion/${tile}_hist2d.txt  # confusion 
 # pkstat  -nodata 0  -hist   -i   /tmp/$tile.tif                                                            > NED_MERIT/confusion/${tile}_hist.txt    # actual 
 
+
+ gdal_translate -of XYZ   /tmp/${tile}.tif       /tmp/geom_100M_NED_NA_078_036.txt 
+ gdal_translate -of XYZ   /dev/shm/${tile}.tif  /dev/shm/geom_100M_MERIT_NA_078_036.txt 
+
+paste -d " "  <( awk '{  print $3  }'   /tmp/geom_100M_NED_NA_078_036.txt  )   <(  awk '{ print $3  }'    /dev/shm/geom_100M_MERIT_NA_078_036.txt ) >  /dev/shm/geom_NED_MERIT.txt 
 
 module load Apps/R/3.3.2-generic
 
