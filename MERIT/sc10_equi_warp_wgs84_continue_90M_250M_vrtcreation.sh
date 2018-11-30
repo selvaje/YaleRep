@@ -1,16 +1,16 @@
 #!/bin/bash
 #SBATCH -p day
 #SBATCH -n 1 -c 1  -N 1  
-#SBATCH -t 8:00:00
+#SBATCH -t 24:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc09_equi_warp_wgs84_continue_90M_250M.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc09_equi_warp_wgs84_continue_90M_250M.sh.%J.err
-#SBATCH --mem-per-cpu=8000
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc10_equi_warp_wgs84_continue_90M_250M.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc10_equi_warp_wgs84_continue_90M_250M.sh.%J.err
+#SBATCH --mem-per-cpu=10000
 
 # intensity exposition range variance elongation azimuth extend width 
 
-# for TOPO in deviation multirough stdev aspect dx dxx dxy dy dyy pcurv roughness slope tcurv tpi tri vrm tci spi convergence ; do for RESN in 0.10 0.25 ; do sbatch --export=TOPO=$TOPO,RESN=$RESN    /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc09_equi_warp_wgs84_continue_90M_250M_vrtcreation.sh ; done ; done 
+# for TOPO in dev-magnitude dev-scale rough-magnitude rough-scale elev-stdev aspect aspect-sine aspect-cosine northness easthness dx dxx dxy dy dyy pcurv roughness slope tcurv tpi tri vrm cti spi convergence geom ; do for RESN in  0.25 ; do sbatch --export=TOPO=$TOPO,RESN=$RESN    /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc10_equi_warp_wgs84_continue_90M_250M_vrtcreation.sh ; done ; done 
 
 # sbatch  --export=TOPO=dx,RESN=0.10 /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc09_equi_warp_wgs84_continue_90M_250M_vrtcreation.sh
 # sbatch  --export=TOPO=dx,RESN=0.25 /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc09_equi_warp_wgs84_continue_90M_250M_vrtcreation.sh
@@ -20,6 +20,8 @@ sstat  -j   $SLURM_JOB_ID.batch   --format=JobID,MaxVMSize
 echo "############################################################"
 sacct  -j   $SLURM_JOB_ID  --format=jobid,MaxVMSize,start,end,CPUTImeRaw,NodeList,ReqCPUS,ReqMem,Elapsed,Timelimit 
 echo "############################################################"
+
+
 
 P=$SLURM_CPUS_PER_TASK
 export MERIT=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT
@@ -34,98 +36,88 @@ if [ $RESN = "1.00" ] ; then export RES="0.00833333333333333333333333333" ; fi
 
 export RESN
 
-if [ $TOPO != "aspect" ]   &&  [ $TOPO != "deviation" ] &&  [ $TOPO != "multirough" ]  ; then 
-
 if [ $RESN = "1.00" ] ; then 
-gdalbuildvrt -overwrite -srcnodata -9999 -vrtnodata -9999   $RAM/${TOPO}_1KMbilinear_MERIT.vrt  $MERIT/$TOPO/tiles/???????_E7_${RESN}.tif
+gdalbuildvrt -overwrite -srcnodata -9999 -vrtnodata -9999   $RAM/${TOPO}_1KMbilinear_MERIT.vrt  $MERIT/$TOPO/tiles/???????_E7_${RESN}.tif   # check this name in case of re-run
 gdal_translate  --config GDAL_CACHEMAX 4000   -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND   -a_nodata -9999  $RAM/${TOPO}_1KMbilinear_MERIT.vrt   $MERIT/final1km/${TOPO}_1KMbilinear_MERIT.tif
 rm -f $RAM/${TOPO}_1KMbilinear_MERIT.vrt 
 fi 
 
-if [ $RESN = "0.25" ] ; then 
-gdalbuildvrt -overwrite -srcnodata -9999 -vrtnodata -9999   $RAM/${TOPO}_250Mbilinear_MERIT.vrt  $MERIT/$TOPO/tiles/???????_E7_${RESN}.tif
-gdal_translate  --config GDAL_CACHEMAX 4000 -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -a_nodata -9999 -co BIGTIFF=YES       $RAM/${TOPO}_250Mbilinear_MERIT.vrt   $MERIT/final250m/${TOPO}_250Mbilinear_MERITf.tif
-gdal_translate  --config GDAL_CACHEMAX 4000 -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -co  BLOCKYSIZE=512 -co  BLOCKXSIZE=512 -co COPY_SRC_OVERVIEWS=YES -mo CO=YES -co TILED=YES -a_nodata 0 -ot Byte -scale $RAM/${TOPO}_250Mbilinear_MERIT.vrt $MERIT/final250m/${TOPO}_250Mbilinear_MERITb.tif
-rm -f $RAM/${TOPO}_250Mbilinear_MERIT.vrt 
-fi 
+# if [ $RESN = "0.25" ] ; then 
+# gdalbuildvrt -overwrite -srcnodata -9999 -vrtnodata -9999   $RAM/${TOPO}_250Mbilinear_MERIT.vrt  $MERIT/$TOPO/tiles/${TOPO}_250M_MERIT_???????.tif
+# gdal_translate  --config GDAL_CACHEMAX 4000 -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -a_nodata -9999 -co BIGTIFF=YES $RAM/${TOPO}_250Mbilinear_MERIT.vrt   $MERIT/final250m/${TOPO}_250Mbilinear_MERIT.tif
+# rm -f $RAM/${TOPO}_250Mbilinear_MERIT.vrt 
+# fi 
 
-fi 
+# pkinfo -nodata -9999 -mm -i $MERIT/final250m/${TOPO}_250Mbilinear_MERIT.tif > $MERIT/final250m/${TOPO}_250Mbilinear_MERIT_mm.txt 
 
-################################################################################################################################
-
-if [ $TOPO = "aspect"   ] ; then 
-
-for FUN in sin cos Ew Nw ; do
-
-if [ $FUN  = "sin" ]  ; then   FUNN=aspect-sine  ; fi 
-if [ $FUN  = "cos" ]  ; then   FUNN=apect-cosine ; fi 
-if [ $FUN  = "Ew"  ]  ; then   FUNN=easteness    ; fi 
-if [ $FUN  = "Nw"  ]  ; then   FUNN=northness    ; fi
-
-if [ $RESN = "1.00" ] ; then
-gdalbuildvrt  -overwrite -srcnodata -9999 -vrtnodata -9999 $RAM/${TOPO}_${FUN}_1KMbilinear_MERIT.vrt  $MERIT/$TOPO/tiles/???????_E7_${FUN}_${RESN}.tif
-gdal_translate  --config GDAL_CACHEMAX 4000   -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -a_nodata -9999  $RAM/${TOPO}_${FUN}_1KMbilinear_MERIT.vrt   $MERIT/final1km/${FUNN}_1KMbilinear_MERIT.tif
-rm -f $RAM/${TOPO}_${FUN}_1KMbilinear_MERIT.vrt
-fi
-
-if [ $RESN = "0.25" ] ; then
-gdalbuildvrt -overwrite -srcnodata -9999 -vrtnodata -9999   $RAM/${TOPO}_${FUN}_250Mbilinear_MERIT.vrt  $MERIT/$TOPO/tiles/???????_E7_${FUN}_${RESN}.tif
-gdal_translate  --config GDAL_CACHEMAX 4000   -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -a_nodata -9999 -co BIGTIFF=YES   $RAM/${TOPO}_${FUN}_250Mbilinear_MERIT.vrt   $MERIT/final250m/${FUNN}_250Mbilinear_MERITf.tif
-gdal_translate  --config GDAL_CACHEMAX 4000   -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -co  BLOCKYSIZE=512 -co  BLOCKXSIZE=512 -co COPY_SRC_OVERVIEWS=YES -mo CO=YES -co TILED=YES -a_nodata 0 -ot Byte -scale $RAM/${TOPO}_${FUN}_250Mbilinear_MERIT.vrt $MERIT/final250m/${FUNN}_250Mbilinear_MERITb.tif
-rm -f $RAM/${FUNN}_250Mbilinear_MERIT.vrt
-fi 
-
-done
-
-fi 
-
-############################# only aspect  ####################################### 
-
-if [ $TOPO = "aspect"   ] ; then 
-
-if [ $RESN = "1.00" ] ; then 
-gdalbuildvrt  $RAM/${TOPO}_1KMbilinear_MERIT.vrt  $MERIT/$TOPO/tiles/???????_E7_${RESN}.tif
-gdal_translate  --config GDAL_CACHEMAX 4000  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -a_nodata -9999  $RAM/${TOPO}_1KMbilinear_MERIT.vrt   $MERIT/final1km/${TOPO}_1KMbilinear_MERIT.tif
-rm -f $RAM/${TOPO}_1KMbilinear_MERIT.vrt 
-fi 
-
-if [ $RESN = "0.25" ] ; then 
-gdalbuildvrt -overwrite -srcnodata -9999 -vrtnodata -9999   $RAM/${TOPO}_250Mbilinear_MERIT.vrt  $MERIT/$TOPO/tiles/???????_E7_${RESN}.tif
-gdal_translate  --config GDAL_CACHEMAX 4000  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -a_nodata -9999 -co BIGTIFF=YES       $RAM/${TOPO}_250Mbilinear_MERIT.vrt   $MERIT/final250m/${TOPO}_250Mbilinear_MERITf.tif
-gdal_translate  --config GDAL_CACHEMAX 4000   -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -co  BLOCKYSIZE=512 -co  BLOCKXSIZE=512 -co COPY_SRC_OVERVIEWS=YES -mo CO=YES -co TILED=YES -a_nodata 0 -ot Byte -scale $RAM/${TOPO}_250Mbilinear_MERIT.vrt $MERIT/final250m/${TOPO}_250Mbilinear_MERITb.tif
-rm -f $RAM/${TOPO}_250Mbilinear_MERIT.vrt 
-fi 
-
-fi
+# pkgetmask -min -9998 -max 9999999999 -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -ot Byte -i $MERIT/final250m/${TOPO}_250Mbilinear_MERIT.tif -o $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_msk.tif
 
 
-#########################################################################################################
+# Byte         0      255  SCALE=1 ; fi 
+if [  $TOPO = geom ] ; then OT=Byte       ;  MULT=1 ; NODATA=0  ;  SCALE=1 ;  fi                                                         #  -min 0 -max 10                    OK
+
+# UInt16      0      65,535 
+if [  $TOPO =  aspect ] ; then OT=UInt16    ;  MULT=100    ; NODATA=65535   ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi       #  -min 0           -max 360        OK
+if [  $TOPO =  spi    ] ; then OT=UInt16    ;  MULT=0.1    ; NODATA=65535   ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi       #  -min 9.76709e-06 -max 565981     OK
+if [  $TOPO =  vrm ]    ; then OT=UInt16     ; MULT=100000 ; NODATA=65535   ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi       #  -min -2.97452e-08 -max 0.516682  OK
+
+# Int16    -32,768   32,767 
+if [  $TOPO =  aspect-cosine ]    ; then OT=Int16 ; MULT=10000 ; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min -1           -max 1         OK
+if [  $TOPO =  aspect-sine ]      ; then OT=Int16 ; MULT=1000  ; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min -1           -max 1         OK
+if [  $TOPO =  convergence ]      ; then OT=Int16 ; MULT=100   ; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min -99.9968     -max 99.9134   OK
+if [  $TOPO =  cti ]              ; then OT=Int16 ; MULT=1000  ; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min -7.29337     -max 19.8719   OK
+if [  $TOPO =  dev-magnitude ]    ; then OT=Int16 ; MULT=10    ; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min -424.413     -max 1713.44   OK
+if [  $TOPO =  dev-scale ]        ; then OT=Int16 ; MULT=1     ; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min 1            -max 1999      OK
+if [  $TOPO =  dx ]               ; then OT=Int16 ; MULT=1000  ; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min -8.02223     -max 8.1319    OK
+if [  $TOPO =  dxx ]              ; then OT=Int16 ; MULT=10000 ; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min -0.167993    -max 0.162343  OK
+if [  $TOPO =  dxy ]              ; then OT=Int16 ; MULT=100000; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min -0.0403883   -max 0.0424977 OK
+if [  $TOPO =  dy ]               ; then OT=Int16 ; MULT=1000  ; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min -8.01632     -max 8.7637    OK
+if [  $TOPO =  dyy ]              ; then OT=Int16 ; MULT=10000 ; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min -0.0786815   -max 0.162356  OK
+if [  $TOPO =  easthness ]        ; then OT=Int16 ; MULT=10000 ; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min -0.971806    -max 0.975874  OK
+if [  $TOPO =  elev-stdev ]       ; then OT=Int16 ; MULT=10    ; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min  0           -max 847.221   OK
+if [  $TOPO =  northness ]        ; then OT=Int16 ; MULT=10000 ; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min -0.965886    -max 0.982116  OK
+if [  $TOPO =  pcurv ]            ; then OT=Int16 ; MULT=100000; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min -0.0671902   -max 0.0295959 OK
+if [  $TOPO =  rough-magnitude ]  ; then OT=Int16 ; MULT=100   ; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min 1.90916e-05  -max 49.724    OK
+if [  $TOPO =  rough-scale ]      ; then OT=Int16 ; MULT=1     ; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min 1            -max 1999      OK
+if [  $TOPO =  roughness ]        ; then OT=Int16 ; MULT=10    ; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min 0            -max 1793.76   OK
+if [  $TOPO =  slope ]            ; then OT=Int16 ; MULT=100   ; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min 0            -max 80.1772   OK
+if [  $TOPO =  tcurv ]            ; then OT=Int16 ; MULT=100000; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min -0.0948295   -max 0.0476475 OK
+if [  $TOPO =  tpi ]              ; then OT=Int16 ; MULT=10    ; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min -925.032     -max 823.632   OK
+if [  $TOPO =  tri ]              ; then OT=Int16 ; MULT=10    ; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min 0            -max 1076.05   OK
 
 
-if [ $TOPO = "deviation" ] || [ $TOPO = "multirough" ]  ; then 
+# oft-calc -ot $OT -um $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_msk.tif $MERIT/final250m/${TOPO}_250Mbilinear_MERIT.tif $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT.tif <<EOF
+# 1
+# #1 $MULT *
+# EOF
 
-for FUN in mag sca ; do
+pksetmask -ot  $OT -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -co BIGTIFF=YES -m $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_msk.tif -msknodata 0  -nodata $NODATA -i  $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT.tif -o $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_int.tif  
 
-if [ $TOPO = "deviation" ]   ; then   TOPON=dev ; fi 
-if [ $TOPO = "multirough" ]  ; then   TOPON=rough ; fi 
-if [ $FUN  = "mag" ]  ; then   FUNN=magnitude ; fi 
-if [ $FUN  = "sca" ]  ; then   FUNN=scale     ; fi 
-
-if [ $RESN = "1.00" ] ; then 
-gdalbuildvrt  $RAM/${TOPO}_${FUN}_1KMbilinear_MERIT.vrt  $MERIT/$TOPO/tiles/???????_E7_${FUN}_${RESN}.tif
-gdal_translate   --config GDAL_CACHEMAX 4000   -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -a_nodata -9999  $RAM/${TOPO}_${FUN}_1KMbilinear_MERIT.vrt   $MERIT/final1km/${TOPON}-${FUNN}_1KMbilinear_MERIT.tif
-rm -f $RAM/${TOPO}_${FUN}_1KMbilinear_MERIT.vrt $MERIT/$TOPO/tiles/???????_E7_${FUN}_${RESN}.tif
-fi 
-
-if [ $RESN = "0.25" ] ; then 
-gdalbuildvrt -overwrite -srcnodata -9999 -vrtnodata -9999   $RAM/${TOPO}_${FUN}_250Mbilinear_MERIT.vrt  $MERIT/$TOPO/tiles/???????_E7_${FUN}_${RESN}.tif
-gdal_translate  --config GDAL_CACHEMAX 4000   -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -a_nodata -9999 -co BIGTIFF=YES       $RAM/${TOPO}_${FUN}_250Mbilinear_MERIT.vrt   $MERIT/final250m/${TOPON}-${FUNN}_250Mbilinear_MERITf.tif
-gdal_translate  --config GDAL_CACHEMAX 4000  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -co  BLOCKYSIZE=512 -co  BLOCKXSIZE=512 -co COPY_SRC_OVERVIEWS=YES -mo CO=YES -co TILED=YES -a_nodata 0 -ot Byte -scale $RAM/${TOPO}_${FUN}_250Mbilinear_MERIT.vrt $MERIT/final250m/${TOPON}-${FUNN}_250Mbilinear_MERITb.tif
-rm -f $RAM/${TOPO}_${FUN}_250Mbilinear_MERIT.vrt 
-fi 
+# pkinfo -nodata $NODATA   -mm -i $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_int.tif > $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_int_mm.txt 
 
 
-done
-fi
+# start to prepare a cloud-optimized GeoTIFF  as described at https://github.com/Envirometrix/LandGISmaps#cloud-optimized-geotiff 
 
 
+# gdaladdo -clean  $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_int.tif # usefull in case of re-run 
+# gdaladdo --config GDAL_CACHEMAX 8000 --config COMPRESS_OVERVIEW LZW -r average -ro  $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_int.tif 16  # external overview for assesment 
+gdaladdo --config GDAL_CACHEMAX 8000  -r nearest   $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_int.tif  2 4 8 16 32 64 128 
+
+# Pay attention that I have inserted  also the -co BIGTIFF=YES -co TILED=YES 
+# Anyway very very awkward to have extend that are not rounded to the degree. User will complain if they have to crop the tif
+
+gdal_translate -ot $OT -projwin  -180.00000 87.37000 179.99994 -62.00081 --config GDAL_CACHEMAX 8000    \
+               -co BIGTIFF=YES  -co COMPRESS=LZW -co BLOCKYSIZE=512 -co  BLOCKXSIZE=512 -co COPY_SRC_OVERVIEWS=YES -mo CO=YES \
+               --config GDAL_TIFF_OVR_BLOCKSIZE 512 -co TILED=YES -a_nodata $NODATA -a_srs EPSG:4326   \
+               $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_int.tif  $MERIT/geohub250m/dtm_${TOPO}_merit.dem_m_250m_s0..0cm_2018_v1.0.tif
+
+             # dtm_slope_merit.dem_m_250m_s0..0cm_2017_v1.0.tif
+gdal_edit.py -a_ullr  -180.00000 87.37000 179.99994 -62.00081 \
+              -mo "TIFFTAG_ARTIST=Giuseppe Amatulli (giuseppe.amatulli@gmail.com)" \
+              -mo "TIFFTAG_DATETIME=2018" \
+              -mo "TIFFTAG_IMAGEDESCRIPTION= ${TOPO} geomorphometry variable derived from MERIT-DEM - resolution 3 arc-seconds" \
+              -mo "Offset=0" -mo "Scale=$SCALE" \
+$MERIT/geohub250m/dtm_${TOPO}_merit.dem_m_250m_s0..0cm_2018_v1.0.tif
+
+echo get statistic 
+# pkinfo -nodata $NODATA  -mm -i $MERIT/geohub250m/dtm_${TOPO}_merit.dem_m_250m_s0..0cm_2018_v1.0.tif  > $MERIT/geohub250m/dtm_${TOPO}_merit.dem_m_250m_s0..0cm_2018_v1.0_mm.txt 
