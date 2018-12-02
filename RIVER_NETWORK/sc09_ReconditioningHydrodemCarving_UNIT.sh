@@ -2,8 +2,8 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 1 -N 1  
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc06_ReconditioningHydrodemCarving_UNIT.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc06_ReconditioningHydrodemCarving_UNIT.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc06_ReconditioningHydrodemCarving_UNIT.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc06_ReconditioningHydrodemCarving_UNIT.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 
@@ -15,31 +15,31 @@
 # sbatch --export=N=200,DIM=20,UNIT=3753,GEO=GLOBE,RADIUS=71,TRH=8   --mem-per-cpu=43000   /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc06_ReconditioningHydrodemCarving_UNIT.sh 
 
 # prepare the RAM needed  # aggiunta a mano la 3 colonna con il tempo
-# for UNIT in  1 2 3 4 5 6 7 8 9 10 11 12 13 14 1145 154 2597 3005 3317 3629 3753 4000 4001 573 810  ; do  gdalinfo /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/unit/UNIT${UNIT}msk.tif | grep "Size is" | awk -v  UNIT=$UNIT  '{ gsub(",", " " ) ; print UNIT ,    int (( $3 * $4 / 1000000 * 31 ) + 500 ) }'  ; done | sort -gr -k 2,2  | awk ' { print $1"_"$2  } '   >  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/UNIT_RAM.txt
+# for UNIT in  1 2 3 4 5 6 7 8 9 10 11 12 13 14 1145 154 2597 3005 3317 3629 3753 4000 4001 573 810  ; do  gdalinfo /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/unit/UNIT${UNIT}msk.tif | grep "Size is" | awk -v  UNIT=$UNIT  '{ gsub(",", " " ) ; print UNIT ,    int (( $3 * $4 / 1000000 * 31 ) + 500 ) }'  ; done | sort -gr -k 2,2  | awk ' { print $1"_"$2  } '   >  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/UNIT_RAM.txt
 
 # calculate minute for each unit 
-# for file in  /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc06_ReconditioningHydrodemCarving.sh.*.out ; do  echo   $( grep  -A 1  LSBATCH         $file | awk '{if (NR==2)  print $(NF-1) }' )  $(grep  "CPU time" $file  | awk '{ print $4  }'  )   ; done  | sort -k 1  -g   | uniq   > /tmp/min_unit.txt
+# for file in  /gpfs/scratch60/fas/sbsc/ga254/stdout/sc06_ReconditioningHydrodemCarving.sh.*.out ; do  echo   $( grep  -A 1  LSBATCH         $file | awk '{if (NR==2)  print $(NF-1) }' )  $(grep  "CPU time" $file  | awk '{ print $4  }'  )   ; done  | sort -k 1  -g   | uniq   > /tmp/min_unit.txt
 # for UNIT in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 1145 154 2597 3005 3317 3629 3753 4000 4001 573 810 ; do echo $UNIT $( grep ^"${UNIT} " /tmp/min_unit.txt | head -1 | awk '{ print $2 }'  )  $( grep ^"${UNIT} "  /tmp/min_unit.txt |tail  -1 | awk '{ print $2 }'  ) ; done
 
 # for lunch a sinble unit
 # fare correre e cancellare 
 
-# grep "User defined signal"  /gpfs/scratch60/fas/sbsc/ga254/grace0/std*/sc06_ReconditioningHydrodemCarving.sh.*.err 
-# bsub   -W 24:00 -M 30000   -R "rusage[mem=30000]" -n 1  -R "span[hosts=1]"  -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc06_ReconditioningHydrodemCarving.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc06_ReconditioningHydrodemCarving.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc06_ReconditioningHydrodemCarving_UNIT.sh 100 40  4001 GLOBE
+# grep "User defined signal"  /gpfs/scratch60/fas/sbsc/ga254/std*/sc06_ReconditioningHydrodemCarving.sh.*.err 
+# bsub   -W 24:00 -M 30000   -R "rusage[mem=30000]" -n 1  -R "span[hosts=1]"  -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc06_ReconditioningHydrodemCarving.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc06_ReconditioningHydrodemCarving.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc06_ReconditioningHydrodemCarving_UNIT.sh 100 40  4001 GLOBE
 
-# for TRH in 1 2 3 4 5 6 7 8 9 10 ;do bsub   -W 24:00  -n 1  -R "span[hosts=1]"  -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc06_ReconditioningHydrodemCarving.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc06_ReconditioningHydrodemCarving.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc06_ReconditioningHydrodemCarving_UNIT.sh 200 110  3753  GLOBE 81 $TRH ; done 
+# for TRH in 1 2 3 4 5 6 7 8 9 10 ;do bsub   -W 24:00  -n 1  -R "span[hosts=1]"  -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc06_ReconditioningHydrodemCarving.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc06_ReconditioningHydrodemCarving.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc06_ReconditioningHydrodemCarving_UNIT.sh 200 110  3753  GLOBE 81 $TRH ; done 
 
 
-#  cat  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt   | xargs -n 2 -P 1 bash -c $'  for LINE in $( cat   /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/UNIT_RAM.txt    ) ; do    UNIT=$( echo $LINE | tr "_" " "  | awk \'{  print $1  }\' ) ; RAM=$( echo $LINE | tr "_" " "  | awk \'{  print $2  }\' ) ; TIME=$( echo $LINE | tr "_" " "  | awk \'{  print $3  }\' )  ;  bsub  -W 24:00 -M ${RAM}  -R "rusage[mem=${RAM}]" -n 1  -R "span[hosts=1]"  -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc06_ReconditioningHydrodemCarving.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc06_ReconditioningHydrodemCarving.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc06_ReconditioningHydrodemCarving_UNIT.sh $1 $2  $UNIT GLOBE   ; done ' _ 
+#  cat  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt   | xargs -n 2 -P 1 bash -c $'  for LINE in $( cat   /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/UNIT_RAM.txt    ) ; do    UNIT=$( echo $LINE | tr "_" " "  | awk \'{  print $1  }\' ) ; RAM=$( echo $LINE | tr "_" " "  | awk \'{  print $2  }\' ) ; TIME=$( echo $LINE | tr "_" " "  | awk \'{  print $3  }\' )  ;  bsub  -W 24:00 -M ${RAM}  -R "rusage[mem=${RAM}]" -n 1  -R "span[hosts=1]"  -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc06_ReconditioningHydrodemCarving.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc06_ReconditioningHydrodemCarving.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc06_ReconditioningHydrodemCarving_UNIT.sh $1 $2  $UNIT GLOBE   ; done ' _ 
 
 # search for computation that reach the time limit
-# for file in   /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/*   ; do  grep TERM_RUNLIMIT -B 3 $file | head -1 | awk '{  print $3, $4 , $5  }'  ; done  > /tmp/missing_LOG_DIM_UNIT.txt
-# cat /tmp/missing.txt | xargs -n 3 -P 1 bash -c  $'  awk -v LOG=$1 -v DIM=$2  -v UNIT=$3 \'{ gsub("_"," ") ; if ($1==UNIT) { print LOG, DIM , UNIT ,  $2 , $3 } }\'  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/UNIT_RAM.txt    ' _  >  /tmp/missing_LOG_DIM_UNIT_RAM_TIME.txt
-# cat   /tmp/missing_LOG_DIM_UNIT_RAM_TIME.txt  | xargs -n 5 -P 1 bash -c $'  bsub  -W ${1}:00 -M ${4}  -R "rusage[mem=${4}]" -n 1  -R "span[hosts=1]"  -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc06_ReconditioningHydrodemCarving.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc06_ReconditioningHydrodemCarving.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc06_ReconditioningHydrodemCarving_UNIT.sh $1 $2  $3 GLOBE   ; done ' _ 
+# for file in   /gpfs/scratch60/fas/sbsc/ga254/stdout/*   ; do  grep TERM_RUNLIMIT -B 3 $file | head -1 | awk '{  print $3, $4 , $5  }'  ; done  > /tmp/missing_LOG_DIM_UNIT.txt
+# cat /tmp/missing.txt | xargs -n 3 -P 1 bash -c  $'  awk -v LOG=$1 -v DIM=$2  -v UNIT=$3 \'{ gsub("_"," ") ; if ($1==UNIT) { print LOG, DIM , UNIT ,  $2 , $3 } }\'  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/UNIT_RAM.txt    ' _  >  /tmp/missing_LOG_DIM_UNIT_RAM_TIME.txt
+# cat   /tmp/missing_LOG_DIM_UNIT_RAM_TIME.txt  | xargs -n 5 -P 1 bash -c $'  bsub  -W ${1}:00 -M ${4}  -R "rusage[mem=${4}]" -n 1  -R "span[hosts=1]"  -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc06_ReconditioningHydrodemCarving.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc06_ReconditioningHydrodemCarving.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc06_ReconditioningHydrodemCarving_UNIT.sh $1 $2  $3 GLOBE   ; done ' _ 
 
-#  cat /tmp/missing.txt   | xargs -n 3 -P 1 bash -c $'   cat  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/UNIT_RAM.txt  ) ; do    UNIT=$( echo $LINE | tr "_" " "  | awk \'{  print $1  }\' ) ; RAM=$( echo $LINE | tr "_" " "  | awk \'{  print $2  }\' ) ; TIME=$( echo $LINE | tr "_" " "  | awk \'{  print $3  }\' )  ;  bsub  -W ${TIME}:00 -M ${RAM}  -R "rusage[mem=${RAM}]" -n 1  -R "span[hosts=1]"  -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc06_ReconditioningHydrodemCarving.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc06_ReconditioningHydrodemCarving.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc06_ReconditioningHydrodemCarving_UNIT.sh $1 $2  $UNIT GLOBE   ; done ' _ 
+#  cat /tmp/missing.txt   | xargs -n 3 -P 1 bash -c $'   cat  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/UNIT_RAM.txt  ) ; do    UNIT=$( echo $LINE | tr "_" " "  | awk \'{  print $1  }\' ) ; RAM=$( echo $LINE | tr "_" " "  | awk \'{  print $2  }\' ) ; TIME=$( echo $LINE | tr "_" " "  | awk \'{  print $3  }\' )  ;  bsub  -W ${TIME}:00 -M ${RAM}  -R "rusage[mem=${RAM}]" -n 1  -R "span[hosts=1]"  -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc06_ReconditioningHydrodemCarving.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc06_ReconditioningHydrodemCarving.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc06_ReconditioningHydrodemCarving_UNIT.sh $1 $2  $UNIT GLOBE   ; done ' _ 
 
-#  cat  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt   | xargs -n 2 -P 1 bash -c $'   for UNIT in 497_338_3562_333   ; do bsub  -W 24:00 -M 70000  -R "rusage[mem=70000]" -n 1  -R "span[hosts=1]"  -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc06_ReconditioningHydrodemCarving.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc06_ReconditioningHydrodemCarving.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc06_ReconditioningHydrodemCarving_UNIT.sh $1 $2  $UNIT EUROASIA   ; done ' _ 
+#  cat  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt   | xargs -n 2 -P 1 bash -c $'   for UNIT in 497_338_3562_333   ; do bsub  -W 24:00 -M 70000  -R "rusage[mem=70000]" -n 1  -R "span[hosts=1]"  -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc06_ReconditioningHydrodemCarving.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc06_ReconditioningHydrodemCarving.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc06_ReconditioningHydrodemCarving_UNIT.sh $1 $2  $UNIT EUROASIA   ; done ' _ 
 
 
 # calculate the ram 
@@ -64,12 +64,12 @@
 
 echo UNIT ${UNIT} TYPE ${N} DIMENSION ${DIM}  STDEV ${RADIUS}
 
-cd /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb 
-export DIR=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK
+cd /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb 
+export DIR=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK
 
-rm -f /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_GLOBE/PERMANENT/.gislock
-source  /gpfs/home/fas/sbsc/ga254/scripts/general/enter_grass7.0.2-grace2.sh  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_GLOBE/PERMANENT 
-rm -f /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_GLOBE/PERMANENT/.gislock
+rm -f /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_GLOBE/PERMANENT/.gislock
+source  /gpfs/home/fas/sbsc/ga254/scripts/general/enter_grass7.0.2-grace2.sh  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_GLOBE/PERMANENT 
+rm -f /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_GLOBE/PERMANENT/.gislock
 
 export N
 export DIM
@@ -116,8 +116,8 @@ echo start r.hydridem                                                           
 /gpfs/home/fas/sbsc/ga254/.grass7/addons/bin/r.hydrodem    input=${DEM}_carvFilter   output=${DEM}_cond   memory=65000  --overwrite 
 
 echo start the output 
-# r.out.gdal --overwrite -f -c createopt="COMPRESS=DEFLATE,ZLEVEL=9" format=GTiff nodata=-9999 type=Int16  input=${DEM}_cond    output=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/dem_unit/${DEM}_cond${UNIT}_log${N}_DIM${DIM}_w$NEIG.tif 
-# r.out.gdal --overwrite -f -c createopt="COMPRESS=DEFLATE,ZLEVEL=9" format=GTiff nodata=-9999 type=Int16  input=${OCCURENCE}                   output=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/output/GSW_unit/${OCCURENCE}_$UNIT.tif 
+# r.out.gdal --overwrite -f -c createopt="COMPRESS=DEFLATE,ZLEVEL=9" format=GTiff nodata=-9999 type=Int16  input=${DEM}_cond    output=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/dem_unit/${DEM}_cond${UNIT}_log${N}_DIM${DIM}_w$NEIG.tif 
+# r.out.gdal --overwrite -f -c createopt="COMPRESS=DEFLATE,ZLEVEL=9" format=GTiff nodata=-9999 type=Int16  input=${OCCURENCE}                   output=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/output/GSW_unit/${OCCURENCE}_$UNIT.tif 
 
 
 if  [  ${GEO} = "GLOBE"   ] ; then 
@@ -132,7 +132,7 @@ gdal_edit.py   -a_nodata 0  $DIR/output/stream_unit_small/stream${UNIT}_log${N}_
 rm -f /dev/shm/stream${UNIT}_log${N}_DIM${DIM}_STDEV${RADIUS}_w${NEIG}_TRH${TRH}.tif
 
 # r.stream.order  stream_rast=stream  direction=drainage  stream_vect=stream_vect   accumulation=accumulation  elevation=${DEM}_cond
-# v.in.ogr  nput=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NHDplus/shp/NHDPlusV21_MS_05_NHDSnapshot_06/NHDFlowline.shp  output=NHDFlowline  --o 
+# v.in.ogr  nput=/project/fas/sbsc/ga254/dataproces/NHDplus/shp/NHDPlusV21_MS_05_NHDSnapshot_06/NHDFlowline.shp  output=NHDFlowline  --o 
 # v.to.rast input=NHDFlowline output=stream_NHD value=1  type=line use=val  --o 
 # r.stream.order  stream_rast=stream_NHD   direction=drainage  stream_vect=stream_vect_NHD    accumulation=accumulation  elevation=${DEM}_cond  --o 
 # r.mapcalc " occurrence_250m_GLOBE_1_null   =  if( isnull(occurrence_250m_GLOBE_null_1) , 1 , null() ) "  --o

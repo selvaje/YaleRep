@@ -4,8 +4,8 @@
 #SBATCH -t 2:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc01_rasterize_vector.sh.%A.%a.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc01_rasterize_vector.sh.%A.%a.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc01_rasterize_vector.sh.%A.%a.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc01_rasterize_vector.sh.%A.%a.err
 #SBATCH --job-name=sc01_rasterize_vector.sh
 #SBATCH --array=1-829
 
@@ -13,10 +13,10 @@
 
 # data from https://zenodo.org/record/1297434#.W4_713XBjNP
 
-INDIR=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GRWL/GRWL_vector_V01.01
-OUTDIR=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GRWL/GRWL_vector_to_rast
+INDIR=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/GRWL/GRWL_vector_V01.01
+OUTDIR=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/GRWL/GRWL_vector_to_rast
 
-# file=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/equi7/dem/EU/EU_048_000.tif
+# file=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/MERIT/equi7/dem/EU/EU_048_000.tif
 
 file=$(ls $INDIR/*.shp  | head -n $SLURM_ARRAY_TASK_ID | tail -1 )
 filename=$(basename $file .shp )

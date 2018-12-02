@@ -2,99 +2,99 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 1 -N 1  
 #SBATCH -t 6:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc08_crete_carving_layer_inmapset.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc08_crete_carving_layer_inmapset.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc08_crete_carving_layer_inmapset.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc08_crete_carving_layer_inmapset.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 
-# for RADIUS in 11 21 31 41 51 61 71 81 91 101 111 121 131 141 151 161  ; do export RADIUS ;  grep ^200   /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt  | xargs -n 2 -P 1 bash -c $' sbatch  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc08_crete_carving_layer_inmapset.sh $1 $2 GLOBE $RADIUS   ' _ ; done 
+# for RADIUS in 11 21 31 41 51 61 71 81 91 101 111 121 131 141 151 161  ; do export RADIUS ;  grep ^200   /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt  | xargs -n 2 -P 1 bash -c $' sbatch  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc08_crete_carving_layer_inmapset.sh $1 $2 GLOBE $RADIUS   ' _ ; done 
 
-# for RADIUS in 161  ; do export RADIUS ;  grep ^200   /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt  | xargs -n 2 -P 1 bash -c $' sbatch   --export=N=$1,DIM=$2,GLOBE="GLOBE",RADIUS=$RADIUS    /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc08_crete_carving_layer_inmapset.sh    ' _ ; done 
+# for RADIUS in 161  ; do export RADIUS ;  grep ^200   /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt  | xargs -n 2 -P 1 bash -c $' sbatch   --export=N=$1,DIM=$2,GLOBE="GLOBE",RADIUS=$RADIUS    /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc08_crete_carving_layer_inmapset.sh    ' _ ; done 
 
-# cat  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt   | xargs -n 2 -P 1 bash -c $'   bsub -W 6:00 -n 1 -R "span[hosts=1]" -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc05_crete_carving_layer.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc05_crete_carving_layer.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc05_crete_carving_layer_inmapset.sh $1 $2 GLOBE ' _
+# cat  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt   | xargs -n 2 -P 1 bash -c $'   bsub -W 6:00 -n 1 -R "span[hosts=1]" -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc05_crete_carving_layer.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc05_crete_carving_layer.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc05_crete_carving_layer_inmapset.sh $1 $2 GLOBE ' _
 
-# cat  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt   | xargs -n 2 -P 1 bash -c $'   bsub -W 6:00 -n 1 -R "span[hosts=1]" -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc05_crete_carving_layer.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc05_crete_carving_layer.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc05_crete_carving_layer_inmapset.sh $1 $2 EUROASIA ' _ 
+# cat  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt   | xargs -n 2 -P 1 bash -c $'   bsub -W 6:00 -n 1 -R "span[hosts=1]" -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc05_crete_carving_layer.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc05_crete_carving_layer.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc05_crete_carving_layer_inmapset.sh $1 $2 EUROASIA ' _ 
 
-# for RADIUS in 11 21 31 41 51 61 71 81 91 101 111 121 131 141 151 161  ; do export RADIUS ;  grep ^200   /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt  | xargs -n 2 -P 1 bash -c $'   bsub -W 6:00 -n 1 -R "span[hosts=1]" -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc05_crete_carving_layer.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc05_crete_carving_layer.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc05_crete_carving_layer_inmapset.sh $1 $2 GLOBE $RADIUS   ' _ ; done 
+# for RADIUS in 11 21 31 41 51 61 71 81 91 101 111 121 131 141 151 161  ; do export RADIUS ;  grep ^200   /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt  | xargs -n 2 -P 1 bash -c $'   bsub -W 6:00 -n 1 -R "span[hosts=1]" -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc05_crete_carving_layer.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc05_crete_carving_layer.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc05_crete_carving_layer_inmapset.sh $1 $2 GLOBE $RADIUS   ' _ ; done 
 
 
 # bash /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc05_crete_carving_layer_inpaset.sh 001 20 GLOBE
 
 # create the txt file 
 
-# rm -f      /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt 
+# rm -f      /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt 
 # seq  10 10 150  | xargs -n 1 -P 8 bash -c $'  
 # DIM=$1
 # echo 001 $DIM 
-# ' _   >>    /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt  
+# ' _   >>    /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt  
 
 # seq  10 10 150  | xargs -n 1 -P 8 bash -c $'  
 # DIM=$1
 # echo 005 $DIM 
-# ' _   >>    /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt  
+# ' _   >>    /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt  
 
 # seq  10 10 150  | xargs -n 1 -P 8 bash -c $'  
 # DIM=$1
 # echo 010 $DIM 
-# ' _   >>    /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt  
+# ' _   >>    /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt  
 
 # seq 10 10 150 | xargs -n 1 -P 8 bash -c $'  
 # DIM=$1
 # echo 100 $DIM 
-# ' _   >>  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt 
+# ' _   >>  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt 
 
 # seq 10 10 150 | xargs -n 1 -P 8 bash -c $'  
 # DIM=$1
 # echo 200 $DIM
-# ' _   >>   /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt 
+# ' _   >>   /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt 
 
 
 # seq 10 10 150 | xargs -n 1 -P 8 bash -c $'  
 # DIM=$1
 # echo 300 $DIM
-# ' _  >>  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt 
+# ' _  >>  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt 
 
 # seq 10 10 150 | xargs -n 1 -P 8 bash -c $'  
 # DIM=$1
 # echo 400 $DIM
-# ' _  >>  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt 
+# ' _  >>  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt 
 
 # seq 10 10 150 | xargs -n 1 -P 8 bash -c $'  
 # DIM=$1
 # echo 500 $DIM
-# ' _  >>  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt 
+# ' _  >>  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt 
 
 # seq 10 10 150 | xargs -n 1 -P 8 bash -c $'  
 # DIM=$1
 # echo 600 $DIM
-# ' _  >>  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt 
+# ' _  >>  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt 
 
 # seq 10 10 150 | xargs -n 1 -P 8 bash -c $'  
 # DIM=$1
 # echo 700 $DIM
-# ' _  >>  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt 
+# ' _  >>  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt 
 
 # seq 10 10 150 | xargs -n 1 -P 8 bash -c $'  
 # DIM=$1
 # echo 800 $DIM
-# ' _  >>  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt 
+# ' _  >>  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt 
 
 # seq 10 10 150 | xargs -n 1 -P 8 bash -c $'  
 # DIM=$1
 # echo 900 $DIM
-# ' _  >>  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt 
+# ' _  >>  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt 
 
 # seq 10 10 150 | xargs -n 1 -P 8 bash -c $'  
 # DIM=$1
 # echo 950 $DIM
-# ' _  >>  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt 
+# ' _  >>  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt 
 
-cd         /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb 
-export DIR=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK
+cd         /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb 
+export DIR=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK
 
-rm -f   /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_$GLOBE/PERMANENT/.gislock
-source  /gpfs/home/fas/sbsc/ga254/scripts/general/enter_grass7.0.2-grace2.sh  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_$GLOBE/PERMANENT 
-rm -f   /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_$GLOBE/PERMANENT/.gislock
+rm -f   /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_$GLOBE/PERMANENT/.gislock
+source  /gpfs/home/fas/sbsc/ga254/scripts/general/enter_grass7.0.2-grace2.sh  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_$GLOBE/PERMANENT 
+rm -f   /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_$GLOBE/PERMANENT/.gislock
 
 r.mask   -r  --quiet
 

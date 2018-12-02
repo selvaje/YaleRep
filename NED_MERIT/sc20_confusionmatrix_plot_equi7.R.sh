@@ -1,5 +1,5 @@
 # https://ragrawal.wordpress.com/2011/05/16/visualizing-confusion-matrix-in-r/
-cd /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces
+cd /gpfs/loomis/project/fas/sbsc/ga254/dataproces
 
 
 tile=NA_078_036
@@ -39,7 +39,7 @@ geom_M = raster ("/dev/shm/NA_078_036.tif")
 
 geom_N
 
-pdf("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NED_MERIT/figure/geomorphon_plots.pdf" , width=11.5, height=10   )
+pdf("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NED_MERIT/figure/geomorphon_plots.pdf" , width=11.5, height=10   )
 
 par (oma=c(2,2,2,1) , mar=c(0.4,0.5,2,4) , cex.lab=0.5 , cex=0.6 , cex.axis=0.4  ,   mfrow=c(2,2) ,  xpd=NA  , bty= "n"   )  # bty= "n" remove the box
 
@@ -94,7 +94,7 @@ confusion$predicted_class = c(class)
 confusion = merge(confusion, actual, by=c("Actual"))
 confusion$Percent = confusion$Freq/confusion$ActualFreq*100
 
-pdf(paste0("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NED_MERIT/figure/confusion_matrix_",tile,".pdf") , width=9.7, height=8   )
+pdf(paste0("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NED_MERIT/figure/confusion_matrix_",tile,".pdf") , width=9.7, height=8   )
  
 #render plot
 # we use three different layers

@@ -5,19 +5,19 @@
 #SBATCH -t 1:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
-#SBATCH -e  /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc03_mask_enlargment.sh%A_%a.err
-#SBATCH -o  /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc03_mask_enlargment.sh%A_%a.out
+#SBATCH -e  /gpfs/scratch60/fas/sbsc/ga254/stderr/sc03_mask_enlargment.sh%A_%a.err
+#SBATCH -o  /gpfs/scratch60/fas/sbsc/ga254/stdout/sc03_mask_enlargment.sh%A_%a.out
 #SBATCH --job-name=sc03_mask_enlargment.sh
 
 # sbatch   /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK_MERIT/sc03_mask_enlargment.sh
 
 # 1150 files 
 
-DIRP=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/RIVER_NETWORK_MERIT
-DIRS=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT
+DIRP=/project/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT
+DIRS=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT
 RAM=/dev/shm
 
-file=$(ls  /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/RIVER_NETWORK_MERIT/msk/*_msk.tif | tail -n  $SLURM_ARRAY_TASK_ID | head -1 )
+file=$(ls  /project/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/msk/*_msk.tif | tail -n  $SLURM_ARRAY_TASK_ID | head -1 )
 filename=$(basename $file  _msk.tif  )
 
 pkfilter -nodata 0  -co COMPRESS=DEFLATE -co ZLEVEL=9 -ot Byte  -of GTiff  -dx 10  -dy 10 -d 10  -f max   -i $file -o    $DIRS/msk_enlarge/tiles_km1/${filename}_msk.tif 

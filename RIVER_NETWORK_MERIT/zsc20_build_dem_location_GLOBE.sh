@@ -4,15 +4,15 @@
 #SBATCH -t 24:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
-#SBATCH -e  /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc20_build_dem_location_GLOBE.sh%J.err
-#SBATCH -o  /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc20_build_dem_location_GLOBE.sh%J.out
+#SBATCH -e  /gpfs/scratch60/fas/sbsc/ga254/stderr/sc20_build_dem_location_GLOBE.sh%J.err
+#SBATCH -o  /gpfs/scratch60/fas/sbsc/ga254/stdout/sc20_build_dem_location_GLOBE.sh%J.out
 #SBATCH --mem-per-cpu=5000
 
 # sbatch /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK_MERIT/sc20_build_dem_location_GLOBE.sh 
 
 
-GRASS=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/grassdb
-DIRP=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/RIVER_NETWORK_MERIT
+GRASS=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/grassdb
+DIRP=/project/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT
 
 ####  comment rm for securit   
 

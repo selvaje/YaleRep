@@ -2,8 +2,8 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 8 -N 1
 #SBATCH -t 10:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc02_monthlymean.sh.%A.%a.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc02_monthlymean.sh.%A.%a.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc02_monthlymean.sh.%A.%a.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc02_monthlymean.sh.%A.%a.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc02_monthlymean.sh
@@ -11,7 +11,7 @@
 
 # sbatch /gpfs/home/fas/sbsc/ga254/scripts/SNOWESA/sc02_monthlymean.sh
 
-export DIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/SNOWESA/input 
+export DIR=/project/fas/sbsc/ga254/dataproces/SNOWESA/input 
 
 # SLURM_ARRAY_TASK_ID=1
 export MONTH=$SLURM_ARRAY_TASK_ID

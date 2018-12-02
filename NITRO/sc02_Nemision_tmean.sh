@@ -3,8 +3,8 @@
 #SBATCH -J sc02_Nemision_tmean.sh
 #SBATCH -n 1 -c 8 -N 1  
 #SBATCH -t 24:00:00  
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc01_Nemision_tmean.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc01_Nemision_tmean.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc01_Nemision_tmean.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc01_Nemision_tmean.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --mem-per-cpu=5000
@@ -12,7 +12,7 @@
 # sbatch /gpfs/home/fas/sbsc/ga254/scripts/NP/sc02_Nemision_tmean.sh 
 
 export  INDIR=/project/fas/sbsc/sd566/global_wsheds/global_results_merged/filled_str_ord_maximum_max50x_lakes_manual_correction/climate
-export OUTDIR=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NP/global_wsheds 
+export OUTDIR=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NP/global_wsheds 
 
 echo  -145 15  -90 60 a >  $OUTDIR/tile.txt
 echo   -90 15    0 60 b >> $OUTDIR/tile.txt

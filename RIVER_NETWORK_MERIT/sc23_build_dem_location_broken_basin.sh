@@ -2,8 +2,8 @@
 #SBATCH -p week
 #SBATCH -n 1 -c 1 -N 1
 #SBATCH -t 168:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc23_build_dem_location_broken_basin.sh.%A_%a.out 
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc23_build_dem_location_broken_basin.sh.%A_%a.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc23_build_dem_location_broken_basin.sh.%A_%a.out 
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc23_build_dem_location_broken_basin.sh.%A_%a.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc23_build_dem_location_broken_basin.sh
@@ -23,8 +23,8 @@ echo SLURM_ARRAY_TASK_MIN   $SLURM_ARRAY_TASK_MIN
 
 module load Apps/GRASS/7.3-beta
 
-export MERIT=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/RIVER_NETWORK_MERIT
-export SC=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT
+export MERIT=/project/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT
+export SC=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT
 export GRASS=/tmp
 export RAM=/dev/shm 
 

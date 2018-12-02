@@ -2,24 +2,24 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 1 -N 1  
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc06_build_dem_location_EUROASIA.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc06_build_dem_location_EUROASIA.sh.%J.err 
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc06_build_dem_location_EUROASIA.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc06_build_dem_location_EUROASIA.sh.%J.err 
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 
 # sbatch   /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc06_build_dem_location_EUROASIA.sh 
 
-cd /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb 
-export DIRP=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/RIVER_NETWORK
-export DIRS=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK
+cd /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb 
+export DIRP=/project/fas/sbsc/ga254/dataproces/RIVER_NETWORK
+export DIRS=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK
 
 ####  comment rm for security   
 rm -rf   $DIRS/RIVER_NETWORK/grassdb/loc_river_fill_EUROASIA
 source /gpfs/home/fas/sbsc/ga254/scripts/general/create_location_grass7.0.2-grace2.sh   $DIRS/grassdb loc_river_fill_EUROASIA  $DIRP/dem_EUROASIA/be75_grd_LandEnlarge_EUROASIA.tif
 
-# rm -f   /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_EUROASIA/PERMANENT/.gislock
-# source  /gpfs/home/fas/sbsc/ga254/scripts/general/enter_grass7.0.2-grace2.sh   /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_EUROASIA/PERMANENT 
-rm -f   /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_EUROASIA/PERMANENT/.gislock
+# rm -f   /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_EUROASIA/PERMANENT/.gislock
+# source  /gpfs/home/fas/sbsc/ga254/scripts/general/enter_grass7.0.2-grace2.sh   /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_EUROASIA/PERMANENT 
+rm -f   /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_EUROASIA/PERMANENT/.gislock
 
 r.in.gdal   in=$DIRP/unit/UNIT497_338_3562_333msk.tif     out=UNIT497_338_3562_333   --overwrite    memory=2047 
 

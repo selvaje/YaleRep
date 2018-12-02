@@ -5,8 +5,8 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --mem-per-cpu=2000
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc99_MERITadjust_1km.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc99_MERITadjust_1km.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc99_MERITadjust_1km.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc99_MERITadjust_1km.sh.%J.err
 
 # for TOPO in altitude ; do  for MATH in min  ; do for  KM in 1   ; do  sbatch    --export=TOPO=$TOPO,MATH=$MATH,KM=$KM   /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK_MERIT/sc99_MERITadjust_1km.sh ; done   ; done ; done  
 
@@ -16,8 +16,8 @@ echo "############################################################"
 sacct  -j   $SLURM_JOB_ID  --format=jobid,MaxVMSize,start,end,CPUTImeRaw,NodeList,ReqCPUS,ReqMem,Elapsed,Timelimit 
 echo "############################################################"
 
-export MERIT=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/RIVER_NETWORK_MERIT
-export SCRATCH=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/MERIT
+export MERIT=/project/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT
+export SCRATCH=/gpfs/scratch60/fas/sbsc/ga254/dataproces/MERIT
 
 export res=10
 export TOPO

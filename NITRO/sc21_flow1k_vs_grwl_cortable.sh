@@ -4,8 +4,8 @@
 #SBATCH -t 1:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc21_flow1k_vs_grwl_cortable.sh.%A.%a.out  
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc21_flow1k_vs_grwl_cortable.sh.%A.%a.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc21_flow1k_vs_grwl_cortable.sh.%A.%a.out  
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc21_flow1k_vs_grwl_cortable.sh.%A.%a.err
 #SBATCH --job-name=sc21_flow1k_vs_grwl_grwlarea.sh
 #SBATCH --mem-per-cpu=10000
 
@@ -13,10 +13,10 @@
 
 
 
-   DIR=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NITRO
- GRWL=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NITRO/GRWL
-AREAK=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NITRO/GRWL/area_1km
- ARC1=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GEO_AREA/area_tif/1arc-sec-Area_prj6965
+   DIR=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NITRO
+ GRWL=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NITRO/GRWL
+AREAK=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NITRO/GRWL/area_1km
+ ARC1=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/GEO_AREA/area_tif/1arc-sec-Area_prj6965
  
 
 
@@ -30,7 +30,7 @@ AREAK=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/datapro
 # awk ' { if($3 >= 0 ) print $3  }'  $GRWL/gwrl_area1km_crop_msk.txt   >  $GRWL/gwrl_area1km_crop_msk_clean.txt
 # rm $GRWL/../gwrl_area1km_crop_msk.tif $GRWL/../gwrl_area1km_crop_msk.txt 
 
-# paste /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NITRO/FLO1K/FLO1K.ts.1960.2015.qav_mean_clean.txt  $GRWL/gwrl_area1km_crop_msk_clean.txt > $GRWL/flow_gwrl.txt 
+# paste /gpfs/loomis/project/fas/sbsc/ga254/dataproces/NITRO/FLO1K/FLO1K.ts.1960.2015.qav_mean_clean.txt  $GRWL/gwrl_area1km_crop_msk_clean.txt > $GRWL/flow_gwrl.txt 
 #  awk '{  if ($1 != 0 ) { if ($2 != 0) { print }  } }' $GRWL/flow_gwrl.txt   > $GRWL/flow_gwrl_no0.txt 
 
 
@@ -39,7 +39,7 @@ module load Apps/R/3.3.2-generic
 R --vanilla --no-readline   -q  <<EOF
 
 library(ggplot2)
-table=read.table("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NITRO/GRWL/flow_gwrl_no0.txt")
+table=read.table("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NITRO/GRWL/flow_gwrl_no0.txt")
 colnames(table)[1] = "Q"  # FLO1K
 colnames(table)[2] = "W"  # GRWL 
 
@@ -62,6 +62,6 @@ p <- ggplot( data = df   , aes(x = x , y = y)) +
     labs(y = "log(SA-GRWL) (m)")  + 
     theme_bw()
 # print(p)
-ggsave("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NITRO/GRWL/Q_FLO1K_vs_SA_GRWL.png")
+ggsave("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NITRO/GRWL/Q_FLO1K_vs_SA_GRWL.png")
 
 EOF

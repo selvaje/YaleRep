@@ -1,4 +1,4 @@
-DIR=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK
+DIR=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK
 
 # Y=11562        # 14028
 # for X in $(seq 14028 14103 ); do 
@@ -22,10 +22,10 @@ module load Apps/R/3.1.1-generic
 # R  --vanilla  <<EOF
 
 # # library(raster)
-# # tif = raster("/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/dem_unit/occurrence_250m_profile.tif")
+# # tif = raster("/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/dem_unit/occurrence_250m_profile.tif")
 
-# table = read.table("/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/dem_unit/dem_profile.txt")
-# postscript("/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/dem_unit/dem_profile.ps" , paper="special" , horizo=F , width=8, height=4  )
+# table = read.table("/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/dem_unit/dem_profile.txt")
+# postscript("/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/dem_unit/dem_profile.ps" , paper="special" , horizo=F , width=8, height=4  )
 
 # # par (oma=c(4,1,6,1) , mar=c(1,4,0,0) , cex.lab=1 , cex=1 , cex.axis=1 , mfcol=c(1,2) 
 
@@ -57,21 +57,21 @@ module load Apps/R/3.1.1-generic
 
 # EOF
 
-# convert -flatten -density 300  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/dem_unit/dem_profile.ps  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/dem_unit/dem_profile.png
-# ps2epsi /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/dem_unit/dem_profile.ps /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/dem_unit/dem_profile.eps
+# convert -flatten -density 300  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/dem_unit/dem_profile.ps  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/dem_unit/dem_profile.png
+# ps2epsi /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/dem_unit/dem_profile.ps /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/dem_unit/dem_profile.eps
 
-# evince /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/dem_unit/dem_profile.eps 
+# evince /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/dem_unit/dem_profile.eps 
 
 R  --vanilla  <<EOF
 
-table001 = read.table("/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/output/txt/tmp/UNIT3753_001_s.txt")
-table010 = read.table("/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/output/txt/tmp/UNIT3753_010_s.txt")
-table100 = read.table("/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/output/txt/tmp/UNIT3753_100_s.txt")
-table200 = read.table("/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/output/txt/tmp/UNIT3753_200_s.txt")
-table300 = read.table("/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/output/txt/tmp/UNIT3753_300_s.txt")
-table400 = read.table("/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/output/txt/tmp/UNIT3753_400_s.txt")
+table001 = read.table("/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/output/txt/tmp/UNIT3753_001_s.txt")
+table010 = read.table("/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/output/txt/tmp/UNIT3753_010_s.txt")
+table100 = read.table("/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/output/txt/tmp/UNIT3753_100_s.txt")
+table200 = read.table("/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/output/txt/tmp/UNIT3753_200_s.txt")
+table300 = read.table("/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/output/txt/tmp/UNIT3753_300_s.txt")
+table400 = read.table("/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/output/txt/tmp/UNIT3753_400_s.txt")
 
-postscript("/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/dem_unit/calibration.ps" , paper="special" , horizo=F , width=6, height=8  )
+postscript("/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/dem_unit/calibration.ps" , paper="special" , horizo=F , width=6, height=8  )
 
 par(oma=c(2,3,3,3) , mar=c(5,5,0,0))
 
@@ -86,10 +86,10 @@ dev.off()
 
 EOF
 
-convert -flatten -density 300  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/dem_unit/calibration.ps  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/dem_unit/calibration.png
-ps2epsi /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/dem_unit/calibration.ps /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/dem_unit/calibration.eps
+convert -flatten -density 300  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/dem_unit/calibration.ps  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/dem_unit/calibration.png
+ps2epsi /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/dem_unit/calibration.ps /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/dem_unit/calibration.eps
 
-evince /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/dem_unit/calibration.eps 
+evince /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/dem_unit/calibration.eps 
 
 
 

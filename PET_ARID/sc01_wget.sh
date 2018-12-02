@@ -2,7 +2,7 @@
 # source https://cgiarcsi.community/data/global-aridity-and-pet-database/ 
 
 
-cd /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/PET_ARID/ARIDITY/
+cd /project/fas/sbsc/ga254/dataproces/PET_ARID/ARIDITY/
 
 wget https://www.dropbox.com/sh/e5is592zafvovwf/AACSS163OQ2nm5m1jmlZk4Gva/Global%20PET%20and%20Aridity%20Index/Global%20Aridity%20-%20Annual.zip 
 
@@ -12,7 +12,7 @@ gdal_edit.py -a_ullr  -180 90 180 -60  AI_annual.tif
 
 
 
-cd /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/PET_ARID/PET
+cd /project/fas/sbsc/ga254/dataproces/PET_ARID/PET
 wget https://www.dropbox.com/sh/e5is592zafvovwf/AAB-D21XrVb3A5IxG5oT5Oooa/Global%20PET%20and%20Aridity%20Index/Global%20PET%20-%20Monthly.zip?dl=0
 
 unzip "Global PET - Monthly.zip?dl=0"

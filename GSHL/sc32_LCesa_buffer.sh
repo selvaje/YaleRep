@@ -2,18 +2,18 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 8 -N 1  
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc32_LCesa_buffer.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc32_LCesa_buffer.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc32_LCesa_buffer.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc32_LCesa_buffer.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH -J sc32_LCesa_buffer.sh
 
 # sbatch  /gpfs/home/fas/sbsc/ga254/scripts/GSHL/sc32_LCesa_buffer.sh 
 
-export    BUF=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_lst_ws_bin/LST_plot_buf
-export    LCESA=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/LCESA
-export    LST=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_lst_ws_bin
-export    LST_MAX=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/LST_max
+export    BUF=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_lst_ws_bin/LST_plot_buf
+export    LCESA=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/GSHL/LCESA
+export    LST=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_lst_ws_bin
+export    LST_MAX=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/GSHL/LST_max
 export    RAM=/dev/shm
 
 

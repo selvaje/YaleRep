@@ -2,8 +2,8 @@
 #SBATCH -p scavenge 
 #SBATCH -n 1 -c 1 -N 1 
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc35_arrow_plot.R.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc35_arrow_plot.R.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc35_arrow_plot.R.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc35_arrow_plot.R.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH -J sc35_arrow_plot_bin_buf.R.sh
@@ -13,15 +13,15 @@
 # module load Apps/R/3.0.3  
 module load Apps/R/3.1.1-generic
 
-cd /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_lst_ws_bin
+cd /gpfs/loomis/project/fas/sbsc/ga254/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_lst_ws_bin
 
 R  --vanilla --no-readline   -q  <<EOF
 
 library(ggplot2)
 
-BIN="/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_lst_ws_bin/LST_plot_bin/"
-BUF="/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_lst_ws_bin/LST_plot_buf/"
-BINBUF="/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_lst_ws_bin/LST_plot_bin_buf/"
+BIN="/gpfs/loomis/project/fas/sbsc/ga254/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_lst_ws_bin/LST_plot_bin/"
+BUF="/gpfs/loomis/project/fas/sbsc/ga254/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_lst_ws_bin/LST_plot_buf/"
+BINBUF="/gpfs/loomis/project/fas/sbsc/ga254/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_lst_ws_bin/LST_plot_bin_buf/"
 
 
 Madrid.bin  = read.table(paste (BIN,"LST_MOYDmax_Day_value_378441rec_bin_meanLST.txt", sep=""))

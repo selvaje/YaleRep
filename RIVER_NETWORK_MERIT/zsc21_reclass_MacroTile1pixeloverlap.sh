@@ -2,15 +2,15 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 1 -N 1
 #SBATCH -t 10:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc21_reclass_MacroTile1pixeloverlap.sh.%J.out 
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc21_reclass_MacroTile1pixeloverlap.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc21_reclass_MacroTile1pixeloverlap.sh.%J.out 
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc21_reclass_MacroTile1pixeloverlap.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc21_reclass_MacroTile1pixeloverlap.sh
 
 # sbatch /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK_MERIT/sc21_reclass_MacroTile1pixeloverlap.sh
 
-MERIT=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT
+MERIT=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT
 GRASS=/tmp
 RAM=/dev/shm
 

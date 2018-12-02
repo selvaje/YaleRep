@@ -2,8 +2,8 @@
 #SBATCH -p scavenge
 #SBATCH -n 1 -c 8 -N 1  
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc20_animation_addcostline.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc20_animation_addcostline.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc20_animation_addcostline.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc20_animation_addcostline.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc20_animation_addcostline.sh
@@ -12,7 +12,7 @@
 
 module load Apps/R/3.3.2-generic
 
-export DIR=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/figure/median_10KM
+export DIR=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/MERIT/figure/median_10KM
 
 # correction to have in value in percentage
 # cd  /lustre/scratch/client/fas/sbsc/ga254/dataproces/GMTED2010/final/percent 
@@ -78,7 +78,7 @@ rm(x)
 }
 }
 
-path = "/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/figure"
+path = "/gpfs/loomis/project/fas/sbsc/ga254/dataproces/MERIT/figure"
 
 pdf(paste(path,"/pdf/",filename,".pdf",sep=""),width=16 , height=8 )
 
@@ -89,7 +89,7 @@ day001=raster(paste(file,sep=""))
 ext <- as.vector(extent(day001))
 print ("load shapefile")
 
-coast=shapefile("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/figure/shp/globe_clip.shp" ,  useC=FALSE )
+coast=shapefile("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/MERIT/figure/shp/globe_clip.shp" ,  useC=FALSE )
 
 # coast=crop(coast, extent(ext)) 
  

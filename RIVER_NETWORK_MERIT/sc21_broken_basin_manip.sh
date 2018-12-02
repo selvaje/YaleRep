@@ -2,8 +2,8 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 1 -N 1  
 #SBATCH -t 1:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc21_broken_basin_manip.sh.%A_%a.out  
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc21_broken_basin_manip.sh.%A_%a.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc21_broken_basin_manip.sh.%A_%a.out  
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc21_broken_basin_manip.sh.%A_%a.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc21_broken_basin_manip.sh
@@ -13,11 +13,11 @@
 # sbatch /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK_MERIT/sc21_broken_basin_manip.sh
 # sbatch -d afterany:$(qmys | grep  sc20_build_dem_location_4streamTile.sh | awk '{ print $1}' | uniq)  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK_MERIT/sc21_broken_basin_manip.sh
 
-MERIT=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT
+MERIT=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT
 GRASS=/tmp
 RAM=/dev/shm
 
-file=$(ls /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles_brokb/lbasin_h??v??.tif   | head -n  $SLURM_ARRAY_TASK_ID | tail  -1 )
+file=$(ls /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles_brokb/lbasin_h??v??.tif   | head -n  $SLURM_ARRAY_TASK_ID | tail  -1 )
 
 filename=$( basename $file ) 
 

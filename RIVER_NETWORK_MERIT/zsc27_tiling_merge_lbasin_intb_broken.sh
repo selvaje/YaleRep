@@ -2,8 +2,8 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 9 -N 1
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc27_tiling_merge_lbasin_intb_broken.sh.%A_%a.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc27_tiling_merge_lbasin_intb_broken.sh.%A_%a.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc27_tiling_merge_lbasin_intb_broken.sh.%A_%a.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc27_tiling_merge_lbasin_intb_broken.sh.%A_%a.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc27_tiling_merge_lbasin_intb_broken.sh
@@ -14,12 +14,12 @@
 ####    sbatch  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK_MERIT/sc27_tiling_merge_lbasin_intb_broken.sh
 
 # check for errors 
-# grep "Bus error"  /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc27_tiling_merge_lbasin_intb_broken.sh.*
+# grep "Bus error"  /gpfs/scratch60/fas/sbsc/ga254/stderr/sc27_tiling_merge_lbasin_intb_broken.sh.*
 
-export MERIT=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT
+export MERIT=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT
 export GRASS=/tmp
 export RAM=/dev/shm
-# export RAMT=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/tmp
+# export RAMT=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/tmp
 export RAMT=/dev/shm
 
 find  /tmp/     -user $USER -mtime +1   2>/dev/null  | xargs -n 1 -P 1 rm -ifr  
@@ -32,11 +32,11 @@ find  /dev/shm  -user $USER -mtime +1   2>/dev/null  | xargs -n 1 -P 1 rm -ifr
 
 # SLURM_ARRAY_TASK_ID=7
 
-export tile=$( awk -v AR=$SLURM_ARRAY_TASK_ID '{ if(NR==AR)  print $1      }' /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GEO_AREA/tile_files/tile_lat_long_45d_MERIT_noheader.txt )
-export  ulx=$( awk -v AR=$SLURM_ARRAY_TASK_ID '{ if(NR==AR)  print int($2) }' /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GEO_AREA/tile_files/tile_lat_long_45d_MERIT_noheader.txt )
-export  uly=$( awk -v AR=$SLURM_ARRAY_TASK_ID '{ if(NR==AR)  print int($3) }' /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GEO_AREA/tile_files/tile_lat_long_45d_MERIT_noheader.txt )
-export  lrx=$( awk -v AR=$SLURM_ARRAY_TASK_ID '{ if(NR==AR)  print int($4) }' /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GEO_AREA/tile_files/tile_lat_long_45d_MERIT_noheader.txt )
-export  lry=$( awk -v AR=$SLURM_ARRAY_TASK_ID '{ if(NR==AR)  print int($5) }' /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GEO_AREA/tile_files/tile_lat_long_45d_MERIT_noheader.txt )
+export tile=$( awk -v AR=$SLURM_ARRAY_TASK_ID '{ if(NR==AR)  print $1      }' /project/fas/sbsc/ga254/dataproces/GEO_AREA/tile_files/tile_lat_long_45d_MERIT_noheader.txt )
+export  ulx=$( awk -v AR=$SLURM_ARRAY_TASK_ID '{ if(NR==AR)  print int($2) }' /project/fas/sbsc/ga254/dataproces/GEO_AREA/tile_files/tile_lat_long_45d_MERIT_noheader.txt )
+export  uly=$( awk -v AR=$SLURM_ARRAY_TASK_ID '{ if(NR==AR)  print int($3) }' /project/fas/sbsc/ga254/dataproces/GEO_AREA/tile_files/tile_lat_long_45d_MERIT_noheader.txt )
+export  lrx=$( awk -v AR=$SLURM_ARRAY_TASK_ID '{ if(NR==AR)  print int($4) }' /project/fas/sbsc/ga254/dataproces/GEO_AREA/tile_files/tile_lat_long_45d_MERIT_noheader.txt )
+export  lry=$( awk -v AR=$SLURM_ARRAY_TASK_ID '{ if(NR==AR)  print int($5) }' /project/fas/sbsc/ga254/dataproces/GEO_AREA/tile_files/tile_lat_long_45d_MERIT_noheader.txt )
 
 echo $ulx $uly $lrx $lry
 

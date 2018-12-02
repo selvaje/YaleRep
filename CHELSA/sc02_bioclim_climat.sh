@@ -2,8 +2,8 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 6 -N 1
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc02_bioclim_climat.sh.%A_%a.out    
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc02_bioclim_climat.sh.%A_%a.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc02_bioclim_climat.sh.%A_%a.out    
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc02_bioclim_climat.sh.%A_%a.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc02_bioclim_climat.sh
@@ -14,7 +14,7 @@
 
 module load Apps/GRASS/7.3-beta
 
-export CHELSA=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/CHELSA
+export CHELSA=/project/fas/sbsc/ga254/dataproces/CHELSA
 export GRASS=/tmp
 export RAM=/dev/shm
 
@@ -49,7 +49,7 @@ echo cp tif data to RAM
 
 echo  tmax tmin prec | xargs -n 1 -P 3 bash -c $' 
 VAR=$1
-cp /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/CHELSA/${VAR}_clim/CHELSA_${VAR}_*_V1.2.tif $RAM
+cp /project/fas/sbsc/ga254/dataproces/CHELSA/${VAR}_clim/CHELSA_${VAR}_*_V1.2.tif $RAM
 ' _ 
 
 

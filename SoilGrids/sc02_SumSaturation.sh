@@ -2,8 +2,8 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 8 -N 1
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc02_SumSaturation.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc02_SumSaturation.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc02_SumSaturation.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc02_SumSaturation.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc02_SumSaturation.sh
@@ -11,7 +11,7 @@
 
 # sbatch /gpfs/home/fas/sbsc/ga254/scripts/SoilGrids/sc02_SumSaturation.sh
 
-export DIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/SoilGrids/AWC
+export DIR=/project/fas/sbsc/ga254/dataproces/SoilGrids/AWC
 export RAM=/dev/shm
 
 # Upper Left  (-180.0000000,  84.0000000) (180d 0' 0.00"W, 84d 0' 0.00"N)

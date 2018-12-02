@@ -2,16 +2,16 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 12 -N 1  
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc01_wget_unzip.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc01_wget_unzip.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc01_wget_unzip.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc01_wget_unzip.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc01_wget_unzip.sh
 
 #  sbatch /gpfs/home/fas/sbsc/ga254/scripts/NED/sc01_wget_unzip.sh
 
-export ZIP=/gpfs/loomis/scratch60/fas/sbsc/ga254/grace0/dataproces/NED/zip
-export TIF=/gpfs/loomis/scratch60/fas/sbsc/ga254/grace0/dataproces/NED/tif
+export ZIP=/gpfs/loomis/scratch60/fas/sbsc/ga254/dataproces/NED/zip
+export TIF=/gpfs/loomis/scratch60/fas/sbsc/ga254/dataproces/NED/tif
 
 cd $ZIP
 

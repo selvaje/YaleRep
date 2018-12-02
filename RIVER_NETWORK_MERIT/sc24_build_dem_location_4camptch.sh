@@ -2,8 +2,8 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 3 -N 1
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc28_tiling20d_aggregate.sh.%A_%a.out 
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc28_tiling20d_aggregate.sh.%A_%a.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc28_tiling20d_aggregate.sh.%A_%a.out 
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc28_tiling20d_aggregate.sh.%A_%a.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc28_tiling20d_aggregate.sh
@@ -14,7 +14,7 @@
 #### sbatch  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK_MERIT/sc28_tiling20d_aggregate.sh
 #### sbatch  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK_MERIT/sc28_tiling20d_aggregate.sh
 
-export MERIT=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT
+export MERIT=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT
 export GRASS=/tmp
 export RAM=/dev/shm
 

@@ -1,6 +1,6 @@
 
 
-DIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NP/pearson
+DIR=/project/fas/sbsc/ga254/dataproces/NP/pearson
 
 # for file in $DIR/lu_9_TN_season_*_CONUS_corr_mask.tif $DIR/lu_9_TP_season_*_CONUS_corr_mask.tif ; do 
 #     pkstat  -nbin 1000  -src_min -1 -src_max 1    -hist -i $file | awk '{ if ($1<-0.5 ||  $1>+0.5) print   }'    >  $DIR/$(basename   $file .tif)_hist.txt 
@@ -14,13 +14,13 @@ library(plotrix)
 library(zoo)
 
 
-DIR="/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NP/pearson/"
+DIR="/project/fas/sbsc/ga254/dataproces/NP/pearson/"
 luTN1 =  read.table(paste0(DIR,"lu_9_TN_season_1_CONUS_corr_mask_hist.txt"))
 luTN2 =  read.table(paste0(DIR,"lu_9_TN_season_2_CONUS_corr_mask_hist.txt"))
 luTN3 =  read.table(paste0(DIR,"lu_9_TN_season_3_CONUS_corr_mask_hist.txt"))
 luTN4 =  read.table(paste0(DIR,"lu_9_TN_season_4_CONUS_corr_mask_hist.txt"))
 
-pdf("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NP/figure/pdf/lu_9_TN_pearson_hist.pdf",width=6 , height=6 )
+pdf("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NP/figure/pdf/lu_9_TN_pearson_hist.pdf",width=6 , height=6 )
 
 par(bty="n") # deleting the box
 

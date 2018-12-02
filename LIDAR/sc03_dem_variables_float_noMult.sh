@@ -2,14 +2,14 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 1 -N 1  
 #SBATCH -t 3:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc03_dem_variables_float_noMult.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc03_dem_variables_float_noMult.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc03_dem_variables_float_noMult.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc03_dem_variables_float_noMult.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc03_dem_variables_float_noMult.sh
 
-# # for file in /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/LIDAR/input/*/d{s,t}m_wgs84_crop_a.tif  ; do   sbatch --export=file=$file   /gpfs/home/fas/sbsc/ga254/scripts/LIDAR/sc03_dem_variables_float_noMult.sh  ; done 
-# # bash /gpfs/home/fas/sbsc/ga254/scripts/LIDAR/sc03_dem_variables_float_noMult.sh /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/LIDAR/input/ID09_Lloyd/dsm_wgs84_crop_a.tif
+# # for file in /project/fas/sbsc/ga254/dataproces/LIDAR/input/*/d{s,t}m_wgs84_crop_a.tif  ; do   sbatch --export=file=$file   /gpfs/home/fas/sbsc/ga254/scripts/LIDAR/sc03_dem_variables_float_noMult.sh  ; done 
+# # bash /gpfs/home/fas/sbsc/ga254/scripts/LIDAR/sc03_dem_variables_float_noMult.sh /project/fas/sbsc/ga254/dataproces/LIDAR/input/ID09_Lloyd/dsm_wgs84_crop_a.tif
 
 # sbatch   /gpfs/home/fas/sbsc/ga254/scripts/LIDAR/sc03_dem_variables_float_noMult.sh  
 
@@ -17,7 +17,7 @@ module load Apps/GRASS/7.3-beta
 
 # use this if one file is missing 
 
-LIDAR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/LIDAR
+LIDAR=/project/fas/sbsc/ga254/dataproces/LIDAR
 RAM=/dev/shm
 # file=$1
 filename=$(basename $file .tif )
@@ -77,7 +77,7 @@ rm -f $RAM/roughness_${filename}_0.tif
 # filenameupa=$(basename $file dem.tif)
 
 # echo  generate tci with file $filename.tif
-gdal_translate  -co COMPRESS=DEFLATE -co ZLEVEL=9  -projwin  $(getCorners4Gtranslate  $LIDAR/roughness/${filename}.tif ) /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/RIVER_NETWORK_MERIT/upa/all_tif.vrt  $LIDAR/upa/${filename}.tif
+gdal_translate  -co COMPRESS=DEFLATE -co ZLEVEL=9  -projwin  $(getCorners4Gtranslate  $LIDAR/roughness/${filename}.tif ) /project/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/upa/all_tif.vrt  $LIDAR/upa/${filename}.tif
 gdal_calc.py --overwrite --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9 --co=INTERLEAVE=BAND  -B $LIDAR/slope/${filename}.tif -A $LIDAR/upa/${filename}.tif  --outfile=$LIDAR/tci/${filename}.tif    --calc="(log ( A.astype(float) / (tan(  B.astype(float) * 3.141592 / 180) + 0.01 ) ) )"
 
 # echo  generate spi with file $filename.tif

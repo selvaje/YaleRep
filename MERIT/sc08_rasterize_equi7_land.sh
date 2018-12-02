@@ -5,8 +5,8 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --mem-per-cpu=5000
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc08_rasterize_equi7_land.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc08_rasterize_equi7_land.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc08_rasterize_equi7_land.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc08_rasterize_equi7_land.sh.%J.err
 
 # for CT  in  AF  AN  AS  EU  NA  OC  SA ; do for  KM in 0.25 0.10 1.00 5.00 10.00  ; do  sbatch    --export=CT=$CT,KM=$KM /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc08_rasterize_equi7_land.sh   ; done ; done 
 
@@ -17,8 +17,8 @@ echo "############################################################"
 sacct  -j   $SLURM_JOB_ID  --format=jobid,MaxVMSize,start,end,CPUTImeRaw,NodeList,ReqCPUS,ReqMem,Elapsed,Timelimit 
 echo "############################################################"
 
-export EQUI=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/EQUI7/grids
-export MERIT=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/equi7/dem
+export EQUI=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/EQUI7/grids
+export MERIT=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/MERIT/equi7/dem
 export RAM=/dev/shm
 export res=$( echo  $KM \* 1000 | bc )
 export RES=$(echo  0.00083333333333333333333333333 \* 10 \* $KM | bc -l ) 
@@ -41,7 +41,7 @@ exit
 
 for CT  in  AF  AN  AS  EU  NA  OC  SA ; do
 rm -f $RAM/EQUI7_V13_${CT}_GEOG_ZONE.*
-ogr2ogr  -clipdst    $EQUI/$CT/GEOG/EQUI7_V13_${CT}_GEOG_ZONE.shp  $RAM/EQUI7_V13_${CT}_GEOG_ZONE.shp       /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/input_tif/all_tif_shp.shp
+ogr2ogr  -clipdst    $EQUI/$CT/GEOG/EQUI7_V13_${CT}_GEOG_ZONE.shp  $RAM/EQUI7_V13_${CT}_GEOG_ZONE.shp       /gpfs/loomis/project/fas/sbsc/ga254/dataproces/MERIT/input_tif/all_tif_shp.shp
 ogrinfo -geom=NO -al $RAM/EQUI7_V13_${CT}_GEOG_ZONE.shp   | grep _dem.tif | awk '{  print $4 }'  >  $EQUI/$CT/GEOG/EQUI7_V13_${CT}_GEOG_TILEMERIT.txt 
 done 
 

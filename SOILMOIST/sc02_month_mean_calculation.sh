@@ -2,8 +2,8 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 4 -N 1
 #SBATCH -t 1:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc02_month_mean_calculation.sh.%A.%a.err
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc02_month_mean_calculation.sh.%A.%a.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc02_month_mean_calculation.sh.%A.%a.err
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc02_month_mean_calculation.sh.%A.%a.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc02_month_mean_calculation.sh
@@ -13,7 +13,7 @@
 
 # SLURM_ARRAY_TASK_ID=5
 export YEAR=$(expr $SLURM_ARRAY_TASK_ID + 1983 ) # start from 1984 
-export DIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/SOILMOIST
+export DIR=/project/fas/sbsc/ga254/dataproces/SOILMOIST
 
 echo 01 02 03 04 05 06 07 08 09 10 11 12  | xargs -n 1 -P 4 bash -c $'
 MM=$1

@@ -3,17 +3,17 @@
 #SBATCH -J sc10_pred_analysis.sh 
 #SBATCH -n 1 -c 3  -N 1  
 #SBATCH -t 24:00:00  
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc11_discharge4st-order.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc11_discharge4st-order.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc11_discharge4st-order.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc11_discharge4st-order.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 
 # sbatch /gpfs/home/fas/sbsc/ga254/scripts/NITRO/sc11_discharge4st-order.sh
 
-export WIDTH=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NITRO/width_pred
+export WIDTH=/project/fas/sbsc/ga254/dataproces/NITRO/width_pred
 export ORDER=/project/fas/sbsc/sd566/global_wsheds/global_results_merged/netCDF/stream_order_lakes0.tif
-export FLO=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NITRO/FLO1K
-export NITRO=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NITRO
+export FLO=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NITRO/FLO1K
+export NITRO=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NITRO
 export RAM=/dev/shm
 
 # w_pete1  <- (0.510 * x ) + 1.86              =   
@@ -117,7 +117,7 @@ export RAM=/dev/shm
 ############## add attribute to coscat region 
 
 # crop comscat 
-gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -projwin $(getCorners4Gtranslate $NITRO/prediction/prediction_Length2_order1.tif) /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/COSCAT/tif/COSCAT_1km.tif  $RAM/COSCAT_1km_crop.tif   
+gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -projwin $(getCorners4Gtranslate $NITRO/prediction/prediction_Length2_order1.tif) /gpfs/loomis/project/fas/sbsc/ga254/dataproces/COSCAT/tif/COSCAT_1km.tif  $RAM/COSCAT_1km_crop.tif   
 
 echo   $NITRO/prediction/prediction_Length.tif $NITRO/prediction/prediction_Length2.tif $NITRO/prediction/prediction_WQmean.tif | xargs -n 1 -P 3 bash -c $' 
 export file=$1 
@@ -175,7 +175,7 @@ export mesure=${filename:11:8}
 if [ $filename = prediction_WQmean ] ; then rule=mean ; else rule=sum ; fi 
 
 rm -f $NITRO/COSCAT/COSCAT_order1_$mesure.*
-pkextractogr  -srcnodata -9999 -f "ESRI Shapefile"    -r $rule -s /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/COSCAT/shp/COSCAT.shp -i $NITRO/prediction/${filename}_order1.tif -o $NITRO/COSCAT/COSCAT_order1_$mesure.shp
+pkextractogr  -srcnodata -9999 -f "ESRI Shapefile"    -r $rule -s /gpfs/loomis/project/fas/sbsc/ga254/dataproces/COSCAT/shp/COSCAT.shp -i $NITRO/prediction/${filename}_order1.tif -o $NITRO/COSCAT/COSCAT_order1_$mesure.shp
 
 for ORD in $(seq 2 9) ; do 
 ORDP=$(expr $ORD - 1 )

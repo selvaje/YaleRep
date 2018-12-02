@@ -5,10 +5,10 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --mem-per-cpu=2000
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc04_dem_variables_float_noMult_resKM.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc04_dem_variables_float_noMult_resKM.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc04_dem_variables_float_noMult_resKM.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc04_dem_variables_float_noMult_resKM.sh.%J.err
 
-# for TOPO in forms ; do  for MATH in count majority percent  ; do for  KM in 1 5 10 50 100 ; do  sbatch  -o  /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc04_variables_merge_resKM${KM}TOPO${TOPO}MATH${MATH}.sh.%J.out  -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc04_variables_merge_resKM${KM}TOPO${TOPO}MATH${MATH}.sh.%J.err -J sc04_variables_merge_resKM${KM}TOPO${TOPO}MATH${MATH}.sh  --export=TOPO=$TOPO,MATH=$MATH,KM=$KM /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc04_dem_variables_float_noMult_resKM_categorical.sh ; done   ; done ; done   
+# for TOPO in forms ; do  for MATH in count majority percent  ; do for  KM in 1 5 10 50 100 ; do  sbatch  -o  /gpfs/scratch60/fas/sbsc/ga254/stdout/sc04_variables_merge_resKM${KM}TOPO${TOPO}MATH${MATH}.sh.%J.out  -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc04_variables_merge_resKM${KM}TOPO${TOPO}MATH${MATH}.sh.%J.err -J sc04_variables_merge_resKM${KM}TOPO${TOPO}MATH${MATH}.sh  --export=TOPO=$TOPO,MATH=$MATH,KM=$KM /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc04_dem_variables_float_noMult_resKM_categorical.sh ; done   ; done ; done   
 
 
 echo "############################################################"
@@ -17,8 +17,8 @@ echo "############################################################"
 sacct  -j   $SLURM_JOB_ID  --format=jobid,MaxVMSize,start,end,CPUTImeRaw,NodeList,ReqCPUS,ReqMem,Elapsed,Timelimit 
 echo "############################################################"
 
-export MERIT=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT
-export SCRATCH=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/MERIT
+export MERIT=/project/fas/sbsc/ga254/dataproces/MERIT
+export SCRATCH=/gpfs/scratch60/fas/sbsc/ga254/dataproces/MERIT
 
 export res=$( expr $KM \* 10)
 export TOPO
@@ -40,7 +40,7 @@ pkfilter -nodata 0  -co COMPRESS=DEFLATE -co ZLEVEL=9 -ot Byte  -of GTiff  -dx $
 
 echo starting the merging  $MERIT/$TOPO/$MATH/${TOPO}_${KM}KM${MATH}_MERIT.tif  
 
-gdalbuildvrt  -te  $(getCorners4Gwarp    /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/input_tif/all_tif.vrt )    -overwrite       $SCRATCH/$TOPO/$MATH/tiles_km$KM.vrt   $SCRATCH/$TOPO/$MATH/tiles_km$KM/*.tif
+gdalbuildvrt  -te  $(getCorners4Gwarp    /project/fas/sbsc/ga254/dataproces/MERIT/input_tif/all_tif.vrt )    -overwrite       $SCRATCH/$TOPO/$MATH/tiles_km$KM.vrt   $SCRATCH/$TOPO/$MATH/tiles_km$KM/*.tif
 gdal_translate -a_nodata 0  -co COMPRESS=DEFLATE -co ZLEVEL=9   $SCRATCH/$TOPO/$MATH/tiles_km$KM.vrt   $MERIT/$TOPO/$MATH/geom_${KM}KM${MATH}_MERIT.tif 
 gdal_edit.py -a_nodata   0  $MERIT/$TOPO/$MATH/geom_${KM}KM${MATH}_MERIT.tif
 rm -f  $SCRATCH/$TOPO/$MATH/tiles_km$KM/*.tif  $SCRATCH/$TOPO/$MATH/tiles_km$KM.vrt   
@@ -61,7 +61,7 @@ pkfilter -nodata 0  -co COMPRESS=DEFLATE -co ZLEVEL=9 -ot Byte  -of GTiff  -dx $
 
 echo starting the merging  $MERIT/$TOPO/$MATH/${TOPO}_${KM}KM${MATH}_MERIT.tif  
 
-gdalbuildvrt  -te  $(getCorners4Gwarp    /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/input_tif/all_tif.vrt )    -overwrite       $SCRATCH/$TOPO/$MATH/tiles_km$KM.vrt   $SCRATCH/$TOPO/$MATH/tiles_km$KM/*.tif
+gdalbuildvrt  -te  $(getCorners4Gwarp    /project/fas/sbsc/ga254/dataproces/MERIT/input_tif/all_tif.vrt )    -overwrite       $SCRATCH/$TOPO/$MATH/tiles_km$KM.vrt   $SCRATCH/$TOPO/$MATH/tiles_km$KM/*.tif
 gdal_translate -a_nodata 0  -co COMPRESS=DEFLATE -co ZLEVEL=9   $SCRATCH/$TOPO/$MATH/tiles_km$KM.vrt   $MERIT/$TOPO/$MATH/geom_${KM}KM${MATH}_MERIT.tif 
 gdal_edit.py -a_nodata   0  $MERIT/$TOPO/$MATH/geom_${KM}KM${MATH}_MERIT.tif
 rm -f  $SCRATCH/$TOPO/$MATH/tiles_km$KM/*.tif  $SCRATCH/$TOPO/$MATH/tiles_km$KM.vrt   

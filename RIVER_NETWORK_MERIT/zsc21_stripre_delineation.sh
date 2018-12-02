@@ -2,16 +2,16 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 1 -N 1
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc21_stripre_delineation.sh.%A_%a.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc21_stripre_delineation.sh.%A_%a.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc21_stripre_delineation.sh.%A_%a.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc21_stripre_delineation.sh.%A_%a.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc21_stripre_delineation.sh
 
-MERIT=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/RIVER_NETWORK_MERIT
+MERIT=/project/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT
 
-awk '{ if ($3==85) print $1  }'  /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GEO_AREA/tile_files/tile_lat_long_40d_MERIT_noheader.txt > /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/txt/orizontal_tiles.txt 
-awk '{ if ($2==-180) print $1  }'  /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GEO_AREA/tile_files/tile_lat_long_40d_MERIT_noheader.txt > /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/txt/vertical_tiles.txt 
+awk '{ if ($3==85) print $1  }'  /project/fas/sbsc/ga254/dataproces/GEO_AREA/tile_files/tile_lat_long_40d_MERIT_noheader.txt > /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/txt/orizontal_tiles.txt 
+awk '{ if ($2==-180) print $1  }'  /project/fas/sbsc/ga254/dataproces/GEO_AREA/tile_files/tile_lat_long_40d_MERIT_noheader.txt > /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/txt/vertical_tiles.txt 
 
 
 # orizontal stripe 
@@ -28,6 +28,6 @@ pkcomposite   -file 1  -cr sum  $( ls  $MERIT/lbasin_tiles_stripe/stripe_vert_*.
 
 
 
-awk '{ if ($4==-140) print   }'  /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GEO_AREA/tile_files/tile_lat_long_40d_MERIT_noheader.txt
-awk '{ if ($4==-140) print   }'  /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GEO_AREA/tile_files/tile_lat_long_40d_MERIT_noheader.txt
+awk '{ if ($4==-140) print   }'  /project/fas/sbsc/ga254/dataproces/GEO_AREA/tile_files/tile_lat_long_40d_MERIT_noheader.txt
+awk '{ if ($4==-140) print   }'  /project/fas/sbsc/ga254/dataproces/GEO_AREA/tile_files/tile_lat_long_40d_MERIT_noheader.txt
 

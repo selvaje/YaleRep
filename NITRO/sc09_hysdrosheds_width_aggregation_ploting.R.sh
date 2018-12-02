@@ -4,18 +4,18 @@
 #SBATCH -t 168:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc08_hysdrosheds_width_aggregation_ploting.R.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc08_hysdrosheds_width_aggregation_ploting.R.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc08_hysdrosheds_width_aggregation_ploting.R.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc08_hysdrosheds_width_aggregation_ploting.R.%J.err
 #SBATCH --job-name=sc08_hysdrosheds_width_aggregation_ploting.R.sh
 #SBATCH --mem-per-cpu=10000
 
 # sbatch /gpfs/home/fas/sbsc/ga254/scripts/NITRO/sc09_hysdrosheds_width_aggregation_ploting.R.sh
 
 
-export OUTDIR=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NITRO/GRWL
+export OUTDIR=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NITRO/GRWL
 export RAM=/dev/shm
 
-cd /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NITRO/GRWL
+cd /gpfs/loomis/project/fas/sbsc/ga254/dataproces/NITRO/GRWL
 # awk ' {   if ($2 > 1 ) print   }'  $OUTDIR/FLO1K_qav_grwl_1km_clean.txt > $OUTDIR/FLO1K_qav_grwl_1km_clean_moreW1.txt
 
 
@@ -25,7 +25,7 @@ module load Apps/R/3.3.2-generic
 # R --vanilla --no-readline   -q  <<'EOF'
 
 # library(ggplot2)
-# table=read.table("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NITRO/GRWL/FLO1K_qav_grwl_1km_clean_moreW1.txt")
+# table=read.table("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NITRO/GRWL/FLO1K_qav_grwl_1km_clean_moreW1.txt")
 # colnames(table)[1] = "Q"  # FLO1K
 # colnames(table)[2] = "W"  # GRWL 
 
@@ -51,7 +51,7 @@ module load Apps/R/3.3.2-generic
 #     labs(y = "log(W-GRWL) (m)")  + 
 #     theme_bw()
 # # print(p)
-# ggsave("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NITRO/GRWL/Q_FLO1K_vs_W_GRWL.png")
+# ggsave("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NITRO/GRWL/Q_FLO1K_vs_W_GRWL.png")
 
 
 # w_pete1  <- (0.510 * x ) + 1.86
@@ -73,7 +73,7 @@ module load Apps/R/3.3.2-generic
 #     theme_bw()
 # # print(p)
 
-# ggsave("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NITRO/GRWL/W_GRWL_W_Pete1.png")
+# ggsave("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NITRO/GRWL/W_GRWL_W_Pete1.png")
 
 # # GRWL vs W calculate with Pete2 formula 
 
@@ -90,7 +90,7 @@ module load Apps/R/3.3.2-generic
 #     theme_bw()
 # # print(p)
 
-# ggsave("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NITRO/GRWL/W_GRWL_W_Pete2.png")
+# ggsave("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NITRO/GRWL/W_GRWL_W_Pete2.png")
 
 # # GRWL vs W calculate with George formula 
 
@@ -107,7 +107,7 @@ module load Apps/R/3.3.2-generic
 #     theme_bw()
 # # print(p)
 
-# ggsave("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NITRO/GRWL/W_GRWL_W_Georg.png")
+# ggsave("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NITRO/GRWL/W_GRWL_W_Georg.png")
 
 # EOF
 
@@ -120,7 +120,7 @@ library(car)
 library(quantreg)
 library(mblm)
 
-table=read.table("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NITRO/GRWL/FLO1K_qav_grwl_1km_new.txt")
+table=read.table("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NITRO/GRWL/FLO1K_qav_grwl_1km_new.txt")
 colnames(table)[1] = "Q"  # FLO1K
 colnames(table)[2] = "W"  # GRWL 
 
@@ -150,7 +150,7 @@ df <- data.frame(x = x, y = y,
       labs(y = "ln(W-GRWL) (m)")  + 
       theme_bw()
   print(p)
-  ggsave("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NITRO/GRWL/Q_FLO1K_vs_W_GRWL_logQ200_F.png")
+  ggsave("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NITRO/GRWL/Q_FLO1K_vs_W_GRWL_logQ200_F.png")
 
 Qreg75=rq( y ~ x , tau=0.75)
 Qreg25=rq( y ~ x , tau=0.25)
@@ -185,9 +185,9 @@ df <- data.frame(x = x, y = y,
       labs(y = "W-GRWL (m)")  + 
       theme_bw()
 print(p)
-ggsave("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NITRO/GRWL/Q_FLO1K_vs_W_GRWL_Q200_F.png")
+ggsave("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NITRO/GRWL/Q_FLO1K_vs_W_GRWL_Q200_F.png")
 
-save.image("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NITRO/GRWL/Q_FLO1K_vs_W_GRWL.R")
+save.image("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NITRO/GRWL/Q_FLO1K_vs_W_GRWL.R")
 
 
 

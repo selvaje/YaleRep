@@ -1,5 +1,5 @@
 # https://ragrawal.wordpress.com/2011/05/16/visualizing-confusion-matrix-in-r/
-cd /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces
+cd /gpfs/loomis/project/fas/sbsc/ga254/dataproces
 
 
 for tile in n45w120 n40w100 ; do 
@@ -38,7 +38,7 @@ confusion = merge(confusion, actual, by=c("Actual"))
 confusion$Percent = confusion$Freq/confusion$ActualFreq*100
 
 
-pdf(paste0("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NED_MERIT/figure/confusion_matrix_",tile,".pdf") , width=9.7, height=8   )
+pdf(paste0("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NED_MERIT/figure/confusion_matrix_",tile,".pdf") , width=9.7, height=8   )
  
 #render plot
 # we use three different layers

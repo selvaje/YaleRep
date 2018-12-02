@@ -4,14 +4,14 @@
 #SBATCH -t 24:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc08_hysdrosheds_width_aggregation.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc08_hysdrosheds_width_aggregation.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc08_hysdrosheds_width_aggregation.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc08_hysdrosheds_width_aggregation.sh.%J.err
 #SBATCH --job-name=sc08_hysdrosheds_width_aggregation.sh
 
 # sbatch /gpfs/home/fas/sbsc/ga254/scripts/NITRO/sc08_hysdrosheds_width_aggregation.sh
 
-export INDIR=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GRWL/GRWL_vector_to_rast
-export OUTDIR=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NITRO
+export INDIR=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/GRWL/GRWL_vector_to_rast
+export OUTDIR=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NITRO
 export RAM=/dev/shm
 
 echo  -145 15  -125 60 an >  $OUTDIR/tile.txt

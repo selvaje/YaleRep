@@ -2,8 +2,8 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 3 -N 1
 #SBATCH -t 8:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc31_merge5-10p_colorComposite.sh.%J.out   
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc31_merge5-10p_colorComposite.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc31_merge5-10p_colorComposite.sh.%J.out   
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc31_merge5-10p_colorComposite.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc31_merge5-10p_colorComposite.sh
@@ -11,7 +11,7 @@
 ####   sbatch  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK_MERIT/sc31_merge5-10p_colorComposite.sh
 ####   sbatch  --dependency=afterany:$(qmys | grep sc28_tiling20d_aggregate.sh  | awk '{ print $1  }' | uniq)  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK_MERIT/sc31_merge5-10p_colorComposite.sh
 
-export MERIT=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT
+export MERIT=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT
 export GRASS=/tmp
 export RAM=/dev/shm
 

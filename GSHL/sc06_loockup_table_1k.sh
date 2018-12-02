@@ -3,15 +3,15 @@
 #SBATCH -J sc06_loockup_table_1k.sh
 #SBATCH -n 1 -c 8 -N 1  
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc06_loockup_table_1k.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc06_loockup_table_1k.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc06_loockup_table_1k.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc06_loockup_table_1k.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 
 # sbatch /gpfs/home/fas/sbsc/ga254/scripts/GSHL/sc06_loockup_table_1k.sh
 
-export    DIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL
-export OUTDIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_ws_bin_table
+export    DIR=/project/fas/sbsc/ga254/dataproces/GSHL
+export OUTDIR=/project/fas/sbsc/ga254/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_ws_bin_table
 
 echo -180 15  -90 80 a >  $DIR/tile.txt
 echo  -90 15    0 80 b >> $DIR/tile.txt

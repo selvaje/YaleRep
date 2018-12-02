@@ -2,8 +2,8 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 2 -N 1
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc03_rasterize.sh.%A_%a.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc03_rasterize.sh.%A_%a.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc03_rasterize.sh.%A_%a.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc03_rasterize.sh.%A_%a.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc03_rasterize.sh 
@@ -29,7 +29,7 @@
 
 # 
 
-export DIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NHDplus
+export DIR=/project/fas/sbsc/ga254/dataproces/NHDplus
 
 echo rasteri the full network 
 rm -f $DIR/tmp/select.*  $DIR/tif/*.tif  
@@ -53,7 +53,7 @@ exit
 
 
 echo raster river order number 1 
-rm -f $DIR/tmp/select.*    $DIR/tif/*.tif    /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/NHDplus/NHDplus_H_250m_order1.tif 
+rm -f $DIR/tmp/select.*    $DIR/tif/*.tif    /gpfs/scratch60/fas/sbsc/ga254/dataproces/NHDplus/NHDplus_H_250m_order1.tif 
 
 ls $DIR/shp/*/NHDFlowline.shp  | xargs -n 1 -P 4 bash -c  $'
 file=$1

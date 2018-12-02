@@ -2,15 +2,15 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 2 -N 1
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc26_reclass_lbasin_broken.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc26_reclass_lbasin_broken.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc26_reclass_lbasin_broken.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc26_reclass_lbasin_broken.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc26_reclass_lbasin_broken.sh
 
 # sbatch  --dependency=afterok:$(qmys | grep sc25_reclass_lbasin_intb.sh    | awk '{ print $1  }' | uniq)    /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK_MERIT/sc26_reclass_lbasin_broken.sh
 
-MERIT=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT
+MERIT=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT
 GRASS=/tmp
 RAM=/dev/shm
 

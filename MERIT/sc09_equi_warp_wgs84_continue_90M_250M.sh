@@ -4,8 +4,8 @@
 #SBATCH -t 24:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc09_equi_warp_wgs84_continue_90M_250M.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc09_equi_warp_wgs84_continue_90M_250M.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc09_equi_warp_wgs84_continue_90M_250M.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc09_equi_warp_wgs84_continue_90M_250M.sh.%J.err
 #SBATCH --mem-per-cpu=2000
 
 # warp equi7 to wgs84 for 90m and 250m, save intermediate tif in scratch then cp to project by getting the mean in case of overalliping 
@@ -22,9 +22,9 @@ sacct  -j   $SLURM_JOB_ID  --format=jobid,MaxVMSize,start,end,CPUTImeRaw,NodeLis
 echo "############################################################"
 
 P=$SLURM_CPUS_PER_TASK
-export MERIT=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT
-export SCRATCH=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/MERIT
-export EQUI=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/EQUI7/grids
+export MERIT=/project/fas/sbsc/ga254/dataproces/MERIT
+export SCRATCH=/gpfs/scratch60/fas/sbsc/ga254/dataproces/MERIT
+export EQUI=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/EQUI7/grids
 export RAM=/dev/shm
 export TOPO=$TOPO
 

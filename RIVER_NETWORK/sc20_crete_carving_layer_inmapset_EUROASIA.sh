@@ -2,8 +2,8 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 1 -N 1  
 #SBATCH -t 6:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc20_crete_carving_layer_inmapset_EUROASIA.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc20_crete_carving_layer_inmapset_EUROASIA.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc20_crete_carving_layer_inmapset_EUROASIA.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc20_crete_carving_layer_inmapset_EUROASIA.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 
@@ -12,12 +12,12 @@
 
 # create the txt file 
 
-cd         /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb 
-export DIR=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK
+cd         /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb 
+export DIR=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK
 
-rm -f   /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_$GLOBE/PERMANENT/.gislock
-source /gpfs/home/fas/sbsc/ga254/scripts/general/enter_grass7.0.2-grace2.sh /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_$GLOBE/PERMANENT 
-rm -f   /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_$GLOBE/PERMANENT/.gislock
+rm -f   /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_$GLOBE/PERMANENT/.gislock
+source /gpfs/home/fas/sbsc/ga254/scripts/general/enter_grass7.0.2-grace2.sh /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_$GLOBE/PERMANENT 
+rm -f   /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_$GLOBE/PERMANENT/.gislock
 
 r.mask   -r  --quiet
 
@@ -56,7 +56,7 @@ echo ${N} $DIM
 
 # dem standard deviation  displacement 
 RAM=/dev/shm
-DPROJ=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/RIVER_NETWORK
+DPROJ=/project/fas/sbsc/ga254/dataproces/RIVER_NETWORK
 
 xminEAo=$(gdalinfo $DPROJ/unit/UNIT3562_333msk.tif   | grep "Origin" | awk '{ gsub ("[(),]"," ") ; printf ("%.14f\n" ,  $3  )}')
 xymaxEAo=$(gdalinfo $DPROJ/unit/UNIT3562_333msk.tif   | grep "Origin" | awk '{ gsub ("[(),]"," ") ; printf ("%.14f\n" ,  $4  )}')
@@ -110,6 +110,6 @@ r.mapcalc "fin_be75_grd_LandEnlarge_std${RADIUS}_norm_${GLOBE}_pk = fin_be75_grd
 r.mapcalc "fin_${OCCURENCE}_log${N}_DIM${DIM}_STDEV${STDEVV} = if( $OCCURENCE@PERMANENT < 101 , ( log( $OCCURENCE@PERMANENT + 1) / 4.615121 * $DIM * (( 1 - fin_be75_grd_LandEnlarge_std${RADIUS}_norm_${GLOBE}_pk ))), 0 )"  --overwrite
 fi 
 
-for ZONE in RIGHT ; do   RADIUS=151 ; N=200 ; DIM=120 ; if [ $ZONE = RIGHT ]  ; then  RAM=9400 ; else RAM=68000  ; fi  ;  sbatch --export=N=$N,DIM=$DIM,GEO=EUROASIA,ZONE=$ZONE,RADIUS=$RADIUS,TRH=8 -J sc21_ReconditioningHydrodemCarving_N${N}_DIM${DIM}_STDEV${RADIUS}_TRH${TRH}_final_$ZONE.sh -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc21_ReconditioningHydrodemCarving_final_$ZONE.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc21_ReconditioningHydrodemCarving_final_$ZONE.%J.err   --mem-per-cpu=$RAM  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc21_ReconditioningHydrodemCarving_UNIT_final_EUROASIA.sh ; done
+for ZONE in RIGHT ; do   RADIUS=151 ; N=200 ; DIM=120 ; if [ $ZONE = RIGHT ]  ; then  RAM=9400 ; else RAM=68000  ; fi  ;  sbatch --export=N=$N,DIM=$DIM,GEO=EUROASIA,ZONE=$ZONE,RADIUS=$RADIUS,TRH=8 -J sc21_ReconditioningHydrodemCarving_N${N}_DIM${DIM}_STDEV${RADIUS}_TRH${TRH}_final_$ZONE.sh -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc21_ReconditioningHydrodemCarving_final_$ZONE.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc21_ReconditioningHydrodemCarving_final_$ZONE.%J.err   --mem-per-cpu=$RAM  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc21_ReconditioningHydrodemCarving_UNIT_final_EUROASIA.sh ; done
 
 

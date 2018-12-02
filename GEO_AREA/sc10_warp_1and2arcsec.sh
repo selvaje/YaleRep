@@ -4,22 +4,22 @@
 #SBATCH -t 1:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc10_warp_1and2arcsec.sh.%A.%a.out  
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc10_warp_1and2arcsec.sh.%A.%a.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc10_warp_1and2arcsec.sh.%A.%a.out  
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc10_warp_1and2arcsec.sh.%A.%a.err
 #SBATCH --job-name=sc10_warp_1and2arcsec.sh
 #SBATCH --array=2-649
 
 # start from 2 , 1 is the header 
 # sbatch /gpfs/home/fas/sbsc/ga254/scripts/GEO_AREA/sc10_warp_1and2arcsec.sh
 
-geo_string=$(  head  -n  $SLURM_ARRAY_TASK_ID   /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GEO_AREA/tile_files/tile_lat_long_10d.txt   | tail  -1 ) 
+geo_string=$(  head  -n  $SLURM_ARRAY_TASK_ID   /gpfs/loomis/project/fas/sbsc/ga254/dataproces/GEO_AREA/tile_files/tile_lat_long_10d.txt   | tail  -1 ) 
 tile=$( echo $geo_string | awk '{  print $1 }' ) 
 xmin=$( echo $geo_string | awk '{  print $4 }' ) 
 ymin=$( echo $geo_string | awk '{  print $7 }' ) 
 xmax=$( echo $geo_string | awk '{  print $6 }' ) 
 ymax=$( echo $geo_string | awk '{  print $5 }' ) 
 
-DIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GEO_AREA/area_tif
+DIR=/project/fas/sbsc/ga254/dataproces/GEO_AREA/area_tif
 
 
 echo tile $tile to be processed 

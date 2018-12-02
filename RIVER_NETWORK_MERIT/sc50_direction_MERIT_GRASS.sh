@@ -2,8 +2,8 @@
 #SBATCH -p scavenge
 #SBATCH -n 1 -c 8 -N 1
 #SBATCH -t 8:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc50_direction_MERIT_GRASS.sh.%J.out   
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc50_direction_MERIT_GRASS.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc50_direction_MERIT_GRASS.sh.%J.out   
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc50_direction_MERIT_GRASS.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc50_direction_MERIT_GRASS.sh
@@ -11,37 +11,37 @@
 
 # bash /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK_MERIT/sc50_direction_MERIT_GRASS.sh 
 
-DIR=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT
+DIR=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT
 
 for CT in sicily ; do #  madag ; do 
 
 if  [  $CT  = "sicily" ] ; then geo_string="12.38   38.35  15.70  36.60" ; fi 
 if  [  $CT  = "madag" ]  ; then geo_string="43.1 -11.8 50.7 -25.6" ; fi 
 
-cd /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT
+cd /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT
 
-gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -projwin $geo_string  /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/RIVER_NETWORK_MERIT/elv/all_tif.vrt  $CT/elv_MERIT.tif  &
+gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -projwin $geo_string  /gpfs/loomis/project/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/elv/all_tif.vrt  $CT/elv_MERIT.tif  &
 
-gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -projwin $geo_string  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles_final20d/lbasin_h18v04.tif       $CT/lbasin_GRASS.tif  & 
+gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -projwin $geo_string  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles_final20d/lbasin_h18v04.tif       $CT/lbasin_GRASS.tif  & 
 
-gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -projwin $geo_string  /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/RIVER_NETWORK_MERIT/upa/all_tif.vrt  $CT/upa_MERIT.tif & 
+gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -projwin $geo_string  /gpfs/loomis/project/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/upa/all_tif.vrt  $CT/upa_MERIT.tif & 
 
-gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -projwin $geo_string  /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/RIVER_NETWORK_MERIT/upg/all_tif.vrt  $CT/upg_MERIT.tif & 
+gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -projwin $geo_string  /gpfs/loomis/project/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/upg/all_tif.vrt  $CT/upg_MERIT.tif & 
 
-gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -projwin $geo_string  /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/RIVER_NETWORK_MERIT/dep/all_tif.vrt  $CT/dep_MERIT.tif &
+gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -projwin $geo_string  /gpfs/loomis/project/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/dep/all_tif.vrt  $CT/dep_MERIT.tif &
 
-gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -projwin $geo_string  /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/RIVER_NETWORK_MERIT/dir/all_tif.vrt  $CT/dir_MERIT.tif &
+gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -projwin $geo_string  /gpfs/loomis/project/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/dir/all_tif.vrt  $CT/dir_MERIT.tif &
 
-gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -projwin $geo_string  /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/slope/tiles/all_tif.vrt        $CT/slope_MERIT.tif & 
+gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -projwin $geo_string  /gpfs/loomis/project/fas/sbsc/ga254/dataproces/MERIT/slope/tiles/all_tif.vrt        $CT/slope_MERIT.tif & 
 
-gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -projwin $geo_string  /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/LCESA/1998/LC160_Y1998.tif $CT/LC160_Y1998.tif 
+gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -projwin $geo_string  /project/fas/sbsc/ga254/dataproces/LCESA/1998/LC160_Y1998.tif $CT/LC160_Y1998.tif 
 
 # area pixels 
-gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -projwin $geo_string /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GEO_AREA/area_tif/75arc-sec-Area_prj28.tif  $CT/75arc-sec-Area_prj28.tif 
+gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -projwin $geo_string /project/fas/sbsc/ga254/dataproces/GEO_AREA/area_tif/75arc-sec-Area_prj28.tif  $CT/75arc-sec-Area_prj28.tif 
 
-gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -projwin $geo_string /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GEO_AREA/area_tif/30arc-sec-Area_prj28.tif  $CT/30arc-sec-Area_prj28.tif 
+gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -projwin $geo_string /project/fas/sbsc/ga254/dataproces/GEO_AREA/area_tif/30arc-sec-Area_prj28.tif  $CT/30arc-sec-Area_prj28.tif 
 
-cd /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/$CT
+cd /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/$CT
 
 rm -rf $DIR/$CT/grassdb
 source /gpfs/home/fas/sbsc/ga254/scripts/general/create_location_grass7.3-grace2.sh $DIR/$CT/grassdb loc_$CT  elv_MERIT.tif

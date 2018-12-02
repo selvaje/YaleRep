@@ -1,7 +1,7 @@
 #  bash /gpfs/home/fas/sbsc/ga254/scripts/GSHL/sc01_bin_1k.sh 
-#  bsub -W 24:00 -n 8 -R "span[hosts=1]" -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc01_bin_1k.sh.%J.out  -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc01_bin_1k.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/GSHL/sc01_bin_1k.sh 
+#  bsub -W 24:00 -n 8 -R "span[hosts=1]" -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc01_bin_1k.sh.%J.out  -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc01_bin_1k.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/GSHL/sc01_bin_1k.sh 
 
-export DIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0
+export DIR=/project/fas/sbsc/ga254/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0
 
 gdalwarp -overwrite -te -180 -60 +180 +80 -tr 0.00833333333333333 0.00833333333333333 -wo NUM_THREADS=8 -wm 4000 -srcnodata -3.4028234663852886e+3 -dstnodata "None"  -t_srs EPSG:4326 -r bilinear -co COMPRESS=DEFLATE -co ZLEVEL=9 $DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0.tif $DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84.tif
 
@@ -54,4 +54,4 @@ rm -f  ${DIR}_bin/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_bin${BIN}_c
 
 rm -f /tmp/color.txt 
 
-bsub  -W 08:00  -n 8  -R "span[hosts=1]"  -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc02_core.sh.%J.out  -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc02_core.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/GSHL/sc02_core_1k_250.sh 1k
+bsub  -W 08:00  -n 8  -R "span[hosts=1]"  -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc02_core.sh.%J.out  -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc02_core.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/GSHL/sc02_core_1k_250.sh 1k

@@ -12,7 +12,7 @@ library(raster)
 library(ggplot2)
 library("gridExtra")
 
-LIDAR="/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/LIDAR/"
+LIDAR="/project/fas/sbsc/ga254/dataproces/LIDAR/"
 
 for ( dir  in c("azimuth","convergence","dx","dxx","dxy","dy","dyy","elongation","exposition","extend","intensity","pcurv","range","roughness","slope","spi","tci","tcurv","tpi","tri","variance","vrm","width")) {
 	raster  <- raster(paste0(LIDAR,"/",dir,"/","dsm_wgs84_crop_e.tiff"))
@@ -25,24 +25,24 @@ for ( dir  in c("azimuth","convergence","dx","dxx","dxy","dy","dyy","elongation"
 
 # elevation 
 
-elevation_dsm   =  raster ("/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/LIDAR/input/SC14_CZO/dsm_wgs84_crop_e.tiff"  ) 
-elevation_dtm   =  raster ("/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/LIDAR/input/SC14_CZO/dtm_wgs84_crop_e.tiff"  ) 
-elevation_mrt   =  raster ("/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/LIDAR/input/SC14_CZO/merit.tiff"  ) 
+elevation_dsm   =  raster ("/project/fas/sbsc/ga254/dataproces/LIDAR/input/SC14_CZO/dsm_wgs84_crop_e.tiff"  ) 
+elevation_dtm   =  raster ("/project/fas/sbsc/ga254/dataproces/LIDAR/input/SC14_CZO/dtm_wgs84_crop_e.tiff"  ) 
+elevation_mrt   =  raster ("/project/fas/sbsc/ga254/dataproces/LIDAR/input/SC14_CZO/merit.tiff"  ) 
 
-cos_dsm   =  raster ("/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/LIDAR/aspect/dsm_wgs84_crop_e_cos.tiff"  ) 
-sin_dsm   =  raster ("/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/LIDAR/aspect/dsm_wgs84_crop_e_sin.tiff"  ) 
-Ew_dsm   =  raster ("/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/LIDAR/aspect/dsm_wgs84_crop_e_Ew.tiff"  ) 
-Nw_dsm   =  raster ("/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/LIDAR/aspect/dsm_wgs84_crop_e_Nw.tiff"  ) 
+cos_dsm   =  raster ("/project/fas/sbsc/ga254/dataproces/LIDAR/aspect/dsm_wgs84_crop_e_cos.tiff"  ) 
+sin_dsm   =  raster ("/project/fas/sbsc/ga254/dataproces/LIDAR/aspect/dsm_wgs84_crop_e_sin.tiff"  ) 
+Ew_dsm   =  raster ("/project/fas/sbsc/ga254/dataproces/LIDAR/aspect/dsm_wgs84_crop_e_Ew.tiff"  ) 
+Nw_dsm   =  raster ("/project/fas/sbsc/ga254/dataproces/LIDAR/aspect/dsm_wgs84_crop_e_Nw.tiff"  ) 
 
-cos_dtm   =  raster ("/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/LIDAR/aspect/dtm_wgs84_crop_e_cos.tiff"  ) 
-sin_dtm   =  raster ("/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/LIDAR/aspect/dtm_wgs84_crop_e_sin.tiff"  ) 
-Ew_dtm   =  raster ("/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/LIDAR/aspect/dtm_wgs84_crop_e_Ew.tiff"  ) 
-Nw_dtm   =  raster ("/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/LIDAR/aspect/dtm_wgs84_crop_e_Nw.tiff"  ) 
+cos_dtm   =  raster ("/project/fas/sbsc/ga254/dataproces/LIDAR/aspect/dtm_wgs84_crop_e_cos.tiff"  ) 
+sin_dtm   =  raster ("/project/fas/sbsc/ga254/dataproces/LIDAR/aspect/dtm_wgs84_crop_e_sin.tiff"  ) 
+Ew_dtm   =  raster ("/project/fas/sbsc/ga254/dataproces/LIDAR/aspect/dtm_wgs84_crop_e_Ew.tiff"  ) 
+Nw_dtm   =  raster ("/project/fas/sbsc/ga254/dataproces/LIDAR/aspect/dtm_wgs84_crop_e_Nw.tiff"  ) 
 
-cos_mrt   =  raster ("/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/LIDAR/aspect/mrt_wgs84_crop_e_cos.tiff"  ) 
-sin_mrt   =  raster ("/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/LIDAR/aspect/mrt_wgs84_crop_e_sin.tiff"  ) 
-Ew_mrt   =  raster ("/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/LIDAR/aspect/mrt_wgs84_crop_e_Ew.tiff"  ) 
-Nw_mrt   =  raster ("/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/LIDAR/aspect/mrt_wgs84_crop_e_Nw.tiff"  ) 
+cos_mrt   =  raster ("/project/fas/sbsc/ga254/dataproces/LIDAR/aspect/mrt_wgs84_crop_e_cos.tiff"  ) 
+sin_mrt   =  raster ("/project/fas/sbsc/ga254/dataproces/LIDAR/aspect/mrt_wgs84_crop_e_sin.tiff"  ) 
+Ew_mrt   =  raster ("/project/fas/sbsc/ga254/dataproces/LIDAR/aspect/mrt_wgs84_crop_e_Ew.tiff"  ) 
+Nw_mrt   =  raster ("/project/fas/sbsc/ga254/dataproces/LIDAR/aspect/mrt_wgs84_crop_e_Nw.tiff"  ) 
 
 
 for ( dir  in c("azimuth","convergence","dx","dxx","dxy","dy","dyy","elongation","exposition","extend","intensity","pcurv","range","roughness","slope","spi","tci","tcurv","tpi","tri","variance","vrm","width","elevation","cos","sin","Ew","Nw")) {
@@ -60,7 +60,7 @@ assign(paste0(dir,"_df") , a  )
 des="aa"     # to intilize 
 letter="zz"  # to intilize 
 
-postscript(paste0("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/LIDAR/figure/dsm-dtm_vs_merit_plot.ps") ,  paper="special" ,  horizo=F , width=9, height=12   )
+postscript(paste0("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/LIDAR/figure/dsm-dtm_vs_merit_plot.ps") ,  paper="special" ,  horizo=F , width=9, height=12   )
 
 for ( dir  in c("azimuth","convergence","dx","dxx","dxy","dy","dyy","elongation","exposition","extend","intensity","pcurv","range","roughness","slope","spi","tci","tcurv","tpi","tri","variance","vrm","width","elevation","cos","sin","Ew","Nw")) {
 data_df = (get(paste0(dir,"_df")))

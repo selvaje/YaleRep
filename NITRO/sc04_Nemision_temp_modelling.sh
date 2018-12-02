@@ -1,6 +1,6 @@
 
 
-DIR=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NP/global_wsheds 
+DIR=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NP/global_wsheds 
 
 
 

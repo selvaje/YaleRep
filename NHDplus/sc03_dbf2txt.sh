@@ -1,7 +1,7 @@
-# bsub   -W 24:00  -n 1  -R "span[hosts=1]"  -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc03_dbf2txt.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc03_dbf2txt.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/NHDplus/sc03_dbf2txt.sh
+# bsub   -W 24:00  -n 1  -R "span[hosts=1]"  -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc03_dbf2txt.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc03_dbf2txt.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/NHDplus/sc03_dbf2txt.sh
 
 
-# for file in /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NHDplus/dbf/*/PlusFlowlineVAA.dbf ; do 
+# for file in /project/fas/sbsc/ga254/dataproces/NHDplus/dbf/*/PlusFlowlineVAA.dbf ; do 
 
 #     export filename=$( basename $(dirname  $file ))
 #     export file
@@ -14,14 +14,14 @@
 # filename = Sys.getenv(c('filename'))
 # file = Sys.getenv(c('file'))
 # dbf = read.dbf(file)
-# write.table(dbf , paste("/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NHDplus/txt/",filename,".txt" , sep="" )  , sep=" ")
+# write.table(dbf , paste("/project/fas/sbsc/ga254/dataproces/NHDplus/txt/",filename,".txt" , sep="" )  , sep=" ")
 # EOF
 
 # done 
 
 # add order to the shp 
 
-DIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NHDplus
+DIR=/project/fas/sbsc/ga254/dataproces/NHDplus
 
 # ogrinfo temp.shp -sql "ALTER TABLE temp DROP COLUMN field_to_drop" 
 

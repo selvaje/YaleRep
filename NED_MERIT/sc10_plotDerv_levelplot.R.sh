@@ -3,7 +3,7 @@
 # module load Apps/R/3.3.2-generic
 # source ("/gpfs/home/fas/sbsc/ga254/scripts/NED_MERIT/sc10_plotDerv_levelplot.R.sh" ) 
 
-# cd /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NED_MERIT/
+# cd /gpfs/loomis/project/fas/sbsc/ga254/dataproces/NED_MERIT/
 
 
 rm(list = ls())
@@ -35,10 +35,10 @@ for ( dir in c("Ew","Nw","sin","cos")) {
  	assign(paste0(dir) , raster  )
  }
 
-elev_M = raster ("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/input_tif/n40w100_dem.tif")
+elev_M = raster ("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/MERIT/input_tif/n40w100_dem.tif")
 elev_M = crop   (elev_M , e)
 
-elev_N = raster ("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NED/input_tif/n40w100.tif")
+elev_N = raster ("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NED/input_tif/n40w100.tif")
 elev_N = crop   (elev_N , e)
 
 elev_dif = raster ("input_tif/tiles/n40w100_dif.tif")
@@ -53,7 +53,7 @@ cols=colR(n)
 options(scipen=10)
 trunc <- function(x, ..., prec = 0) base::trunc(x * 10^prec, ...) / 10^prec
 
-postscript(paste0("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NED_MERIT/figure/derivative_all_var_plot.ps") ,  paper="special" ,  horizo=F , width=6, height=7.5   )
+postscript(paste0("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NED_MERIT/figure/derivative_all_var_plot.ps") ,  paper="special" ,  horizo=F , width=6, height=7.5   )
 par (oma=c(2,2,2,1) , mar=c(0.4,0.5,1,2) , cex.lab=0.5 , cex=0.6 , cex.axis=0.4  ,   mfrow=c(6,4) ,  xpd=NA    )
 
 for ( dir in c("elev_M","elev_N","elev_cor","elev_dif","input_tif","roughness","tri","tpi","vrm","tci","spi","cos","sin","slope","Ew","Nw","pcurv","tcurv","dx","dy","dxx","dyy","dxy","convergence")){
@@ -128,5 +128,5 @@ text(-96.99 , 42.405, letter ,  font=2   ,   xpd=TRUE , cex=1.2 )
 dev.off()
 
 
-system("ps2epsi /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NED_MERIT/figure/derivative_all_var_plot.ps /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NED_MERIT/figure/derivative_all_var_plot.eps")
+system("ps2epsi /gpfs/loomis/project/fas/sbsc/ga254/dataproces/NED_MERIT/figure/derivative_all_var_plot.ps /gpfs/loomis/project/fas/sbsc/ga254/dataproces/NED_MERIT/figure/derivative_all_var_plot.eps")
 

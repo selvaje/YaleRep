@@ -1,9 +1,9 @@
-# bsub   -W 12:00  -R "span[hosts=1]" -n 3   -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc10_river_newtworkGMTED250_mergeEUROASIA.sh.%J.out  -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc10_river_newtworkGMTED250_mergeEUROASIA.sh.%J.err   bash  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc10_river_newtworkGMTED250_mergeEUROASIA.sh
+# bsub   -W 12:00  -R "span[hosts=1]" -n 3   -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc10_river_newtworkGMTED250_mergeEUROASIA.sh.%J.out  -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc10_river_newtworkGMTED250_mergeEUROASIA.sh.%J.err   bash  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc10_river_newtworkGMTED250_mergeEUROASIA.sh
 
 # bsub  /lustre/home/client/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc10_river_newtworkGMTED250_mergeEUROASIA.sh
 
 echo start the script 
-export DIR=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK
+export DIR=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK
 
 # clip out the broken basin 
 
@@ -62,8 +62,8 @@ gdal_edit.py -a_ullr $ulx $uly $lrx $lry  $DIR/output/stream/stream01_91518_MERG
 rm -f  /tmp/color.txt 
 
 
-bsub  -W 12:00  -R "span[hosts=1]" -n 8  -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc11_continentisland_merge_oft-calc.sh   -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc11_continentisland_merge_oft-calc.sh.%J.err   bash  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc11_continentisland_merge_oft-calc.sh  4 
-bsub  -W 12:00  -R "span[hosts=1]" -n 8  -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc11_continentisland_merge_oft-calc.sh   -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc11_continentisland_merge_oft-calc.sh.%J.err   bash  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc11_continentisland_merge_oft-calc.sh  3
-bsub  -W 12:00  -R "span[hosts=1]" -n 8   -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc11_continentisland_merge_oft-calc.sh   -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc11_continentisland_merge_oft-calc.sh.%J.err   bash  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc11_continentisland_merge_oft-calc.sh  10
-bsub  -W 12:00  -R "span[hosts=1]" -n 8 -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc11_continentisland_merge_oft-calc.sh   -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc11_continentisland_merge_oft-calc.sh.%J.err   bash  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc11_continentisland_merge_oft-calc.sh  100
+bsub  -W 12:00  -R "span[hosts=1]" -n 8  -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc11_continentisland_merge_oft-calc.sh   -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc11_continentisland_merge_oft-calc.sh.%J.err   bash  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc11_continentisland_merge_oft-calc.sh  4 
+bsub  -W 12:00  -R "span[hosts=1]" -n 8  -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc11_continentisland_merge_oft-calc.sh   -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc11_continentisland_merge_oft-calc.sh.%J.err   bash  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc11_continentisland_merge_oft-calc.sh  3
+bsub  -W 12:00  -R "span[hosts=1]" -n 8   -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc11_continentisland_merge_oft-calc.sh   -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc11_continentisland_merge_oft-calc.sh.%J.err   bash  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc11_continentisland_merge_oft-calc.sh  10
+bsub  -W 12:00  -R "span[hosts=1]" -n 8 -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc11_continentisland_merge_oft-calc.sh   -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc11_continentisland_merge_oft-calc.sh.%J.err   bash  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc11_continentisland_merge_oft-calc.sh  100
 

@@ -3,16 +3,16 @@
 #SBATCH -J sc03_Nemision_flok1crop.sh
 #SBATCH -n 1 -c 3 -N 1  
 #SBATCH -t 24:00:00  
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc03_Nemision_flok1crop.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc03_Nemision_flok1crop.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc03_Nemision_flok1crop.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc03_Nemision_flok1crop.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --mem-per-cpu=20000
 
 # sbatch /gpfs/home/fas/sbsc/ga254/scripts/NP/sc03_Nemision_flok1crop.sh
 
-export  INDIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/FLO1K
-export  OUTDIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NP
+export  INDIR=/project/fas/sbsc/ga254/dataproces/FLO1K
+export  OUTDIR=/project/fas/sbsc/ga254/dataproces/NP
 export  RAM=/tmp
 
 rm -rf $RAM/*.tif  $INDIR/grassdb/loc_${filename}

@@ -2,8 +2,8 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 1 -N 1
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc02_clump_reclass_1k.sh%J.out 
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc02_clump_reclass_1k.sh%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc02_clump_reclass_1k.sh%J.out 
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc02_clump_reclass_1k.sh%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc02_clump_reclass_1k.sh
@@ -13,7 +13,7 @@
 
 # relclass the bin clump and then overlay 
 
-export DIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0
+export DIR=/project/fas/sbsc/ga254/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0
 export RAM=/dev/shm
 
 # will add to 1 ... so the overall will start from 1 

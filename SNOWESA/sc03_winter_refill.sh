@@ -2,8 +2,8 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 4 -N 1
 #SBATCH -t 02:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc03_winter_refill.sh.%A.%a.out 
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc03_winter_refill.sh.%A.%a.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc03_winter_refill.sh.%A.%a.out 
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc03_winter_refill.sh.%A.%a.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc03_winter_refill.sh
@@ -11,7 +11,7 @@
 
 # sbatch /gpfs/home/fas/sbsc/ga254/scripts/SNOWESA/sc03_winter_refill.sh
 
-export DIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/SNOWESA/month
+export DIR=/project/fas/sbsc/ga254/dataproces/SNOWESA/month
 
 
 

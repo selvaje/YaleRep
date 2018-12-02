@@ -3,15 +3,15 @@
 #SBATCH -J sc03_watershed_1k.sh
 #SBATCH -n 1 -c 1 -N 1  
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc05_watershed_1k.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc05_watershed_1k.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc05_watershed_1k.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc05_watershed_1k.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 
 # sbatch  --mem-per-cpu=50000  /gpfs/home/fas/sbsc/ga254/scripts/GSHL/sc05_watershed_1k.sh 
 # following the example at http://insightsoftwareconsortium.github.io/SimpleITK-Notebooks/32_Watersheds_Segmentation.html
 
-export DIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_watershad
+export DIR=/project/fas/sbsc/ga254/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_watershad
 export PATH=/home/fas/sbsc/ga254/anaconda3/bin:$PATH
 
 rm -f  $DIR/watershed_line_nogeo.tif  $DIR/watershed_poly_nogeo.tif  
@@ -21,20 +21,20 @@ import os
 
 import SimpleITK as sitk
 print("importing image")
-img  = sitk.ReadImage("/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_watershad/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_cost.tif" , sitk.sitkFloat32  )  
+img  = sitk.ReadImage("/project/fas/sbsc/ga254/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_watershad/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_cost.tif" , sitk.sitkFloat32  )  
 
 # # to check img.GetPixelIDTypeAsString 32-bit unsigned integer  
-core = sitk.ReadImage("/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_bin/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_core.tif")
+core = sitk.ReadImage("/project/fas/sbsc/ga254/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_bin/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_core.tif")
 
 marker_img  = sitk.ConnectedComponent(core, fullyConnected=True)
 
 print("start watershed")
 ws_line  = sitk.MorphologicalWatershedFromMarkers( img, marker_img, markWatershedLine=True,  fullyConnected=True)
-sitk.WriteImage( sitk.Cast( ws_line  ,  sitk.sitkFloat32  ),        "/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_watershad/watershed_line_nogeo.tif" )
+sitk.WriteImage( sitk.Cast( ws_line  ,  sitk.sitkFloat32  ),        "/project/fas/sbsc/ga254/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_watershad/watershed_line_nogeo.tif" )
 del(ws_line)
 
 ws_poly  = sitk.MorphologicalWatershedFromMarkers( img, marker_img, markWatershedLine=False, fullyConnected=True)
-sitk.WriteImage( sitk.Cast( ws_poly  ,  sitk.sitkFloat32  ),        "/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_watershad/watershed_poly_nogeo.tif" )
+sitk.WriteImage( sitk.Cast( ws_poly  ,  sitk.sitkFloat32  ),        "/project/fas/sbsc/ga254/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_watershad/watershed_poly_nogeo.tif" )
 del(ws_poly)
 EOF
 
@@ -52,8 +52,8 @@ pksetmask  -co COMPRESS=DEFLATE -co ZLEVEL=9   -m $DIR/GSHHS_land_mask250m_enlar
 rm -f $DIR/watershed_poly_nogeo.tif  
 
 # fatti correre solo  una  volta 
-# pkfilter  -co COMPRESS=DEFLATE -co ZLEVEL=9  -dx 4 -dy 4 -d 4 -f mode   -i /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHHG/GSHHS_land_mask250m_enlarge_clumpMSKclump_UNIT.tif  -o    $DIR/GSHHS_land_mask250m_enlarge_clumpMSKclump_UNIT.tif  
-# cp   /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHHG/GSHHS_land_mask250m_enlarge_clumpMSKclump_UNIT.tif  /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_250_v1_0_watershad 
+# pkfilter  -co COMPRESS=DEFLATE -co ZLEVEL=9  -dx 4 -dy 4 -d 4 -f mode   -i /project/fas/sbsc/ga254/dataproces/GSHHG/GSHHS_land_mask250m_enlarge_clumpMSKclump_UNIT.tif  -o    $DIR/GSHHS_land_mask250m_enlarge_clumpMSKclump_UNIT.tif  
+# cp   /project/fas/sbsc/ga254/dataproces/GSHHG/GSHHS_land_mask250m_enlarge_clumpMSKclump_UNIT.tif  /project/fas/sbsc/ga254/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_250_v1_0_watershad 
 
 pksetmask -co COMPRESS=DEFLATE -co ZLEVEL=9  -m $DIR/GSHHS_land_mask250m_enlarge_clumpMSKclump_UNIT.tif  -msknodata 3767 -nodata 0 -i $DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump.tif  -o $DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump_msk.tif 
 
@@ -63,12 +63,12 @@ pkgetmask -co COMPRESS=DEFLATE -co ZLEVEL=9  -min 3766.5   -max 3767.5 -data 0 -
 gdal_translate  -a_nodata 0   -co COMPRESS=DEFLATE -co ZLEVEL=9  -projwin  -180 80 180 -60    $DIR/GSHHS_land_mask250m_enlarge_clumpMSKclump_UNIT4ws_tmp.tif  $DIR/GSHHS_land_mask250m_enlarge_clumpMSKclump_UNIT4ws.tif 
 rm  $DIR/GSHHS_land_mask250m_enlarge_clumpMSKclump_UNIT4ws_tmp.tif  
 
-source /gpfs/home/fas/sbsc/ga254/scripts/general/create_location_grass7.3-grace2.sh /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/GSHL/grassdb/ cost1k_clump  $DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump_msk.tif    r.in.gdal 
+source /gpfs/home/fas/sbsc/ga254/scripts/general/create_location_grass7.3-grace2.sh /gpfs/scratch60/fas/sbsc/ga254/dataproces/GSHL/grassdb/ cost1k_clump  $DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump_msk.tif    r.in.gdal 
 
 r.clump -d  --overwrite    input=GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump_msk      output=GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump_msk_clump
 r.out.gdal --overwrite nodata=0 -c -f createopt="COMPRESS=DEFLATE,ZLEVEL=9" type=UInt32 format=GTiff input=GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump_msk_clump  output=$DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump_msk_clump.tif 
 
-rm -fr /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/GSHL/grassdb/cost1k_clump  $DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump_msk_clump.tif.aux.xml 
+rm -fr /gpfs/scratch60/fas/sbsc/ga254/dataproces/GSHL/grassdb/cost1k_clump  $DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump_msk_clump.tif.aux.xml 
 
 
 bash /gpfs/home/fas/sbsc/ga254/scripts/general/createct_random.sh  $DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump.tif  $DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump.txt 

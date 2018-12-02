@@ -3,14 +3,14 @@
 #SBATCH -J sc06_maxComposite.sh
 #SBATCH -n 1 -c 16 -N 1  
 #SBATCH -t 6:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc06_maxComposite.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc06_maxComposite.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc06_maxComposite.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc06_maxComposite.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 
 # sbatch    /gpfs/home/fas/sbsc/ga254/scripts/GSHL/sc06_maxComposite.sh
 
-# bsub -n 16  -R "span[hosts=1]" -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc06_maxComposite.sh.%J.out -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc06_maxComposite.sh.%J.err bash   /gpfs/home/fas/sbsc/ga254/scripts/GSHL/sc06_maxComposite.sh
+# bsub -n 16  -R "span[hosts=1]" -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc06_maxComposite.sh.%J.out -o /gpfs/scratch60/fas/sbsc/ga254/stderr/sc06_maxComposite.sh.%J.err bash   /gpfs/home/fas/sbsc/ga254/scripts/GSHL/sc06_maxComposite.sh
 
 export RAM=/dev/shm    
 cleanram
@@ -32,8 +32,8 @@ echo 27000  10800 5401 10800 k  >> $RAM/tiles_xoff_yoff.txt
 echo 32400  10800 5401 10800 q  >> $RAM/tiles_xoff_yoff.txt
 echo 37800  10800 5401 10800 r  >> $RAM/tiles_xoff_yoff.txt
 
-export DIR=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/MYOD11A2_celsiusmean
-export OUT=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/GSHL/LST_max
+export DIR=/gpfs/scratch60/fas/sbsc/ga254/dataproces/MYOD11A2_celsiusmean
+export OUT=/gpfs/scratch60/fas/sbsc/ga254/dataproces/GSHL/LST_max
 
 cat  $RAM/tiles_xoff_yoff.txt  | xargs -n 5 -P 16 bash -c $' 
 

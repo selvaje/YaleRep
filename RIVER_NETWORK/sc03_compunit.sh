@@ -1,4 +1,4 @@
-# bsub -W 24:00 -n 1 -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc03_compunit.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc03_compunit.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc03_compunit.sh
+# bsub -W 24:00 -n 1 -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc03_compunit.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc03_compunit.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc03_compunit.sh
 
 # 1 kg di farena
 # 300 lievito madre
@@ -24,7 +24,7 @@
 # 3562 1519030245  EUROASIA 
 # 3767 8275779607  sea 
 
-export DIR=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/GSHHG
+export DIR=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/GSHHG
 RAM=/dev/shm/
 
 echo create island dataset 
@@ -44,7 +44,7 @@ set all the island  ugula to 1
 pkgetmask -ct  /dev/shm/color.txt  -co COMPRESS=DEFLATE -co ZLEVEL=9   -ot Byte   -min 0.5   -max  999999999  -data 1   -i $DIR/GSHHS_land_mask250m_enlarge_clumpMSKclump_UNITisland.tif  -o $DIR/GSHHS_land_mask250m_enlarge_clumpMSKclump_UNITisland0-1.tif 
 
 # create the island_areas in qgis 
-export DIR=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK
+export DIR=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK
 gdal_rasterize -ot Byte -te -180 -60 +180 +84 -tr 0.002083333333333333 0.002083333333333333 -co COMPRESS=DEFLATE -co ZLEVEL=9 -a id -l island_areas $DIR/shp/island_areas.shp $DIR/shp/island_areas.tif 
 
 pkcreatect -min 1 -max 14 >  /dev/shm/color.txt 
@@ -77,7 +77,7 @@ geo_string=$( oft-bb $DIR/GSHHG/GSHHS_land_mask250m_enlarge_clumpMSKclump_UNIT.t
 gdal_translate  -co COMPRESS=DEFLATE -co ZLEVEL=9  -srcwin  $geo_string  $DIR/GSHHG/GSHHS_land_mask250m_enlarge_clumpMSKclump_UNIT.tif $DIR/unit/UNIT497.tif 
 pkgetmask    -co COMPRESS=DEFLATE -co ZLEVEL=9 -ot Byte -min 496.5 -max 497.5   -data 1 -nodata 0 -i  $DIR/unit/UNIT497.tif  -o $DIR/unit/UNIT497msk.tif
 
-export DIR=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK
+export DIR=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK
 echo   island-west  338   island-est 333
 pkcreatect -min 1 -max 14 >  /dev/shm/color.txt 
 

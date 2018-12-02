@@ -2,8 +2,8 @@
 #SBATCH -p day 
 #SBATCH -n 1 -c 1  -N 1  
 #SBATCH -t 10:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc36_bivariate_BinCound_WatershedCount.R.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc36_bivariate_BinCound_WatershedCount.R.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc36_bivariate_BinCound_WatershedCount.R.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc36_bivariate_BinCound_WatershedCount.R.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc36_bivariate_BinCound_WatershedCount.R.sh
@@ -29,8 +29,8 @@ require(ggplot2)
 bnplot <- c()
 tcplot <- c()
 
-binCount  <- raster("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/additional_layers/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_bin_count.tif")          # meanraster
-watCount  <- raster("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/additional_layers/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_ws_clump_count.tif")     # sdraster 
+binCount  <- raster("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/GSHL/additional_layers/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_bin_count.tif")          # meanraster
+watCount  <- raster("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/GSHL/additional_layers/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_ws_clump_count.tif")     # sdraster 
 
 
 grid<-raster(ncol=1680, nrow=4320)
@@ -68,7 +68,7 @@ tickspotsx=seq(1,15,1)
 tickspotsy=seq(1,10,1)
 
 # col matrix function but with custom x and y labels
-colmatxy<-function(outleg=paste0("/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/additional_layers/legend_count.eps") , nquantiles=nquantiles, upperleft=rgb(0,150,235, maxColorValue=255), upperright=rgb(130,0,80, maxColorValue=255), bottomleft="grey", bottomright=rgb(255,230,15, maxColorValue=255), xlab="mean", ylab="std", brksx, brksy,tckspotsx, tckspotsy){
+colmatxy<-function(outleg=paste0("/project/fas/sbsc/ga254/dataproces/GSHL/additional_layers/legend_count.eps") , nquantiles=nquantiles, upperleft=rgb(0,150,235, maxColorValue=255), upperright=rgb(130,0,80, maxColorValue=255), bottomleft="grey", bottomright=rgb(255,230,15, maxColorValue=255), xlab="mean", ylab="std", brksx, brksy,tckspotsx, tckspotsy){
 my.data<-seq(0,1,.01)
 my.class<-classIntervals(my.data,n=nquantiles,style="quantile")
 my.pal.1<-findColours(my.class,c(upperleft,bottomleft))
@@ -101,7 +101,7 @@ plotbrkstc<-quantile(tcplot,na.rm=TRUE, probs = c(seq(0,1,1/nquantiles))) #x-lab
 collst <- list("brksx"=round(plotbrkstc, digits=3),"brksy"=round(plotbrksbn, digits=3),"colmat"=col.matrix)
 
 
-save(collst,file="/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/additional_layers/collst.rda")  
+save(collst,file="/project/fas/sbsc/ga254/dataproces/GSHL/additional_layers/collst.rda")  
 
 collst
 
@@ -128,8 +128,8 @@ library(sp)
 setEPS()
 
 
-binCount  <- raster("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/additional_layers/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_bin_count.tif")          # meanraster
-watCount  <- raster("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/additional_layers/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_ws_clump_count.tif")     # sdraster 
+binCount  <- raster("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/GSHL/additional_layers/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_bin_count.tif")          # meanraster
+watCount  <- raster("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/GSHL/additional_layers/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_ws_clump_count.tif")     # sdraster 
 
 tempy <- getValues(binCount) # y values    
 tempx <- getValues(watCount) # x values
@@ -168,12 +168,12 @@ plotbrkstc=seq(0,10,1)
 tickspotsx=seq(0,15,1)
 tickspotsy=seq(0,10,1)
 
-load("/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/additional_layers/collst.rda")  
+load("/project/fas/sbsc/ga254/dataproces/GSHL/additional_layers/collst.rda")  
 
 
 
 bivmap<-bivariate.map(rasterx=watCount,rastery=binCount, colormatrix=collst[["colmat"]], nquantiles=nquantiles, brks1=collst[["brksx"]],brks2=collst[["brksy"]])
-postscript("/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/additional_layers/bivariate_count.eps",height=12,width=16,horizo=F ,  paper="special" )
+postscript("/project/fas/sbsc/ga254/dataproces/GSHL/additional_layers/bivariate_count.eps",height=12,width=16,horizo=F ,  paper="special" )
 plot(bivmap,frame.plot=F,axes=F,box=F,add=F,legend=F,col=as.vector(collst[["colmat"]]))
 dev.off()
 

@@ -4,16 +4,16 @@
 #SBATCH -t 4:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
-#SBATCH -e  /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc04_mask_enlargment_merge_clamping.sh%J.err
-#SBATCH -o  /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc04_mask_enlargment_merge_clamping.sh%J.out
+#SBATCH -e  /gpfs/scratch60/fas/sbsc/ga254/stderr/sc04_mask_enlargment_merge_clamping.sh%J.err
+#SBATCH -o  /gpfs/scratch60/fas/sbsc/ga254/stdout/sc04_mask_enlargment_merge_clamping.sh%J.out
 #SBATCH --job-name=sc03_mask_enlargment.sh
 
 # sbatch   /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK_MERIT/sc04_mask_enlargment_merge_clamping.sh 
 
 module load Apps/GRASS/7.3-beta
 
-DIRP=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/RIVER_NETWORK_MERIT
-DIRS=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT
+DIRP=/project/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT
+DIRS=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT
 RAM=/dev/shm
 
 gdalbuildvrt -overwrite -srcnodata 0 -vrtnodata 0 $DIRP/msk_enlarge/msk_enl1km/all_tif.vrt  $DIRS/msk_enlarge/tiles_km1/*_msk.tif

@@ -2,16 +2,16 @@
 #SBATCH -p day 
 #SBATCH -n 1 -c 20  -N 1  
 #SBATCH -t 10:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc31_equi_multiRougDevaggregation4figure.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc31_equi_multiRougDevaggregation4figure.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc31_equi_multiRougDevaggregation4figure.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc31_equi_multiRougDevaggregation4figure.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc31_equi_multiRougDevaggregation4figure.sh
 
 # sbatch   /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc32_equi_multiRougDevaggregation4figure_ploting.R.sh
 
-export MERIT=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT
-export SCRATCH=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/MERIT_BK
+export MERIT=/project/fas/sbsc/ga254/dataproces/MERIT
+export SCRATCH=/gpfs/scratch60/fas/sbsc/ga254/dataproces/MERIT_BK
 export RAM=/dev/shm
 export KM=5.00
 
@@ -29,9 +29,9 @@ library(rasterVis)
 
 for ( CT  in c("AF", "AN", "AS", "EU", "NA", "OC", "SA")  ) {
 
-raster =raster(paste0("/gpfs/loomis/scratch60/fas/sbsc/ga254/grace0/dataproces/MERIT_BK/deviation/",CT,"_devi_5km.tif"))
+raster =raster(paste0("/gpfs/loomis/scratch60/fas/sbsc/ga254/dataproces/MERIT_BK/deviation/",CT,"_devi_5km.tif"))
 
-pdf(paste("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/figure/",CT,"_multiroughnes.pdf", sep=""))
+pdf(paste("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/MERIT/figure/",CT,"_multiroughnes.pdf", sep=""))
 
 n=100
 colR=colorRampPalette(c("blue","green","yellow", "orange" , "red", "brown", "black" ))

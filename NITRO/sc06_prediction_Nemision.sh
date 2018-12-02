@@ -3,15 +3,15 @@
 #SBATCH -J sc06_prediction_Nemision.sh
 #SBATCH -n 1 -c 10  -N 1  
 #SBATCH -t 24:00:00  
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc06_prediction_Nemision.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc06_prediction_Nemision.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc06_prediction_Nemision.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc06_prediction_Nemision.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 
 
 # sbatch /gpfs/home/fas/sbsc/ga254/scripts/NP/sc06_prediction_Nemision.sh
 
-export DIR=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NP
+export DIR=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NP
 
 awk '{ print $2   }' $DIR/gfortran_code/Output_N2O_emission_valid.dat | sort  > $DIR/gfortran_code/Output_N2O_emission_valid_ID.txt 
 awk '{ if (NR>1) print $2   }' $DIR/emision_table_valid_cor.txt                 | sort  > $DIR/emision_table_valid_cor_ID.txt

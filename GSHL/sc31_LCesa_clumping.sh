@@ -2,22 +2,22 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 1 -N 1  
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc31_LCesa_clumping.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc31_LCesa_clumping.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc31_LCesa_clumping.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc31_LCesa_clumping.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH -J sc31_LCesa_clumping.sh
 
 # sbatch  /gpfs/home/fas/sbsc/ga254/scripts/GSHL/sc31_LCesa_clumping.sh 
 
-export    FIN=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/final_product_1k
-export    BINCLUMP=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_bin_clump_reclass 
-export    BIN=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_bin
-export    TAB=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_ws_bin_table 
+export    FIN=/project/fas/sbsc/ga254/dataproces/GSHL/final_product_1k
+export    BINCLUMP=/project/fas/sbsc/ga254/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_bin_clump_reclass 
+export    BIN=/project/fas/sbsc/ga254/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_bin
+export    TAB=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_ws_bin_table 
 
-export    LCESA=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/LCESA
-export    LST=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_lst_ws_bin
-export    LST_MAX=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/LST_max
+export    LCESA=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/GSHL/LCESA
+export    LST=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_lst_ws_bin
+export    LST_MAX=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/GSHL/LST_max
 export    RAM=/dev/shm
 
 # Upper Left  (-180.0000000,  80.0000000) (180d 0' 0.00"W, 80d 0' 0.00"N)
@@ -47,8 +47,8 @@ export    RAM=/dev/shm
 
 # rm  $RAM/LC190_Y2014.vrt   $RAM/LC190_Y2014_?_1km.tif  
 
-rm -r /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/GSHL/grassdb/cost1k_clump 
-source /gpfs/home/fas/sbsc/ga254/scripts/general/create_location_grass7.3-grace2.sh /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/GSHL/grassdb/ cost1k_clump  $LCESA/LC190_Y2014_1km.tif r.in.gdal 
+rm -r /gpfs/scratch60/fas/sbsc/ga254/dataproces/GSHL/grassdb/cost1k_clump 
+source /gpfs/home/fas/sbsc/ga254/scripts/general/create_location_grass7.3-grace2.sh /gpfs/scratch60/fas/sbsc/ga254/dataproces/GSHL/grassdb/ cost1k_clump  $LCESA/LC190_Y2014_1km.tif r.in.gdal 
 
 r.clump -d  --overwrite  input=LC190_Y2014_1km    output=LC190_Y2014_1km_clump
 r.out.gdal  --overwrite  nodata=0 -c -f  createopt="COMPRESS=DEFLATE,ZLEVEL=9" type=UInt32 format=GTiff input=LC190_Y2014_1km_clump output=$LCESA/LC190_Y2014_1km_clump.tif 

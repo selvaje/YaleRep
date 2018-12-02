@@ -4,18 +4,18 @@
 #SBATCH -t 24:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc09_hysdrosheds_legthgrwl_aggregation.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc09_hysdrosheds_legthgrwl_aggregation.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc09_hysdrosheds_legthgrwl_aggregation.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc09_hysdrosheds_legthgrwl_aggregation.sh.%J.err
 #SBATCH --job-name=sc09_hysdrosheds_legthgrwl_aggregation.sh
 
 # sbatch /gpfs/home/fas/sbsc/ga254/scripts/NITRO/sc09_hysdrosheds_legthgrwl_aggregation.sh
 
-export INDIR=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GRWL/GRWL_vector_to_rast
-export OUTDIR=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NITRO
+export INDIR=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/GRWL/GRWL_vector_to_rast
+export OUTDIR=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NITRO
 export RAM=/dev/shm
 
 # # aggregate at 1km
-ls  /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GRWL/GRWL_vector_to_rast/*.tif  | xargs -n 1  -P 10 bash -c $'
+ls  /gpfs/loomis/project/fas/sbsc/ga254/dataproces/GRWL/GRWL_vector_to_rast/*.tif  | xargs -n 1  -P 10 bash -c $'
 file=$1 
 filename=$(basename $file .tif )
 echo $1 
@@ -36,6 +36,6 @@ rm $RAM/????.tif
 
 exit 
 
-pkstat --hist -i   /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NITRO/GRWL/grwl_pixnum_1km.tif | grep -v " 0" > grwl_pixnum_1km_hist.tif 
+pkstat --hist -i   /gpfs/loomis/project/fas/sbsc/ga254/dataproces/NITRO/GRWL/grwl_pixnum_1km.tif | grep -v " 0" > grwl_pixnum_1km_hist.tif 
 
 awk '{  if ($1>=31) { sum=sum+( $1*$2 ) ; sumP=sumP+( $2 )  }  } END { print 100 / 30 / ( ( sum/sumP ) - 30)  } ' grwl_pixnum_1km_hist.txt 

@@ -2,8 +2,8 @@
 #SBATCH -p week
 #SBATCH -n 1 -c 1 -N 1  
 #SBATCH -t 168:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc01b_dem_stdev_tile.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc01b_dem_stdev_tile.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc01b_dem_stdev_tile.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc01b_dem_stdev_tile.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 
@@ -14,8 +14,8 @@
 # for RADIUS in 11 21 31 41 51  61 71 81 91 101 111 121 131 141 151 161 171 ; do for TILE in $( seq 0 39 )  ; do sbatch   --export=RADIUS=$RADIUS,TILE=$TILE -J sc01b_dem_stdev_tile_R${RADIUS}T${TILES}.sh  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc01b_dem_stdev_tile.sh ; done  ; done 
 
 
-DIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/RIVER_NETWORK/dem_stdev
-OUTDIR=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/dem_stdev
+DIR=/project/fas/sbsc/ga254/dataproces/RIVER_NETWORK/dem_stdev
+OUTDIR=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/dem_stdev
 RAM=/dev/shm
 cleanram
 

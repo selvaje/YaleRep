@@ -2,8 +2,8 @@
 #SBATCH -p scavenge
 #SBATCH -n 1 -c 10 -N 1  
 #SBATCH -t 1:00:00  
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc02_gdalwarp_EQUI7.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc02_gdalwarp_EQUI7.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc02_gdalwarp_EQUI7.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc02_gdalwarp_EQUI7.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc02_gdalwarp_EQUI7.sh 
@@ -12,9 +12,9 @@
 
 # sbatch /gpfs/home/fas/sbsc/ga254/scripts/NED/sc02_gdalwarp_EQUI7.sh 
 
-export NEDS=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/NED/tif
-export NEDP=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NED/input_tif
-export EQUI7=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/EQUI7
+export NEDS=/gpfs/scratch60/fas/sbsc/ga254/dataproces/NED/tif
+export NEDP=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NED/input_tif
+export EQUI7=/project/fas/sbsc/ga254/dataproces/EQUI7
 export RAM=/dev/shm
 
 export CT=NA
@@ -22,7 +22,7 @@ export CT=NA
 # gdalbuildvrt -srcnodata  -3.4028234663852886e+38 -vrtnodata -9999 $NEDS/all_tif.vrt $NEDS/*.tif  -overwrite 
 
 
-ls   /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/equi7/dem/NA/*.tif | xargs -n 1 -P 10  bash -c $' 
+ls   /gpfs/loomis/project/fas/sbsc/ga254/dataproces/MERIT/equi7/dem/NA/*.tif | xargs -n 1 -P 10  bash -c $' 
 file=$1 
 filename=$(basename $file )
 

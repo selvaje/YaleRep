@@ -2,8 +2,8 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 1 -N 1  
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc20_build_dem_location_4streamTileR.sh.%A_%a.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc20_build_dem_location_4streamTileR.sh.%A_%a.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc20_build_dem_location_4streamTileR.sh.%A_%a.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc20_build_dem_location_4streamTileR.sh.%A_%a.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc20_build_dem_location_4streamTileR.sh
@@ -13,10 +13,10 @@
 # 1150 number of files 
 # sbatch   /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK_MERIT/sc20_build_dem_location_4streamTileR.sh
 
-file=$(ls /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/RIVER_NETWORK_MERIT/elv/{n35w100,n40w100}_elv.tif    | tail -n  $SLURM_ARRAY_TASK_ID | head -1 )
+file=$(ls /project/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/elv/{n35w100,n40w100}_elv.tif    | tail -n  $SLURM_ARRAY_TASK_ID | head -1 )
 
-# file=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/RIVER_NETWORK_MERIT/elv/n40w100_elv.tif
-MERIT=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/RIVER_NETWORK_MERIT
+# file=/project/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/elv/n40w100_elv.tif
+MERIT=/project/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT
 GRASS=/tmp
 
 RAM=/dev/shm
@@ -59,8 +59,8 @@ g.region res=0:00:30  save=enlarge
 r.stream.extract elevation=elv  accumulation=upa threshold=0.5     depression=dep          direction=dir   stream_raster=stream memory=20000 --o --verbose  ;  r.colors -r stream
 /gpfs/home/fas/sbsc/ga254/.grass7/addons/bin/r.stream.basins -l  stream_rast=stream  direction=dir   basins=lbasin   memory=20000 --o --verbose       ;  r.colors -r lbasin
 
-r.out.gdal --overwrite -c  createopt="COMPRESS=DEFLATE,ZLEVEL=9" type=Int32 format=GTiff nodata=0  input=lbasin  output=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles_full/lbasinR_$tile.tif 
-r.out.gdal --overwrite -c  createopt="COMPRESS=DEFLATE,ZLEVEL=9" type=Int32 format=GTiff nodata=0  input=stream  output=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/stream_tiles_full/streamR_$tile.tif 
+r.out.gdal --overwrite -c  createopt="COMPRESS=DEFLATE,ZLEVEL=9" type=Int32 format=GTiff nodata=0  input=lbasin  output=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles_full/lbasinR_$tile.tif 
+r.out.gdal --overwrite -c  createopt="COMPRESS=DEFLATE,ZLEVEL=9" type=Int32 format=GTiff nodata=0  input=stream  output=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/stream_tiles_full/streamR_$tile.tif 
 
 
 # g.region  save=enlarge
@@ -114,9 +114,9 @@ r.out.gdal --overwrite -c  createopt="COMPRESS=DEFLATE,ZLEVEL=9" type=Int32 form
 
 # r.mask raster=lbasin_clean --o
 
-# r.out.gdal --overwrite -c  createopt="COMPRESS=DEFLATE,ZLEVEL=9" type=Int32 format=GTiff nodata=0  input=stream  output=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/stream_tiles/streamR_$tile.tif 
-# r.out.gdal --overwrite -c  createopt="COMPRESS=DEFLATE,ZLEVEL=9" type=Int32 format=GTiff nodata=0  input=lbasin  output=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles/lbasinR_$tile.tif  
-# rm -f /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles/lbasin_$tile.tif.aux.xml 
+# r.out.gdal --overwrite -c  createopt="COMPRESS=DEFLATE,ZLEVEL=9" type=Int32 format=GTiff nodata=0  input=stream  output=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/stream_tiles/streamR_$tile.tif 
+# r.out.gdal --overwrite -c  createopt="COMPRESS=DEFLATE,ZLEVEL=9" type=Int32 format=GTiff nodata=0  input=lbasin  output=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles/lbasinR_$tile.tif  
+# rm -f /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles/lbasin_$tile.tif.aux.xml 
 
 rm -r /tmp/loc_$tile
 

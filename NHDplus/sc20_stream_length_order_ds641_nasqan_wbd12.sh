@@ -2,8 +2,8 @@
 #SBATCH -p week
 #SBATCH -n 1 -c 1 -N 1
 #SBATCH -t 168:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc20_stream_length_order_ds641_nasqan_wbd12.sh.%A_%a.out  
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc20_stream_length_order_ds641_nasqan_wbd12.sh.%A_%a.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc20_stream_length_order_ds641_nasqan_wbd12.sh.%A_%a.out  
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc20_stream_length_order_ds641_nasqan_wbd12.sh.%A_%a.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc20_stream_length_order_ds641_nasqan_wbd12.sh
@@ -19,7 +19,7 @@
 # b07374525.shp   line 27 
 # largest basin  b07374525 store in line 27 the other can be skiped 
 
-NHD=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NHDplus
+NHD=/project/fas/sbsc/ga254/dataproces/NHDplus
 file=$(ls $NHD/ds641_nasqan_wbd12_wgs84/*.shp  | head  -n  $SLURM_ARRAY_TASK_ID | tail  -1 )
 
 # data preparation 

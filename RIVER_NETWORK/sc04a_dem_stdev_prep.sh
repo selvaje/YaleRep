@@ -1,9 +1,9 @@
-export DIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/RIVER_NETWORK/dem_stdev
+export DIR=/project/fas/sbsc/ga254/dataproces/RIVER_NETWORK/dem_stdev
 
 # X=172800
 # Y=69120 
 
-# cp /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/RIVER_NETWORK/dem/be75_grd_LandEnlarge.tif /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/RIVER_NETWORK/dem_stdev
+# cp /project/fas/sbsc/ga254/dataproces/RIVER_NETWORK/dem/be75_grd_LandEnlarge.tif /project/fas/sbsc/ga254/dataproces/RIVER_NETWORK/dem_stdev
 
 # gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9  -srcwin 0 0 1000 69120        $DIR/be75_grd_LandEnlarge.tif $DIR/be75_grd_LandEnlarge_left.tif 
 # gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9  -srcwin 171800 0 1000  69120  $DIR/be75_grd_LandEnlarge.tif $DIR/be75_grd_LandEnlarge_right.tif 

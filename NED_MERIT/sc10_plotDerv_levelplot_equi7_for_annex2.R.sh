@@ -2,8 +2,8 @@
 #SBATCH -p scavenge 
 #SBATCH -n 1 -c 1 -N 1 
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc10_plotDerv_levelplot_equi7_for_annex2.R.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc10_plotDerv_levelplot_equi7_for_annex2.R.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc10_plotDerv_levelplot_equi7_for_annex2.R.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc10_plotDerv_levelplot_equi7_for_annex2.R.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH -J sc10_plotDerv_levelplot_equi7_for_annex2.R.sh
@@ -12,10 +12,10 @@
 
 module load Apps/R/3.3.2-generic
 
-cd /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NED_MERIT/
+cd /gpfs/loomis/project/fas/sbsc/ga254/dataproces/NED_MERIT/
 
             # e = extent ( 6890000 , 6910000 ,  5200000 , 5218400 ) 
-# gdal_translate -projwin  6890000 5218400   6910000 5200000    /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/equi7/dem/NA/NA_066_048.tif /tmp/test.tif 
+# gdal_translate -projwin  6890000 5218400   6910000 5200000    /gpfs/loomis/project/fas/sbsc/ga254/dataproces/MERIT/equi7/dem/NA/NA_066_048.tif /tmp/test.tif 
 # gdalwarp -r bilinear -srcnodata -9999 -dstnodata -9999  -overwrite  -tr 0.00208333333333333333333333333 0.00208333333333333333333333333   -s_srs   $PR/EQUI7/grids/NA/PROJ/EQUI7_V13_NA_PROJ_ZONE.prj    -t_srs EPSG:4326    -co COMPRESS=DEFLATE -co ZLEVEL=9  /tmp/test.tif  /tmp/test_wgs84.tif
 
 R  --vanilla --no-readline   -q  <<EOF
@@ -38,15 +38,15 @@ library(gridExtra)
 
 e = extent ( 6890000 , 6910000 ,  5200000 , 5218400 ) 
 
-elev_M = raster ("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/equi7/dem/NA/NA_066_048.tif") 
+elev_M = raster ("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/MERIT/equi7/dem/NA/NA_066_048.tif") 
 elev_M = crop   (elev_M , e)
 
 elev_M
 
-elev_N = raster ("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NED/input_tif/NA_066_048.tif") 
+elev_N = raster ("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NED/input_tif/NA_066_048.tif") 
 elev_N = crop   (elev_N , e)
 #  MERIT minus NED  ... positive values are due to not pefect correction of the tree hight 
-elev_dif = raster ("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NED_MERIT/input_tif/tiles/NA_066_048_dif.tif")  
+elev_dif = raster ("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NED_MERIT/input_tif/tiles/NA_066_048_dif.tif")  
 elev_dif = crop   (elev_dif , e)
 
 
@@ -74,7 +74,7 @@ cols=colR(n)
 options(scipen=10)
 trunc <- function(x, ..., prec = 0) base::trunc(x * 10^prec, ...) / 10^prec
 
-pdf(paste0("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NED_MERIT/figure/derivative_all_var_plot_equi7_for_annex2.pdf") , width=6, height=7.5   )
+pdf(paste0("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NED_MERIT/figure/derivative_all_var_plot_equi7_for_annex2.pdf") , width=6, height=7.5   )
 par (oma=c(2,2,2,1) , mar=c(0.4,0.5,1,1.9) , cex.lab=0.5 , cex=0.6 , cex.axis=0.4  ,   mfrow=c(6,4) ,  xpd=NA    )
 
 for ( dir in c("elev_M","elev_N","elev_cor","elev_dif","input_tif","roughness","tri","tpi","vrm","tci","spi","cos","sin","slope","Ew","Nw","pcurv","tcurv","dx","dy","dxx","dyy","dxy","convergence")){

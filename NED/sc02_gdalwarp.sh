@@ -2,8 +2,8 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 1 -N 1  
 #SBATCH -t 1:00:00  
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc02_gdalwarp.sh.%A_%a.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc02_gdalwarp.sh.%A_%a.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc02_gdalwarp.sh.%A_%a.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc02_gdalwarp.sh.%A_%a.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc02_gdalwarp.sh 
@@ -13,13 +13,13 @@
 # 347 
 # sbatch /gpfs/home/fas/sbsc/ga254/scripts/NED/sc02_gdalwarp.sh 
 
-NEDS=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/NED/tif
-NEDP=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NED/input_tif
+NEDS=/gpfs/scratch60/fas/sbsc/ga254/dataproces/NED/tif
+NEDP=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NED/input_tif
 
 RAM=/dev/shm
 
-file=$(ls /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/input_tif/n??w???_dem.tif | head  -n  $SLURM_ARRAY_TASK_ID | tail  -1 )
-# file=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/input_tif/n30w125_dem.tif
+file=$(ls /project/fas/sbsc/ga254/dataproces/MERIT/input_tif/n??w???_dem.tif | head  -n  $SLURM_ARRAY_TASK_ID | tail  -1 )
+# file=/project/fas/sbsc/ga254/dataproces/MERIT/input_tif/n30w125_dem.tif
 
 filename=$(basename $file _dem.tif  )
 

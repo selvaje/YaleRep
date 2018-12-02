@@ -2,8 +2,8 @@
 #SBATCH -p scavenge 
 #SBATCH -n 1 -c 1 -N 1 
 #SBATCH -t 2:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc02_derivative_stats.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc02_derivative_stats.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc02_derivative_stats.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc02_derivative_stats.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH -J sc02_derivative_stats.sh 
@@ -13,7 +13,7 @@
 # module load Apps/R/3.0.3  
 module load Apps/R/3.1.1-generic
 
-cd /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NED_MERIT
+cd /project/fas/sbsc/ga254/dataproces/NED_MERIT
 
 #   NA_072_048.tif  
 #   NA_072_018.tif 
@@ -77,7 +77,7 @@ NA_072_018.ord = rbind (   NA_072_018.ord ,   NA_072_018[16,] )
 NA_072_048.ord\$ID = as.numeric(seq(1,20)) 
 NA_072_018.ord\$ID = as.numeric(seq(1,20)) 
 
-pdf( paste ("/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NED_MERIT/figure/plot_derivative_equi7.pdf", sep="") , width=8, height=8 )
+pdf( paste ("/project/fas/sbsc/ga254/dataproces/NED_MERIT/figure/plot_derivative_equi7.pdf", sep="") , width=8, height=8 )
 
 ggplot() +
     geom_line(data = NA_072_048.ord , aes(x=ID , y = V7),  color = "orange") +

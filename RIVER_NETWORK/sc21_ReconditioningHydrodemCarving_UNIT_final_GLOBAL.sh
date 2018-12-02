@@ -16,7 +16,7 @@
 
 # best combination 200 log ; 120 depth ;  151 diamiter stdev ;  30798730 
 
-# for UNIT in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 154 573 810 1145 2597 3005 3317 3629 3753 4000 4001 ; do RADIUS=151 ; N=200 ; DIM=120 ; RAM=$(awk -F "_" -v UNIT=$UNIT  '{ if ($1==UNIT) print $2  }'  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/UNIT_RAM.txt ) ;   sbatch  --export=N=$N,DIM=$DIM,UNIT=$UNIT,GEO=GLOBE,RADIUS=$RADIUS,TRH=8 -J sc2x1_ReconditioningHydrodemCarving_UNIT${UNIT}_N${N}_DIM${DIM}_STDEV${RADIUS}_TRH${TRH}_final_GLOBAL.sh -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc21_ReconditioningHydrodemCarving_${UNIT}_final_GLOBAL.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc21_ReconditioningHydrodemCarving_${UNIT}_final_GLOBAL.%J.err   --mem-per-cpu=$RAM  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc21_ReconditioningHydrodemCarving_UNIT_final_GLOBAL.sh ; done
+# for UNIT in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 154 573 810 1145 2597 3005 3317 3629 3753 4000 4001 ; do RADIUS=151 ; N=200 ; DIM=120 ; RAM=$(awk -F "_" -v UNIT=$UNIT  '{ if ($1==UNIT) print $2  }'  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/UNIT_RAM.txt ) ;   sbatch  --export=N=$N,DIM=$DIM,UNIT=$UNIT,GEO=GLOBE,RADIUS=$RADIUS,TRH=8 -J sc2x1_ReconditioningHydrodemCarving_UNIT${UNIT}_N${N}_DIM${DIM}_STDEV${RADIUS}_TRH${TRH}_final_GLOBAL.sh -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc21_ReconditioningHydrodemCarving_${UNIT}_final_GLOBAL.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc21_ReconditioningHydrodemCarving_${UNIT}_final_GLOBAL.%J.err   --mem-per-cpu=$RAM  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc21_ReconditioningHydrodemCarving_UNIT_final_GLOBAL.sh ; done
 
 # 1145 154 2597 3005 3317 3629 3753 4000 4001 573 810 497_338_3562_333 
 # new one 
@@ -38,12 +38,12 @@
 
 echo UNIT ${UNIT} TYPE ${N} DIMENSION ${DIM}  STDEV ${RADIUS}
 
-cd /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb 
-export DIR=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK
+cd /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb 
+export DIR=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK
 
-rm -f /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_${GEO}/PERMANENT/.gislock
-source  /gpfs/home/fas/sbsc/ga254/scripts/general/enter_grass7.0.2-grace2.sh  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_${GEO}/PERMANENT 
-rm -f /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_${GEO}/PERMANENT/.gislock
+rm -f /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_${GEO}/PERMANENT/.gislock
+source  /gpfs/home/fas/sbsc/ga254/scripts/general/enter_grass7.0.2-grace2.sh  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_${GEO}/PERMANENT 
+rm -f /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_${GEO}/PERMANENT/.gislock
 
 export N
 export DIM
@@ -54,8 +54,8 @@ export RADIUS
 export DEM=be75_grd_LandEnlarge_${GEO}
 export OCCURENCE=occurrence_250m_${GEO}
 export STDEV=be75_grd_LandEnlarge_std${RADIUS}_norm_${GEO}
-export RPROJ=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/RIVER_NETWORK
-export RSCRA=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK
+export RPROJ=/project/fas/sbsc/ga254/dataproces/RIVER_NETWORK
+export RSCRA=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK
 
 cp  $HOME/.grass7/grass$$     $HOME/.grass7/rc${UNIT}_${N}_${DIM}_STDEV${RADIUS}
 export GISRC=$HOME/.grass7/rc${UNIT}_${N}_${DIM}_STDEV${RADIUS}

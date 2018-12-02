@@ -3,14 +3,14 @@
 #SBATCH -J sc05_computationalUNIT_1k.sh
 #SBATCH -n 1 -c 8 -N 1  
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc05_computationalUNIT_1k.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc05_computationalUNIT_1k.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc05_computationalUNIT_1k.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc05_computationalUNIT_1k.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 
 # sbatch /gpfs/home/fas/sbsc/ga254/scripts/GSHL/sc05_computationalUNIT_1k.sh  
 
-export DIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL
+export DIR=/project/fas/sbsc/ga254/dataproces/GSHL
 
 
 # full process more than 4 our

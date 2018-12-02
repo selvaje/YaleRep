@@ -2,8 +2,8 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 1 -N 1  
 #SBATCH -t 3:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc03_dem_variables_float_noMult.sh.%A_%a.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc03_dem_variables_float_noMult.sh.%A_%a.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc03_dem_variables_float_noMult.sh.%A_%a.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc03_dem_variables_float_noMult.sh.%A_%a.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc03_dem_variables_float_noMult.sh
@@ -11,8 +11,8 @@
 
 ####SBATCH --array=1-1150%10
 
-# # for file in /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/input_tif/n30w090_dem.tif  ; do   sbatch --export=file=$file   /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc03_dem_variables_float_noMult.sh  ; done 
-# # bash /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc03_dem_variables_float_noMult.sh /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/input_tif/n30w090_dem.tif 
+# # for file in /project/fas/sbsc/ga254/dataproces/MERIT/input_tif/n30w090_dem.tif  ; do   sbatch --export=file=$file   /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc03_dem_variables_float_noMult.sh  ; done 
+# # bash /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc03_dem_variables_float_noMult.sh /project/fas/sbsc/ga254/dataproces/MERIT/input_tif/n30w090_dem.tif 
 # # nodata pixe in 1927385 n30w090_dem.tif 
 
 # 1150 number of files 
@@ -20,14 +20,14 @@
 
 module load Apps/GRASS/7.3-beta
 
-# for dir in dx dxx dxy dy dyy pcurv roughness slope tcurv tpi tri vrm ; do join -v  1    -1 1 -2 1 <(ls *.tif | sort ) <( ls        /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/$dir/tiles/  | sort ) ; done | sort | uniq  > /tmp/file_missing.txt 
+# for dir in dx dxx dxy dy dyy pcurv roughness slope tcurv tpi tri vrm ; do join -v  1    -1 1 -2 1 <(ls *.tif | sort ) <( ls        /project/fas/sbsc/ga254/dataproces/MERIT/$dir/tiles/  | sort ) ; done | sort | uniq  > /tmp/file_missing.txt 
 # for tif in  $( cat /tmp/file_missing.txt )  ; do sbatch  --export=tif=$tif   /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc03_dem_variables_float_noMult.sh   ; done
-# file=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/input_tif/$tif 
+# file=/project/fas/sbsc/ga254/dataproces/MERIT/input_tif/$tif 
 
-file=$(ls /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/tmp/*_dem.tif  | head  -n  $SLURM_ARRAY_TASK_ID | tail  -1 )
+file=$(ls /project/fas/sbsc/ga254/dataproces/MERIT/tmp/*_dem.tif  | head  -n  $SLURM_ARRAY_TASK_ID | tail  -1 )
 # use this if one file is missing 
 
-MERIT=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT
+MERIT=/project/fas/sbsc/ga254/dataproces/MERIT
 RAM=$MERIT/tmp
 # RAM=/dev/shm
 filename=$(basename $file .tif )

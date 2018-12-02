@@ -4,8 +4,8 @@
 #SBATCH -t 24:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc10_equi_warp_wgs84_continue_90M_250M.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc10_equi_warp_wgs84_continue_90M_250M.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc10_equi_warp_wgs84_continue_90M_250M.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc10_equi_warp_wgs84_continue_90M_250M.sh.%J.err
 #SBATCH --mem-per-cpu=10000
 
 # intensity exposition range variance elongation azimuth extend width 
@@ -24,9 +24,9 @@ echo "############################################################"
 
 
 P=$SLURM_CPUS_PER_TASK
-export MERIT=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT
-export SCRATCH=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/MERIT
-export EQUI=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/EQUI7/grids
+export MERIT=/project/fas/sbsc/ga254/dataproces/MERIT
+export SCRATCH=/gpfs/scratch60/fas/sbsc/ga254/dataproces/MERIT
+export EQUI=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/EQUI7/grids
 export RAM=/dev/shm
 export TOPO=$TOPO
 
@@ -63,7 +63,7 @@ if [  $TOPO =  vrm ]    ; then OT=UInt16     ; MULT=100000 ; NODATA=65535   ; SC
 
 # Int16    -32,768   32,767 
 if [  $TOPO =  aspect-cosine ]    ; then OT=Int16 ; MULT=10000 ; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min -1           -max 1         OK
-if [  $TOPO =  aspect-sine ]      ; then OT=Int16 ; MULT=1000  ; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min -1           -max 1         OK
+if [  $TOPO =  aspect-sine ]      ; then OT=Int16 ; MULT=10000 ; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min -1           -max 1         OK
 if [  $TOPO =  convergence ]      ; then OT=Int16 ; MULT=100   ; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min -99.9968     -max 99.9134   OK
 if [  $TOPO =  cti ]              ; then OT=Int16 ; MULT=1000  ; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min -7.29337     -max 19.8719   OK
 if [  $TOPO =  dev-magnitude ]    ; then OT=Int16 ; MULT=10    ; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min -424.413     -max 1713.44   OK
@@ -86,20 +86,19 @@ if [  $TOPO =  tpi ]              ; then OT=Int16 ; MULT=10    ; NODATA=-32768  
 if [  $TOPO =  tri ]              ; then OT=Int16 ; MULT=10    ; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min 0            -max 1076.05   OK
 
 
-# oft-calc -ot $OT -um $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_msk.tif $MERIT/final250m/${TOPO}_250Mbilinear_MERIT.tif $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT.tif <<EOF
-# 1
-# #1 $MULT *
-# EOF
+oft-calc -ot $OT -um $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_msk.tif $MERIT/final250m/${TOPO}_250Mbilinear_MERIT.tif $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT.tif <<EOF
+1
+#1 $MULT *
+EOF
 
 pksetmask -ot  $OT -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -co BIGTIFF=YES -m $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_msk.tif -msknodata 0  -nodata $NODATA -i  $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT.tif -o $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_int.tif  
 
 # pkinfo -nodata $NODATA   -mm -i $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_int.tif > $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_int_mm.txt 
 
-
 # start to prepare a cloud-optimized GeoTIFF  as described at https://github.com/Envirometrix/LandGISmaps#cloud-optimized-geotiff 
 
 
-# gdaladdo -clean  $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_int.tif # usefull in case of re-run 
+gdaladdo -clean  $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_int.tif # usefull in case of re-run 
 # gdaladdo --config GDAL_CACHEMAX 8000 --config COMPRESS_OVERVIEW LZW -r average -ro  $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_int.tif 16  # external overview for assesment 
 gdaladdo --config GDAL_CACHEMAX 8000  -r nearest   $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_int.tif  2 4 8 16 32 64 128 
 
@@ -118,6 +117,9 @@ gdal_edit.py -a_ullr  -180.00000 87.37000 179.99994 -62.00081 \
               -mo "TIFFTAG_IMAGEDESCRIPTION= ${TOPO} geomorphometry variable derived from MERIT-DEM - resolution 3 arc-seconds" \
               -mo "Offset=0" -mo "Scale=$SCALE" \
 $MERIT/geohub250m/dtm_${TOPO}_merit.dem_m_250m_s0..0cm_2018_v1.0.tif
+
+# to restore the pixel size to 0.002083333333333 and precise extent use the following  
+# gdal_edit.py -a_ullr  -180.00000  87.370833333333333 180.0000000 -62.0000000  input.tif 
 
 echo get statistic 
 # pkinfo -nodata $NODATA  -mm -i $MERIT/geohub250m/dtm_${TOPO}_merit.dem_m_250m_s0..0cm_2018_v1.0.tif  > $MERIT/geohub250m/dtm_${TOPO}_merit.dem_m_250m_s0..0cm_2018_v1.0_mm.txt 

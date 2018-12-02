@@ -12,7 +12,7 @@ library(raster)
 library(ggplot2)
 library(gridExtra)
 
-LIDAR="/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/LIDAR/"
+LIDAR="/project/fas/sbsc/ga254/dataproces/LIDAR/"
 
 for ( dir  in c("azimuth","convergence","dx","dxx","dxy","dy","dyy","elongation","exposition","extend","intensity","pcurv","range","roughness","slope","spi","tci","tcurv","tpi","tri","variance","vrm","width")) {
 	raster  <- raster(paste0(LIDAR,"/",dir,"/","dsm_wgs84_crop_e.tiff"))
@@ -26,9 +26,9 @@ for ( dir  in c("azimuth","convergence","dx","dxx","dxy","dy","dyy","elongation"
 
 # elevation 
 
-elevation_dsm   =  raster ("/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/LIDAR/input/SC14_CZO/dsm_wgs84_crop_e.tiff"  ) 
-elevation_dtm   =  raster ("/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/LIDAR/input/SC14_CZO/dtm_wgs84_crop_e.tiff"  ) 
-elevation_mrt   =  raster ("/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/LIDAR/input/SC14_CZO/merit.tiff"  ) 
+elevation_dsm   =  raster ("/project/fas/sbsc/ga254/dataproces/LIDAR/input/SC14_CZO/dsm_wgs84_crop_e.tiff"  ) 
+elevation_dtm   =  raster ("/project/fas/sbsc/ga254/dataproces/LIDAR/input/SC14_CZO/dtm_wgs84_crop_e.tiff"  ) 
+elevation_mrt   =  raster ("/project/fas/sbsc/ga254/dataproces/LIDAR/input/SC14_CZO/merit.tiff"  ) 
 
 
 for ( dir  in c("azimuth","convergence","dx","dxx","dxy","dy","dyy","elongation","exposition","extend","intensity","pcurv","range","roughness","slope","spi","tci","tcurv","tpi","tri","variance","vrm","width","elevation")) {
@@ -47,7 +47,7 @@ assign(paste0(dir,"_df") , a  )
 }
 
 
-postscript(paste0("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/LIDAR/figure/dsm-dtm_vs_merit_plot-norm.ps") ,  paper="special" ,  horizo=F , width=8, height=12   )
+postscript(paste0("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/LIDAR/figure/dsm-dtm_vs_merit_plot-norm.ps") ,  paper="special" ,  horizo=F , width=8, height=12   )
 
 for ( dir  in c("azimuth","convergence","dx","dxx","dxy","dy","dyy","elongation","exposition","extend","intensity","pcurv","range","roughness","slope","spi","tci","tcurv","tpi","tri","variance","vrm","width","elevation")) {
 data_df = (get(paste0(dir,"_df")))

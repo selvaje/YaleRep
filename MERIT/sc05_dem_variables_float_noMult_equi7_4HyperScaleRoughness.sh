@@ -2,8 +2,8 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 1 -N 1  
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc05_dem_variables_float_noMult_equi7_4HyperScaleRoughness.sh.%A_%a.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc05_dem_variables_float_noMult_equi7_4HyperScaleRoughness.sh.%A_%a.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc05_dem_variables_float_noMult_equi7_4HyperScaleRoughness.sh.%A_%a.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc05_dem_variables_float_noMult_equi7_4HyperScaleRoughness.sh.%A_%a.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc05_dem_variables_float_noMult_equi7_4HyperScaleRoughness.sh
@@ -17,15 +17,15 @@
 # AS_006_042 AS_006_048 AS_006_054 EU_078_006 EU_078_012 file with negative number ...it create problem in the multiscale 
 
 # check for errors 
-# ls /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/MERIT/{multirough,deviation}/tiles/??_???_???_????_???.tif   | xargs -n 1 -P 10  bash -c $' pkstat -f -nodata -9999 -mm  -i $1    ' _  | grep 32768
+# ls /gpfs/scratch60/fas/sbsc/ga254/dataproces/MERIT/{multirough,deviation}/tiles/??_???_???_????_???.tif   | xargs -n 1 -P 10  bash -c $' pkstat -f -nodata -9999 -mm  -i $1    ' _  | grep 32768
 
-# file=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/equi7/dem/EU/EU_048_000.tif
+# file=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/MERIT/equi7/dem/EU/EU_048_000.tif
 
-file=$(ls /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/equi7/dem/??/??_???_???.tif | head -n $SLURM_ARRAY_TASK_ID | tail -1 )
+file=$(ls /gpfs/loomis/project/fas/sbsc/ga254/dataproces/MERIT/equi7/dem/??/??_???_???.tif | head -n $SLURM_ARRAY_TASK_ID | tail -1 )
 # use this if one file is missing
 
-MERIT=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT
-SCRATCH=/gpfs/loomis/scratch60/fas/sbsc/ga254/grace0/dataproces/MERIT
+MERIT=/project/fas/sbsc/ga254/dataproces/MERIT
+SCRATCH=/gpfs/loomis/scratch60/fas/sbsc/ga254/dataproces/MERIT
 RAM=/dev/shm
 filename=$(basename $file .tif )
 CT=${filename:0:2}

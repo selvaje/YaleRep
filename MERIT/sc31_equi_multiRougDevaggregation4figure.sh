@@ -2,16 +2,16 @@
 #SBATCH -p day 
 #SBATCH -n 1 -c 20  -N 1  
 #SBATCH -t 10:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc31_equi_multiRougDevaggregation4figure.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc31_equi_multiRougDevaggregation4figure.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc31_equi_multiRougDevaggregation4figure.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc31_equi_multiRougDevaggregation4figure.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc31_equi_multiRougDevaggregation4figure.sh
 
 # sbatch  /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc31_equi_multiRougDevaggregation4figure.sh
 
-export MERIT=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT
-export SCRATCH=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/MERIT_BK
+export MERIT=/project/fas/sbsc/ga254/dataproces/MERIT
+export SCRATCH=/gpfs/scratch60/fas/sbsc/ga254/dataproces/MERIT_BK
 export RAM=/dev/shm
 export KM=5.00
 
@@ -21,7 +21,7 @@ if  [ $VAR = "multirough" ] ; then export VAR2=roug  ; fi
 
 export VAR
 
-# ls /gpfs/loomis/scratch60/fas/sbsc/ga254/grace0/dataproces/MERIT_BK/${VAR}/tiles/??_???_???_${VAR2}_mag.tif    | xargs -n 1 -P 20  bash -c $' 
+# ls /gpfs/loomis/scratch60/fas/sbsc/ga254/dataproces/MERIT_BK/${VAR}/tiles/??_???_???_${VAR2}_mag.tif    | xargs -n 1 -P 20  bash -c $' 
 # file=$1 
 # export filename=$(basename $file .tif )
 # export CT=${filename:0:2}

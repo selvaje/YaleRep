@@ -4,6 +4,6 @@
 # The Global Streamflow Indices and Metadata Archive (GSIM) – Part 2: Quality Control, Time-series Indices and Homogeneity Assessment
 # https://www.earth-syst-sci-data.net/10/787/2018/essd-10-787-2018.html 
 
-cd  /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSIM/zip
+cd  /project/fas/sbsc/ga254/dataproces/GSIM/zip
 wget https://iacweb.ethz.ch/staff/lukasgu/GSIM/GSIM_indices.zip
 

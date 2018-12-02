@@ -2,8 +2,8 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 12 -N 1
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc01_wget_tmax-tmin.sh.%J.out 
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc01_wget_tmax-tmin.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc01_wget_tmax-tmin.sh.%J.out 
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc01_wget_tmax-tmin.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc01_wget_tmax-tmin.sh
@@ -12,7 +12,7 @@
 
 
 # for VAR in tmax tmin  ; do 
-# cd /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/CHELSA/$VAR
+# cd /project/fas/sbsc/ga254/dataproces/CHELSA/$VAR
 # export VAR
 # for YEAR in $(seq 1979 2013) ; do
 # export YEAR 
@@ -47,7 +47,7 @@
 
 
 for VAR in tmean  ; do 
-cd /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/CHELSA/$VAR
+cd /project/fas/sbsc/ga254/dataproces/CHELSA/$VAR
 export VAR
 for YEAR in $(seq 1979 2013) ; do
 export YEAR 

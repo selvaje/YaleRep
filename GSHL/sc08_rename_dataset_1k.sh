@@ -2,16 +2,16 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 1 -N 1
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc08_rename_dataset.sh%J.out 
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc08_rename_dataset.sh%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc08_rename_dataset.sh%J.out 
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc08_rename_dataset.sh%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc08_rename_dataset.sh
 
 # riname final dataset 
 
-DIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL
-OUTDIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/final_product_1k
+DIR=/project/fas/sbsc/ga254/dataproces/GSHL
+OUTDIR=/project/fas/sbsc/ga254/dataproces/GSHL/final_product_1k
 
 # for BIN in 1 2 3 4 5 6 7 8 9 ; do 
 # cp $DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_bin_clump_reclass/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_bin${BIN}_clump.tif $OUTDIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_bin${BIN}_clump.tif 

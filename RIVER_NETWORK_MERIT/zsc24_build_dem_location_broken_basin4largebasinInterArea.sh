@@ -2,8 +2,8 @@
 #SBATCH -p week
 #SBATCH -n 1 -c 1 -N 1
 #SBATCH -t 168:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc24_build_dem_location_broken_basin4largebasinInterArea.sh.%A_%a.out 
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc24_build_dem_location_broken_basin4largebasinInterArea.sh.%A_%a.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc24_build_dem_location_broken_basin4largebasinInterArea.sh.%A_%a.out 
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc24_build_dem_location_broken_basin4largebasinInterArea.sh.%A_%a.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc24_build_dem_location_broken_basin4largebasinInterArea.sh
@@ -15,17 +15,17 @@
 
 module load Apps/GRASS/7.3-beta
 
-MERIT=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/RIVER_NETWORK_MERIT
-GRASS=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/grassdb 
+MERIT=/project/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT
+GRASS=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/grassdb 
 RAM=$GRASS/tif 
 
 find  /tmp/     -user $USER    2>/dev/null  | xargs -n 1 -P 1 rm -ifr  
 find  /dev/shm  -user $USER    2>/dev/null  | xargs -n 1 -P 1 rm -ifr  
 
 # SLURM_ARRAY_TASK_ID=60
-UNIT=$( awk -v AR=$SLURM_ARRAY_TASK_ID '{ if(NR==AR)  print $1 }' /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles_brokb_msk1km/brokb_msk1km_clump_hist1_s.txt ) 
+UNIT=$( awk -v AR=$SLURM_ARRAY_TASK_ID '{ if(NR==AR)  print $1 }' /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles_brokb_msk1km/brokb_msk1km_clump_hist1_s.txt ) 
 
-geo_string=$(oft-bb /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles_brokb_msk1km/brokb_msk1km_clump.tif $UNIT | grep BB | awk '{ print $6,$7,$8,$9 }'  ) 
+geo_string=$(oft-bb /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles_brokb_msk1km/brokb_msk1km_clump.tif $UNIT | grep BB | awk '{ print $6,$7,$8,$9 }'  ) 
 
 echo $geo_string for UNIT $UNIT
 
@@ -38,10 +38,10 @@ export lryL=$( echo $geo_string | awk  '{ printf ("%.16f" ,   85 - (($4 + 10) * 
 
 echo  $ulxL $ulyL $lrxL  $lryL 
 
-gdalbuildvrt -overwrite -te $ulxL $lryL $lrxL $ulyL $RAM/msk_brokb_UNIT$UNIT.vrt  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles_brokb_msk/all_tif.vrt   
+gdalbuildvrt -overwrite -te $ulxL $lryL $lrxL $ulyL $RAM/msk_brokb_UNIT$UNIT.vrt  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles_brokb_msk/all_tif.vrt   
 gdal_translate -co BIGTIFF=YES    -co COMPRESS=DEFLATE -co ZLEVEL=9  -a_ullr $ulxL $ulyL $lrxL $lryL  $RAM/msk_brokb_UNIT$UNIT.vrt    $RAM/msk_brokb_UNIT$UNIT.tif 
 gdal_edit.py  -a_nodata 0  $RAM/msk_brokb_UNIT$UNIT.tif  ; rm $RAM/msk_brokb_UNIT$UNIT.vrt  
-cp $RAM/msk_brokb_UNIT$UNIT.tif /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/tmp 
+cp $RAM/msk_brokb_UNIT$UNIT.tif /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/tmp 
 
 for var in msk elv dep upa ; do 
 gdalbuildvrt -overwrite -te $ulxL $lryL $lrxL $ulyL $RAM/UNIT${UNIT}_${var}.vrt  $MERIT/${var}/all_tif.vrt   
@@ -96,8 +96,8 @@ echo "############################################################"
 
 r.mask raster=msk_brokb  --o
 
-r.out.gdal --overwrite -c -m   createopt="COMPRESS=DEFLATE,ZLEVEL=9" type=UInt32 format=GTiff nodata=0  input=lbasin  output=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/lbasin_unit_large/lbasin_brokb$UNIT.tif
-r.out.gdal --overwrite -c -m   createopt="COMPRESS=DEFLATE,ZLEVEL=9" type=UInt32 format=GTiff nodata=0  input=stream  output=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/stream_unit_large/stream_brokb$UNIT.tif
+r.out.gdal --overwrite -c -m   createopt="COMPRESS=DEFLATE,ZLEVEL=9" type=UInt32 format=GTiff nodata=0  input=lbasin  output=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/lbasin_unit_large/lbasin_brokb$UNIT.tif
+r.out.gdal --overwrite -c -m   createopt="COMPRESS=DEFLATE,ZLEVEL=9" type=UInt32 format=GTiff nodata=0  input=stream  output=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/stream_unit_large/stream_brokb$UNIT.tif
 
 # rm -r /tmp/loc_$UNIT
 

@@ -5,12 +5,12 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --mem-per-cpu=2000
-#SBATCH  -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc23_continentisland_merge_GLOBALEUROASIA_oft-calc.sh
-#SBATCH  -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc23_continentisland_merge_GLOBALEUROASIA_oft-calc.sh
+#SBATCH  -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc23_continentisland_merge_GLOBALEUROASIA_oft-calc.sh
+#SBATCH  -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc23_continentisland_merge_GLOBALEUROASIA_oft-calc.sh
 
 # sbatch /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc23_continentisland_merge_GLOBALEUROASIA_oft-calc.sh
 
-export DIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/RIVER_NETWORK/output
+export DIR=/project/fas/sbsc/ga254/dataproces/RIVER_NETWORK/output
 export RAM=/dev/shm
 # endorheic 
 

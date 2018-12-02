@@ -2,14 +2,14 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 1 -N 1  
 #SBATCH -t 5:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc03_dem_variables_float_noMult.sh.%A_%a.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc03_dem_variables_float_noMult.sh.%A_%a.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc03_dem_variables_float_noMult.sh.%A_%a.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc03_dem_variables_float_noMult.sh.%A_%a.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc03_dem_variables_float_noMult.sh
 #SBATCH --array=1-98
 
-# # bash /gpfs/home/fas/sbsc/ga254/scripts/NED/sc03_dem_variables_float_noMult.sh /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NED/input_tif/n10w095.tif 
+# # bash /gpfs/home/fas/sbsc/ga254/scripts/NED/sc03_dem_variables_float_noMult.sh /project/fas/sbsc/ga254/dataproces/NED/input_tif/n10w095.tif 
 
 # 98  number of files 
 # sbatch   /gpfs/home/fas/sbsc/ga254/scripts/NED/sc03_dem_variables_float_noMult.sh  
@@ -19,12 +19,12 @@ module load Apps/GRASS/7.3-beta
 ## create directory 
 ## for VAR in forms aspect dx dxx dxy dy dyy pcurv roughness slope tcurv  tpi  tri vrm spi tci convergence  intensity exposition range variance elongation azimuth extend width   ; do for MATH in min max mean median  stdev tiles ; do for  KM in 1 5 10 50 100  ; do mkdir -p  $VAR/$MATH/tiles_km$KM ; done ; done ; done
 
-file=$(ls /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NED/input_tif/NA*.tif  | head  -n  $SLURM_ARRAY_TASK_ID | tail  -1 )
+file=$(ls /project/fas/sbsc/ga254/dataproces/NED/input_tif/NA*.tif  | head  -n  $SLURM_ARRAY_TASK_ID | tail  -1 )
 # file=$1
 # use this if one file is missing 
 
-MERIT=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT 
-NED=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NED
+MERIT=/project/fas/sbsc/ga254/dataproces/MERIT 
+NED=/project/fas/sbsc/ga254/dataproces/NED
 RAM=/dev/shm
 filename=$(basename $file .tif )
 echo filename  $filename 

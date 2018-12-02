@@ -1,6 +1,6 @@
 # combine the dataset for buffwer and watershed bin data 
 
-DIR=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_lst_ws_bin/LST_plot_bin_buf
+DIR=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_lst_ws_bin/LST_plot_bin_buf
 
 echo Madrid     -3.705310  40.409888 >  $DIR/city.txt
 echo London     -0.114860  51.514306 >> $DIR/city.txt
@@ -18,7 +18,7 @@ echo Munchen    11.574068  48.137742 >> $DIR/city.txt
 echo Amesterdam  4.893276  52.351364 >> $DIR/city.txt
 
 
-export    LST=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_lst_ws_bin
+export    LST=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_lst_ws_bin
 
 cat   $DIR/city.txt     | xargs -n 3 -P 1  bash -c $' 
 

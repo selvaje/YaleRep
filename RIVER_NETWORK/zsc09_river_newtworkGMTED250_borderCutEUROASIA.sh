@@ -1,6 +1,6 @@
-# bsub    -w "$(qmy | grep -e sc08_river_newtworkGMTED250.sh  -e sc08_river_newtworkGMTED250_EUROASIA.sh | awk   '{ printf ("done(%s) && ", $1) }' |   sed 's/....$//')"    -J  sc09_river_newtworkGMTED250_borderCutEUROASIA.sh   -W 24:00 -n 4  -R "span[hosts=1]"  -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc09_river_newtworkGMTED250_borderCutEUROASIA.sh.%J.out  -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc09_river_newtworkGMTED250_borderCutEUROASIA.sh.%J.err    bash  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc09_river_newtworkGMTED250_borderCutEUROASIA.sh 
+# bsub    -w "$(qmy | grep -e sc08_river_newtworkGMTED250.sh  -e sc08_river_newtworkGMTED250_EUROASIA.sh | awk   '{ printf ("done(%s) && ", $1) }' |   sed 's/....$//')"    -J  sc09_river_newtworkGMTED250_borderCutEUROASIA.sh   -W 24:00 -n 4  -R "span[hosts=1]"  -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc09_river_newtworkGMTED250_borderCutEUROASIA.sh.%J.out  -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc09_river_newtworkGMTED250_borderCutEUROASIA.sh.%J.err    bash  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc09_river_newtworkGMTED250_borderCutEUROASIA.sh 
 
-# bsub    -J  sc09_river_newtworkGMTED250_borderCutEUROASIA.sh   -W 24:00 -n 3  -R "span[hosts=1]"  -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc09_river_newtworkGMTED250_borderCutEUROASIA.sh.%J.out  -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc09_river_newtworkGMTED250_borderCutEUROASIA.sh.%J.err    bash  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc09_river_newtworkGMTED250_borderCutEUROASIA.sh 
+# bsub    -J  sc09_river_newtworkGMTED250_borderCutEUROASIA.sh   -W 24:00 -n 3  -R "span[hosts=1]"  -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc09_river_newtworkGMTED250_borderCutEUROASIA.sh.%J.out  -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc09_river_newtworkGMTED250_borderCutEUROASIA.sh.%J.err    bash  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc09_river_newtworkGMTED250_borderCutEUROASIA.sh 
 
 # bash  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc09_river_newtworkGMTED250_borderCutEUROASIA.sh
 
@@ -11,7 +11,7 @@ pkcreatect -min 0 -max 1 >  /tmp/color.txt
 echo 3 4 10 100 | xargs -n 1   -P  4  bash  -c $'    
 TRH=$1
 
-DIR=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK
+DIR=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK
 
 xoff=$(gdalinfo $DIR/output/basin_last/basin_last91518_LEFT_trh${TRH}.tif | grep "Size is" | awk \'{ print $3 -1 }\' )
 yoff=0
@@ -87,4 +87,4 @@ rm -f  /tmp/color.txt
 
 cleanram
 
-bsub   -W 12:00  -R "span[hosts=1]" -n 4   -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc10_river_newtworkGMTED250_mergeEUROASIA.sh.%J.out  -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc10_river_newtworkGMTED250_mergeEUROASIA.sh.%J.err   bash  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc10_river_newtworkGMTED250_mergeEUROASIA.sh
+bsub   -W 12:00  -R "span[hosts=1]" -n 4   -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc10_river_newtworkGMTED250_mergeEUROASIA.sh.%J.out  -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc10_river_newtworkGMTED250_mergeEUROASIA.sh.%J.err   bash  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc10_river_newtworkGMTED250_mergeEUROASIA.sh

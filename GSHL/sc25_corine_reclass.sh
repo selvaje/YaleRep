@@ -3,14 +3,14 @@
 #SBATCH -J sc25_corine_reclass.sh 
 #SBATCH -n 1 -c 1 -N 1  
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc25_corine_reclass.sh.%J.out  
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc25_corine_reclass.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc25_corine_reclass.sh.%J.out  
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc25_corine_reclass.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 
 # sbatch   /gpfs/home/fas/sbsc/ga254/scripts/GSHL/sc25_corine_reclass.sh 
 
-DIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/g250_clc12_V18_5a
+DIR=/project/fas/sbsc/ga254/dataproces/GSHL/g250_clc12_V18_5a
 
 # gdalwarp -co COMPRESS=DEFLATE -co ZLEVEL=9 -overwrite -s_srs EPSG:3035 -t_srs EPSG:4326  -tr 0.002083333333333 0.002083333333333  $DIR/g250_clc12_V18_5.tif $DIR/g250_clc12_V18_5_wgs84.tif
 

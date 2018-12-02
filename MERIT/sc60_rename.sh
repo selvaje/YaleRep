@@ -1,6 +1,6 @@
 
 
-cd /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/MERIT 
+cd /gpfs/scratch60/fas/sbsc/ga254/dataproces/MERIT 
 
 for TOPO in aspect dx dxx dxy dy dyy pcurv roughness slope tcurv tpi tri vrm cti spi convergence ; do
     for file in $TOPO/tiles/??_???_???.tif ; do

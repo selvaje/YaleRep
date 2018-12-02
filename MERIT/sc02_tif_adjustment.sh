@@ -2,14 +2,14 @@
 #SBATCH -p scavenge
 #SBATCH -n 1 -c 1 -N 1  
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc02a_dem_variables_float_noMult.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc02a_dem_variables_float_noMult.sh.%J.err 
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc02a_dem_variables_float_noMult.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc02a_dem_variables_float_noMult.sh.%J.err 
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 
-# for file in /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/input_tif/n30w090_dem.tif  ; do   sbatch --export=file=$file   /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc02a_dem_variables_float_noMult.sh  ; done 
+# for file in /project/fas/sbsc/ga254/dataproces/MERIT/input_tif/n30w090_dem.tif  ; do   sbatch --export=file=$file   /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc02a_dem_variables_float_noMult.sh  ; done 
 
-MERIT=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT
+MERIT=/project/fas/sbsc/ga254/dataproces/MERIT
 RAM=/dev/shm
 filename=$(basename $file .tif )
 
@@ -17,7 +17,7 @@ echo filename  $filename
 echo file   $file 
 
 # chech for consistence 
-# cd /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/input_tif 
+# cd /project/fas/sbsc/ga254/dataproces/MERIT/input_tif 
 # ls *.tif | xargs -n 1 -P 8 bash -c $' gdalinfo $1 | grep Pixel | awk \'{ gsub ("[(),]"," ") ; print $4  }\'    ' _  | uniq 
 # ls *.tif | xargs -n 1 -P 8 bash -c $' gdalinfo $1 -mm  | grep Comp | awk \'{ gsub ("[=,]"," ") ; print $3  }\'    ' _ | sort -g > /tmp/list_min.txt
 # head -1 /tmp/list_min.txt #   -1127.794
@@ -62,7 +62,7 @@ echo file   $file
 # build up the new tiles sistem 
 # for xn in $(seq 0 35 ) ; do  for yn in $(seq 0 11 ) ; do echo $( expr $xn \* 12000 ) $( expr $yn \* 14500 ) 12000 14500 ; done ; done > $INDIR/../geo_file/tiles_36x12.txt 
 
-# cat /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/geo_file/tiles_36x12.txt  | xargs -n 4  -P 8 bash -c $'  
+# cat /project/fas/sbsc/ga254/dataproces/MERIT/geo_file/tiles_36x12.txt  | xargs -n 4  -P 8 bash -c $'  
 # gdal_translate -of VRT  -srcwin $1 $2 12000 14500  $INDIR/all_tif.vrt $INDIR/../altitude/vrt/tiles_${1}_${2}.vrt 
 # ' _ 
 # gdaltindex $INDIR/../altitude/vrt/merit_tiles.shp  $INDIR/../altitude/vrt/tiles*.vrt 

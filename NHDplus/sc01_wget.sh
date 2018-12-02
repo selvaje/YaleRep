@@ -1,14 +1,14 @@
-# bsub -W 24:00  -n 1  -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc01_wget.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc01_wget.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/NHDplus/sc01_wget.sh
+# bsub -W 24:00  -n 1  -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc01_wget.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc01_wget.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/NHDplus/sc01_wget.sh
 
 # code interpretation 
 # http://nhd.usgs.gov/userGuide/Robohelpfiles/NHD_User_Guide/Feature_Catalog/Hydrography_Dataset/Complete_FCode_List.html 
 # http://nhd.usgs.gov/NHDv2.2_poster_052714.pdf 
-# cd /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/NHD/zip
+# cd /gpfs/scratch60/fas/sbsc/ga254/dataproces/NHD/zip
 # wget ftp://rockyftp.cr.usgs.gov/vdelivery/Datasets/Staged/Hydrography/NHD/State/HighResolution/Shape/NHD_H_*_Shape.zip
 
 # download nhdplus database 
 
-cd /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NHDplus/download 
+cd /project/fas/sbsc/ga254/dataproces/NHDplus/download 
 
 # echo download the shape file 
 

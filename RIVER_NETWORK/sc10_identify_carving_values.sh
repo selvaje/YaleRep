@@ -1,6 +1,6 @@
 
 
-export DIR=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/output/txt/
+export DIR=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/output/txt/
 
 # calibration equations 
 

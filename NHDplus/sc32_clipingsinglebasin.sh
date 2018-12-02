@@ -2,8 +2,8 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 4  -N 1
 #SBATCH -t 4:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc32_clipingsinglebasin.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc32_clipingsinglebasin.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc32_clipingsinglebasin.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc32_clipingsinglebasin.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc32_clipingsinglebasin.sh
@@ -11,8 +11,8 @@
 
 # sbatch /gpfs/home/fas/sbsc/ga254/scripts/NHDplus/sc32_clipingsinglebasin.sh
 
-export DIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NHDplus
-export MERIT=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT
+export DIR=/project/fas/sbsc/ga254/dataproces/NHDplus
+export MERIT=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT
 
 ls $DIR/tif_nasqan_wbd12_NAD83m/b????????_proximity.tif   | xargs -n 1 -P 4 bash -c  $' 
 file=$1

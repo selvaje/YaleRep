@@ -2,8 +2,8 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 1 -N 1  
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc22_broken_basin_clumping.sh.%J.out  
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc22_broken_basin_clumping.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc22_broken_basin_clumping.sh.%J.out  
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc22_broken_basin_clumping.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc22_broken_basin_clumping.sh
@@ -12,19 +12,19 @@
 # sbatch -d afterany:$(qmys | grep sc21_broken_basin_manip.sh  | awk '{ print $1}' | uniq)  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK_MERIT/sc22_broken_basin_clumping.sh
 module load Apps/GRASS/7.3-beta
 
-MERIT=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT
+MERIT=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT
 GRASS=/tmp
 RAM=/dev/shm
 
 
-gdalbuildvrt -overwrite    /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles_brokb_msk1km/all_tif.vrt    /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles_brokb_msk1km/lbasin_h??v??.tif  
+gdalbuildvrt -overwrite    /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles_brokb_msk1km/all_tif.vrt    /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles_brokb_msk1km/lbasin_h??v??.tif  
 
-gdalbuildvrt -overwrite  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles_brokb_msk/all_tif.vrt  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles_brokb_msk/lbasin_h??v??.tif 
-geo_string=$(oft-bb  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles_brokb_msk/all_tif.vrt  1 |  grep "Band 1"  |  awk '{ print $6 , $7 , $8-$6+1 , $9-$7+1  }'  )
+gdalbuildvrt -overwrite  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles_brokb_msk/all_tif.vrt  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles_brokb_msk/lbasin_h??v??.tif 
+geo_string=$(oft-bb  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles_brokb_msk/all_tif.vrt  1 |  grep "Band 1"  |  awk '{ print $6 , $7 , $8-$6+1 , $9-$7+1  }'  )
 gdal_translate -srcwin $geo_string   -a_nodata 0   -co COMPRESS=DEFLATE -co ZLEVEL=9  $MERIT/lbasin_tiles_brokb_msk/all_tif.vrt  $MERIT/lbasin_tiles_brokb_msk/all_tif.tif 
 
-rm  -f     /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles_brokb_msk1km/all_tif_shp.*
-gdaltindex     /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles_brokb_msk1km/all_tif_shp.shp     /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles_brokb_msk1km/lbasin_h??v??.tif  
+rm  -f     /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles_brokb_msk1km/all_tif_shp.*
+gdaltindex     /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles_brokb_msk1km/all_tif_shp.shp     /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles_brokb_msk1km/lbasin_h??v??.tif  
 
 gdal_translate  -a_nodata 0  -co COMPRESS=DEFLATE -co ZLEVEL=9  $MERIT/lbasin_tiles_brokb_msk1km/all_tif.vrt  $MERIT/lbasin_tiles_brokb_msk1km/all_tif.tif 
 

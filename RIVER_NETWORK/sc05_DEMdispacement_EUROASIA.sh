@@ -2,14 +2,14 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 1 -N 1  
 #SBATCH -t 6:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc05_DEMdispacement_EUROASIA.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc05_DEMdispacement_EUROASIA.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc05_DEMdispacement_EUROASIA.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc05_DEMdispacement_EUROASIA.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 
 # sbatch /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc05_DEMdispacement_EUROASIA.sh
 
-DIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/RIVER_NETWORK
+DIR=/project/fas/sbsc/ga254/dataproces/RIVER_NETWORK
 
 # dem displacement 
                 # 

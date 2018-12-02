@@ -1,7 +1,7 @@
 # change trh
-#  for EUROASIA in LEFT CENTER RIGHT ; do bsub  -J sc08_river_newtworkGMTED250_EUROASIA.sh   -W 24:00 -M 70000  -R "rusage[mem=70000]" -n 1  -R "span[hosts=1]"  -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc08_river_newtworkGMTED250_EUROASIA.sh.%J.out  -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc08_river_newtworkGMTED250_EUROASIA.sh.%J.err   -J sc08_river_newtworkGMTED250_EUROASIA.sh   bash  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc08_river_newtworkGMTED250_EUROASIA.sh $EUROASIA 1 ; done 
+#  for EUROASIA in LEFT CENTER RIGHT ; do bsub  -J sc08_river_newtworkGMTED250_EUROASIA.sh   -W 24:00 -M 70000  -R "rusage[mem=70000]" -n 1  -R "span[hosts=1]"  -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc08_river_newtworkGMTED250_EUROASIA.sh.%J.out  -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc08_river_newtworkGMTED250_EUROASIA.sh.%J.err   -J sc08_river_newtworkGMTED250_EUROASIA.sh   bash  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc08_river_newtworkGMTED250_EUROASIA.sh $EUROASIA 1 ; done 
 
-#  grep -B 5  G_malloc /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc08_river_newtworkGMTED250.sh.*.err  /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc08_river_newtworkGMTED250_EUROASIA.sh.*.err
+#  grep -B 5  G_malloc /gpfs/scratch60/fas/sbsc/ga254/stderr/sc08_river_newtworkGMTED250.sh.*.err  /gpfs/scratch60/fas/sbsc/ga254/stderr/sc08_river_newtworkGMTED250_EUROASIA.sh.*.err
 
 # this should be the maximum with the ram
 # expr 2000000000 / 1000000 \* 31    = 62000 MB   ##  60 GIGA, so asking always 70
@@ -25,7 +25,7 @@ TRH=$2
 
 # euroasia camptacha data preparation 
 
-DIR=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK
+DIR=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK
 
 source  /gpfs/home/fas/sbsc/ga254/scripts/general/enter_grass7.0.2.sh $DIR/grassdb/loc_river_EUROASIA/PERMANENT  
 

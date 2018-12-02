@@ -1,4 +1,4 @@
-# bsub -W 10:00 -n 1 -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc02_compunit.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc02_compunit.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc02_compunit.sh
+# bsub -W 10:00 -n 1 -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc02_compunit.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc02_compunit.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc02_compunit.sh
 
 # 1 kg di farena
 # 300 lievito madre
@@ -7,7 +7,7 @@
 # 250 olio 
 # impastare con il vino 
 
-export DIR=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/GSHHG
+export DIR=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/GSHHG
 RAM=/dev/shm/
 
 # use this as main mask data 
@@ -34,7 +34,7 @@ rm -f /tmp/hist.txt
 
 # africa 
 # rm  -f  $DIR/../shp/suez.*
-# ogr2ogr  -clipsrc 31 27 36 32  $DIR/../shp/suez.shp  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/GSHHG/version2.3.6/GSHHS_shp/f/GSHHS_f_L1.shp 
+# ogr2ogr  -clipsrc 31 27 36 32  $DIR/../shp/suez.shp  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/GSHHG/version2.3.6/GSHHS_shp/f/GSHHS_f_L1.shp 
 # create the africa.shp in qgis 
 
 # gdal_rasterize -ot Byte -te -180 -60 +180 +84 -tr 0.002083333333333333 0.002083333333333333 -co COMPRESS=DEFLATE -co ZLEVEL=9   -burn 1 -l "africa"   $DIR/../shp/africa.shp     $DIR/../shp/africa.tif   
@@ -56,7 +56,7 @@ rm -f   $DIR/SUMafricaeuroasia.tif   $DIR/SUMafricaeuroasia_ct.tif  $DIR/africa_
 
 # euroasia 
 rm -f  $DIR/../shp/panama.* 
-ogr2ogr -clipsrc   -82 +5  -73 13    $DIR/../shp/panama.shp   /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/GSHHG/version2.3.6/GSHHS_shp/f/GSHHS_f_L1.shp 
+ogr2ogr -clipsrc   -82 +5  -73 13    $DIR/../shp/panama.shp   /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/GSHHG/version2.3.6/GSHHS_shp/f/GSHHS_f_L1.shp 
 # create the africa.shp in qgis 
 
 # gdal_rasterize -ot Byte -te -180 -60 +180 +84 -tr 0.002083333333333333 0.002083333333333333 -co COMPRESS=DEFLATE -co ZLEVEL=9   -burn 1 -l "southamerica"   $DIR/../shp/southamerica.shp     $DIR/../shp/southamerica.tif   
@@ -86,6 +86,6 @@ pkstat --hist -i  $DIR/GSHHS_land_mask250m_enlarge_clumpMSKclump_UNIT.tif   | gr
 sort -k 2,2 -g    $DIR/GSHHS_land_mask250m_enlarge_clumpMSKclump_UNIT.txt   >     $DIR/GSHHS_land_mask250m_enlarge_clumpMSKclump_UNIT_s.txt 
 
 # far partire il seguente dopo aver controllato i valori di captacha e altre isole 
-bsub -W 24:00 -n 1 -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc03_compunit.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc03_compunit.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc03_compunit.sh
+bsub -W 24:00 -n 1 -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc03_compunit.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc03_compunit.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc03_compunit.sh
 
 

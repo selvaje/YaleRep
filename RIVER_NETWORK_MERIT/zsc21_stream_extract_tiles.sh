@@ -4,8 +4,8 @@
 #SBATCH -t 24:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
-#SBATCH -e  /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc21_stream_extract_tiles.sh.%A_%a.err
-#SBATCH -o  /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc21_stream_extract_tiles.sh.%A_%a.out  
+#SBATCH -e  /gpfs/scratch60/fas/sbsc/ga254/stderr/sc21_stream_extract_tiles.sh.%A_%a.err
+#SBATCH -o  /gpfs/scratch60/fas/sbsc/ga254/stdout/sc21_stream_extract_tiles.sh.%A_%a.out  
 #SBATCH --mem-per-cpu=15000
 #SBATCH --array=1-1
 
@@ -15,18 +15,18 @@
 # Upper Right ( 180.0000000,  85.0000000) (180d 0' 0.00"E, 85d 0' 0.00"N)
 # Lower Right ( 180.0000000, -60.0000000) (180d 0' 0.00"E, 60d 0' 0.00"S)
 
-# awk '{ if ($5 <= 90 && $7 >= -60 )  print }' /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GEO_AREA/tile_files/tile_lat_long_10d.txt  | xargs -n 13 -P 1  bash -c $' tile=$1 ; w=$4 ; n=$5 ; e=$6 ; s=$7 ; sbatch  --export=tile=$tile,n=$n,s=$s,e=$e,w=$w   /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK_MERIT/sc21_stream_extract_tiles.sh ' _ 
+# awk '{ if ($5 <= 90 && $7 >= -60 )  print }' /project/fas/sbsc/ga254/dataproces/GEO_AREA/tile_files/tile_lat_long_10d.txt  | xargs -n 13 -P 1  bash -c $' tile=$1 ; w=$4 ; n=$5 ; e=$6 ; s=$7 ; sbatch  --export=tile=$tile,n=$n,s=$s,e=$e,w=$w   /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK_MERIT/sc21_stream_extract_tiles.sh ' _ 
 
-export tile=$( awk -v AR=$SLURM_ARRAY_TASK_ID '{ if(NR==AR) { gsub("_dem.tif","") ;   print $1 } }'  /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/input_tif/tiles_corners.txt )
-export w=$( awk -v AR=$SLURM_ARRAY_TASK_ID    '{ if(NR==AR)  print int($2)  }'  /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/input_tif/tiles_corners.txt )
-export n=$( awk -v AR=$SLURM_ARRAY_TASK_ID    '{ if(NR==AR)  print int($3)  }'  /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/input_tif/tiles_corners.txt )
-export e=$( awk -v AR=$SLURM_ARRAY_TASK_ID    '{ if(NR==AR)  print int($4)  }'  /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/input_tif/tiles_corners.txt )
-export s=$( awk -v AR=$SLURM_ARRAY_TASK_ID    '{ if(NR==AR)  print int($5)  }'  /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/input_tif/tiles_corners.txt )
+export tile=$( awk -v AR=$SLURM_ARRAY_TASK_ID '{ if(NR==AR) { gsub("_dem.tif","") ;   print $1 } }'  /project/fas/sbsc/ga254/dataproces/MERIT/input_tif/tiles_corners.txt )
+export w=$( awk -v AR=$SLURM_ARRAY_TASK_ID    '{ if(NR==AR)  print int($2)  }'  /project/fas/sbsc/ga254/dataproces/MERIT/input_tif/tiles_corners.txt )
+export n=$( awk -v AR=$SLURM_ARRAY_TASK_ID    '{ if(NR==AR)  print int($3)  }'  /project/fas/sbsc/ga254/dataproces/MERIT/input_tif/tiles_corners.txt )
+export e=$( awk -v AR=$SLURM_ARRAY_TASK_ID    '{ if(NR==AR)  print int($4)  }'  /project/fas/sbsc/ga254/dataproces/MERIT/input_tif/tiles_corners.txt )
+export s=$( awk -v AR=$SLURM_ARRAY_TASK_ID    '{ if(NR==AR)  print int($5)  }'  /project/fas/sbsc/ga254/dataproces/MERIT/input_tif/tiles_corners.txt )
 
 echo tile n=$n s=$s w=$w e=$e 
 
-export GRASS=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/grassdb
-export DIRP=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/RIVER_NETWORK_MERIT
+export GRASS=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/grassdb
+export DIRP=/project/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT
 
 source  /gpfs/home/fas/sbsc/ga254/scripts/general/enter_grass7.0.2-grace2.sh  $GRASS/loc_MERIT_ALL/PERMANENT
 
@@ -56,7 +56,7 @@ g.region n=$nL s=$sL e=$eL w=$wL save=enlarge --o
 r.stream.extract elevation=elv  accumulation=upa threshold=5 depression=dep                direction=dir_$tile   stream_raster=stream_$tile memory=14000 --o --verbose 
 /gpfs/home/fas/sbsc/ga254/.grass7/addons/bin/r.stream.basins -l  stream_rast=stream_$tile  direction=dir_$tile   basins=lbasin_$tile   memory=14000 --o --verbose 
 
-r.out.gdal --overwrite -c  createopt="COMPRESS=DEFLATE,ZLEVEL=9" type=Int32 format=GTiff nodata=0  input=lbasin_${tile}  output=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles_full/lbasin_$tile.tif  
+r.out.gdal --overwrite -c  createopt="COMPRESS=DEFLATE,ZLEVEL=9" type=Int32 format=GTiff nodata=0  input=lbasin_${tile}  output=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles_full/lbasin_$tile.tif  
 
 echo left stripe 
 eS=$(g.region -m  | grep e= | awk -F "=" '{ print $2   }' )
@@ -107,9 +107,9 @@ g.remove -f  type=raster name=lbasin_${tile}_rec,lbasin_${tile}_estripe,lbasin_$
 
 r.mask raster=lbasin_${tile}_clean --o
 
-r.out.gdal --overwrite -c  createopt="COMPRESS=DEFLATE,ZLEVEL=9" type=Int32 format=GTiff nodata=0  input=stream_${tile}  output=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/stream_tiles/stream_$tile.tif 
-r.out.gdal --overwrite -c  createopt="COMPRESS=DEFLATE,ZLEVEL=9" type=Int32 format=GTiff nodata=0  input=lbasin_${tile}  output=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles/lbasin_$tile.tif  
-rm -f /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles/lbasin_$tile.tif.aux.xml 
+r.out.gdal --overwrite -c  createopt="COMPRESS=DEFLATE,ZLEVEL=9" type=Int32 format=GTiff nodata=0  input=stream_${tile}  output=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/stream_tiles/stream_$tile.tif 
+r.out.gdal --overwrite -c  createopt="COMPRESS=DEFLATE,ZLEVEL=9" type=Int32 format=GTiff nodata=0  input=lbasin_${tile}  output=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles/lbasin_$tile.tif  
+rm -f /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/lbasin_tiles/lbasin_$tile.tif.aux.xml 
 exit 
 
 

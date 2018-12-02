@@ -1,5 +1,5 @@
 # https://ragrawal.wordpress.com/2011/05/16/visualizing-confusion-matrix-in-r/
-cd /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces
+cd /gpfs/loomis/project/fas/sbsc/ga254/dataproces
 
 
 tile=NA_078_036
@@ -124,7 +124,7 @@ ggcorrplot2 = function (corr, method = c("square", "circle"), type = c("full",
 
 table = read.table("/dev/shm/geom_NED_MERIT.txt")
 
-pdf("/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NED_MERIT/figure/confusion_plots_ggcorr.pdf" , width=11.5, height=10   )
+pdf("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NED_MERIT/figure/confusion_plots_ggcorr.pdf" , width=11.5, height=10   )
 
 
 

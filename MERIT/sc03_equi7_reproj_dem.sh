@@ -2,18 +2,18 @@
 #SBATCH -p scavenge
 #SBATCH -n 1 -c 12  -N 1  
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc03_equi7_reproj_dem.sh.%J.out 
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc03_equi7_reproj_dem.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc03_equi7_reproj_dem.sh.%J.out 
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc03_equi7_reproj_dem.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc03_equi7_reproj_dem.sh
 
 # for CT in EU AF AN AS NA OC SA ; do   sbatch --export=CT=$CT  /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc03_equi7_reproj_dem.sh ; done 
 
-export   DIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT
-export INDIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/input_tif
-export EQUI7=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/EQUI7
-export equi7=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT/equi7/dem
+export   DIR=/project/fas/sbsc/ga254/dataproces/MERIT
+export INDIR=/project/fas/sbsc/ga254/dataproces/MERIT/input_tif
+export EQUI7=/project/fas/sbsc/ga254/dataproces/EQUI7
+export equi7=/project/fas/sbsc/ga254/dataproces/MERIT/equi7/dem
 export KM=0.10
 # file in  $EQUI7  from   https://github.com/TUW-GEO/Equi7Grid/tree/master/equi7grid/grids 
 

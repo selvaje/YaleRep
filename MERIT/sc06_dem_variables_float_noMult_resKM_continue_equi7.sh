@@ -5,8 +5,8 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --mem-per-cpu=2000
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc06_dem_variables_float_noMult_resKM_continue_equi7.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc06_dem_variables_float_noMult_resKM_continue_equi7.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc06_dem_variables_float_noMult_resKM_continue_equi7.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc06_dem_variables_float_noMult_resKM_continue_equi7.sh.%J.err
 
 # for TOPO in deviation multirough  altitude  aspect stdev dx dxx dxy dy dyy pcurv roughness slope  tcurv  tpi  tri vrm tci spi convergence intensity exposition range variance elongation azimuth extend width  ; do  for MATH in min max mean median stdev ; do for  KM in 1 5 10  ; do  sbatch  --export=TOPO=$TOPO,MATH=$MATH,KM=$KM /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc06_dem_variables_float_noMult_resKM_continue_equi7.sh ; done ; done ; done
 
@@ -22,8 +22,8 @@ echo "############################################################"
 sacct  -j   $SLURM_JOB_ID  --format=jobid,MaxVMSize,start,end,CPUTImeRaw,NodeList,ReqCPUS,ReqMem,Elapsed,Timelimit 
 echo "############################################################"
 
-export MERIT=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT
-export SCRATCH=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/MERIT
+export MERIT=/project/fas/sbsc/ga254/dataproces/MERIT
+export SCRATCH=/gpfs/scratch60/fas/sbsc/ga254/dataproces/MERIT
 export RAM=/dev/shm
 
 export TOPO

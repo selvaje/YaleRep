@@ -2,20 +2,20 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 8 -N 1  
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc30_data_prep4arrow_plot.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc30_data_prep4arrow_plot.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc30_data_prep4arrow_plot.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc30_data_prep4arrow_plot.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH -J sc30_data_prep4arrow_plot.sh
 
 # sbatch  /gpfs/home/fas/sbsc/ga254/scripts/GSHL/sc30_data_prep4arrow_plot.sh
 
-export    FIN=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/final_product_1k
-export    BINCLUMP=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_bin_clump_reclass 
-export    BIN=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_bin
-export    TAB=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_ws_bin_table 
-export    LST=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_lst_ws_bin
-export    LST_MAX=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/LST_max/
+export    FIN=/project/fas/sbsc/ga254/dataproces/GSHL/final_product_1k
+export    BINCLUMP=/project/fas/sbsc/ga254/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_bin_clump_reclass 
+export    BIN=/project/fas/sbsc/ga254/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_bin
+export    TAB=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_ws_bin_table 
+export    LST=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_lst_ws_bin
+export    LST_MAX=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/GSHL/LST_max/
 export    RAM=/dev/shm/
 
 # london bin7 id 1614 

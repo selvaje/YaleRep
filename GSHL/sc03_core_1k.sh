@@ -1,10 +1,10 @@
 # bash   /gpfs/home/fas/sbsc/ga254/scripts/GSHL/sc02_core.sh
-# bsub -W 24:00 -n 8 -R "span[hosts=1]" -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc02_core_1k_250.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc02_core_1k_250.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/GSHL/sc02_core_1k_250.sh 1k
+# bsub -W 24:00 -n 8 -R "span[hosts=1]" -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc02_core_1k_250.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc02_core_1k_250.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/GSHL/sc02_core_1k_250.sh 1k
 # in caso di rerun su slurm correggere anche il 1km
 
 export RES=$1
 
-export DIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_${RES}_v1_0_bin
+export DIR=/project/fas/sbsc/ga254/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_${RES}_v1_0_bin
 
 pkcreatect -min 0 -max 1 > /tmp/color.txt 
 pkcreatect -co COMPRESS=DEFLATE -co ZLEVEL=9 -ot Byte  -nodata -1 -min 0 -max 1  -i  $DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_${RES}_v1_0_WGS84_bin9.tif   -o  $DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_${RES}_v1_0_WGS84_bin9_clean.tif
@@ -102,4 +102,4 @@ exit
 
 rm -rf    $DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_${RES}_v1_0_WGS84_core_clump_random_color.txt 
 
-#  bsub  -W 2:00  -M 50000  -R "rusage[mem=50000]"  -n 1  -R "span[hosts=1]"  -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc03_cost_1k_250.sh.sh.%J.out  -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc03_cost_1k_250.sh.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/GSHL/sc03_cost_1k_250.sh  1k
+#  bsub  -W 2:00  -M 50000  -R "rusage[mem=50000]"  -n 1  -R "span[hosts=1]"  -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc03_cost_1k_250.sh.sh.%J.out  -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc03_cost_1k_250.sh.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/GSHL/sc03_cost_1k_250.sh  1k

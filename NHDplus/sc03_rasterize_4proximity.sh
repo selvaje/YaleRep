@@ -2,8 +2,8 @@
 #SBATCH -p scavenge
 #SBATCH -n 1 -c 4  -N 1
 #SBATCH -t 3:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc03_rasterize_4proximity.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc03_rasterize_4proximity.sh.%J.out
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc03_rasterize_4proximity.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc03_rasterize_4proximity.sh.%J.out
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc03_rasterize_4proximity.sh
@@ -29,7 +29,7 @@
 
 # http://projectionwizard.org/ good tools to select projection 
 
-export DIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/NHDplus
+export DIR=/project/fas/sbsc/ga254/dataproces/NHDplus
 
 echo rasteri the full network 
 rm -f $DIR/tmp/select.*  $DIR/tif/*.tif  $DIR/shp_nad83m/* 

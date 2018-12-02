@@ -1,4 +1,4 @@
-# bsub -W 24:00 -M 30000 -R "rusage[mem=30000]" -R "span[hosts=1]" -n 10  -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc01_occurence_resampling.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc01_occurence_resampling.sh.%J.err   bash  /gpfs/home/fas/sbsc/ga254/scripts/GSW/sc01_occurence_resampling.sh
+# bsub -W 24:00 -M 30000 -R "rusage[mem=30000]" -R "span[hosts=1]" -n 10  -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc01_occurence_resampling.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc01_occurence_resampling.sh.%J.err   bash  /gpfs/home/fas/sbsc/ga254/scripts/GSW/sc01_occurence_resampling.sh
 
 
 # Size is 40000, 40000
@@ -8,7 +8,7 @@
 #   0.002083333333333 / 8 =   0.000260417  # this allow the aggregation at 8 * 8 and rich the 250 
 # 504 file 
 
-export OCC=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/GSW/input/occurrence
+export OCC=/gpfs/scratch60/fas/sbsc/ga254/dataproces/GSW/input/occurrence
 export RAM=/dev/shm
 
 cleanram 

@@ -4,8 +4,8 @@
 #SBATCH -t 24:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc30_equi7_distortion_assment.sh .%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc30_equi7_distortion_assment.sh .%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc30_equi7_distortion_assment.sh .%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc30_equi7_distortion_assment.sh .%J.err
 #SBATCH --mem-per-cpu=2000
 
 
@@ -18,9 +18,9 @@ sacct  -j   $SLURM_JOB_ID  --format=jobid,MaxVMSize,start,end,CPUTImeRaw,NodeLis
 echo "############################################################"
 
 
-export MERIT=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MERIT
-export SCRATCH=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/MERIT
-export EQUI7=/gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/EQUI7/grids
+export MERIT=/project/fas/sbsc/ga254/dataproces/MERIT
+export SCRATCH=/gpfs/scratch60/fas/sbsc/ga254/dataproces/MERIT
+export EQUI7=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/EQUI7/grids
 export RAM=/dev/shm
 
 

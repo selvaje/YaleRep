@@ -3,8 +3,8 @@
 #SBATCH -J sc01_Nemision_cdo.sh
 #SBATCH -n 1 -c 8 -N 1  
 #SBATCH -t 24:00:00  
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc01_Nemision_cdo.sh.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc01_Nemision_cdo.sh.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc01_Nemision_cdo.sh.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc01_Nemision_cdo.sh.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --mem-per-cpu=5000
@@ -12,7 +12,7 @@
 # sbatch  /gpfs/home/fas/sbsc/ga254/scripts/NP/sc01_Nemision_cdo.sh
 
 module load Tools/CDO/1.7.2
-export DIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/FLO1K
+export DIR=/project/fas/sbsc/ga254/dataproces/FLO1K
 
 # script piu lungo di 24 ore ..
 # cdo -z zip_9  -P 8 timmax   $DIR/FLO1K.ts.1960.2015.qma.nc   $DIR/FLO1K.ts.1960.2015.qma_maxCDO.nc

@@ -1,7 +1,7 @@
 
 
 
-# files in /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/HYDROSHEDS/shp30ses
+# files in /gpfs/loomis/project/fas/sbsc/ga254/dataproces/HYDROSHEDS/shp30ses
 # on my machine 
 # 
 
@@ -10,7 +10,7 @@ for file in *.shp ; do  ogr2ogr -t_srs 6965.prj   reprj_$file $file ; done
 for file in reprj_*.shp ; do n=$(basename $file .shp ) ; ogr2ogr  -dialect SQLite -sql "SELECT *, ST_Length(Geometry)  AS  LENGTH  FROM $n "  len_$file $file ; done
 for file in len_reprj_*.shp ; do n=$(basename $file .shp ) ; ogr2ogr -t_srs EPSG:4326   wgs84_$file $file ; done
 
-# recopy  on /gpfs/loomis/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/HYDROSHEDS/shp30ses_lengt
+# recopy  on /gpfs/loomis/project/fas/sbsc/ga254/dataproces/HYDROSHEDS/shp30ses_lengt
 
 
 # calculate the averall length 

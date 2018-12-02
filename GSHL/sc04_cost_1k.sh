@@ -3,18 +3,18 @@
 #SBATCH -J sc03_cost_1k.sh
 #SBATCH -n 1 -c 1 -N 1  
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc03_cost_1k.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc03_cost_1k.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc03_cost_1k.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc03_cost_1k.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 
 #  sbatch   --mem-per-cpu=50000  /gpfs/home/fas/sbsc/ga254/scripts/GSHL/sc03_cost_1k.sh
 
-export DIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_watershad
+export DIR=/project/fas/sbsc/ga254/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_watershad
 
-rm -rf /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/GSHL/grassdb/cost1k
+rm -rf /gpfs/scratch60/fas/sbsc/ga254/dataproces/GSHL/grassdb/cost1k
 gdal_edit.py -a_nodata 0  $DIR/../GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_bin/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_core.tif 
-source /gpfs/home/fas/sbsc/ga254/scripts/general/create_location_grass7.0.2-grace2.sh  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/GSHL/grassdb/ cost1k  $DIR/../GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_bin/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_core.tif
+source /gpfs/home/fas/sbsc/ga254/scripts/general/create_location_grass7.0.2-grace2.sh  /gpfs/scratch60/fas/sbsc/ga254/dataproces/GSHL/grassdb/ cost1k  $DIR/../GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_bin/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_core.tif
 
 # source /gpfs/home/fas/sbsc/ga254/scripts/general/enter_grass7.0.2-grace2.sh   $DIR/grassdb/cost/PERMANENT 
 
@@ -34,7 +34,7 @@ r.colors  -r map=impervius_cost
 
 r.out.gdal --overwrite nodata=-1 -c -f createopt="COMPRESS=DEFLATE,ZLEVEL=9" type=Float32 format=GTiff  input=impervius_cost  output=$DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_cost.tif
 
-# rm -rf  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/GSHL/grassdb/cost1k
+# rm -rf  /gpfs/scratch60/fas/sbsc/ga254/dataproces/GSHL/grassdb/cost1k
 
 sbatch  --mem-per-cpu=50000  /gpfs/home/fas/sbsc/ga254/scripts/GSHL/sc04_watershed_1k.sh 
 

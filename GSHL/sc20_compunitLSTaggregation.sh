@@ -3,16 +3,16 @@
 #SBATCH -J sc20_compunitLSTaggregation.sh
 #SBATCH -n 1 -c 1 -N 1  
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc20_compunitLSTaggregation.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc20_compunitLSTaggregation.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc20_compunitLSTaggregation.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc20_compunitLSTaggregation.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 
 # sbatch /gpfs/home/fas/sbsc/ga254/scripts/GSHL/sc20_compunitLSTaggregation.sh
 
-LST=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/MYOD11A2_celsiusmean
-INDIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_watershad
-OUTDIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_lst
+LST=/project/fas/sbsc/ga254/dataproces/MYOD11A2_celsiusmean
+INDIR=/project/fas/sbsc/ga254/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_watershad
+OUTDIR=/project/fas/sbsc/ga254/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_lst
 RAM=/dev/shm
 
 gdal_translate  -projwin  $(getCorners4Gtranslate $INDIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump_msk_clump_bin.tif) $LST/LST_MOYDmax_Day_spline_month7.tif $RAM/LST_MOYDmax_Day_spline_month7.tif

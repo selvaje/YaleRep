@@ -1,4 +1,4 @@
-# bsub  -q week  -W 48:00  -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc04_build_dem_location_GLOBE.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc04_build_dem_location_GLOBE.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc04_build_dem_location_GLOBE.sh 
+# bsub  -q week  -W 48:00  -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc04_build_dem_location_GLOBE.sh.%J.out -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc04_build_dem_location_GLOBE.sh.%J.err bash /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc04_build_dem_location_GLOBE.sh 
 
 # new one 
 # 497 5656337      ?
@@ -17,29 +17,29 @@
 # 3562 1519030245  EUROASIA 
 # 3767 8275779607  sea 
 
-cd /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb 
-export DIR=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK
+cd /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb 
+export DIR=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK
 
 ####  comment rm for securit   
-#### rm -rf   /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_GLOBE
-#### source /gpfs/home/fas/sbsc/ga254/scripts/general/create_location_grass7.0.2.sh  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb loc_river_fill_GLOBE  /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/dem/be75_grd_LandEnlarge.tif 
+#### rm -rf   /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_GLOBE
+#### source /gpfs/home/fas/sbsc/ga254/scripts/general/create_location_grass7.0.2.sh  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb loc_river_fill_GLOBE  /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/dem/be75_grd_LandEnlarge.tif 
 
-rm -f   /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_GLOBE/PERMANENT/.gislock
-source  /gpfs/home/fas/sbsc/ga254/scripts/general/enter_grass7.0.2.sh   /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_GLOBE/PERMANENT 
-rm -f   /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_GLOBE/PERMANENT/.gislock
+rm -f   /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_GLOBE/PERMANENT/.gislock
+source  /gpfs/home/fas/sbsc/ga254/scripts/general/enter_grass7.0.2.sh   /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_GLOBE/PERMANENT 
+rm -f   /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/loc_river_fill_GLOBE/PERMANENT/.gislock
 
 ## g.region n=-11.9395833333333 s=-25.6145833333333 w=43.2125 e=50.5020833333333  
 g.rename raster=be75_grd_LandEnlarge,be75_grd_LandEnlarge_GLOBE
 
 # # 100 water ; 0 land ; 255 no data > transformed to 0 
-gdal_edit.py  -a_nodata  -1   /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/GSW/input/occurrence_250m.tif 
-r.in.gdal in=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/GSW/input/occurrence_250m.tif  out=occurrence_250m_GLOBE  memory=2047  --overwrite
+gdal_edit.py  -a_nodata  -1   /gpfs/scratch60/fas/sbsc/ga254/dataproces/GSW/input/occurrence_250m.tif 
+r.in.gdal in=/gpfs/scratch60/fas/sbsc/ga254/dataproces/GSW/input/occurrence_250m.tif  out=occurrence_250m_GLOBE  memory=2047  --overwrite
 
 for UNIT in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 1145 154 2597 3005 3317 3629 3753 4000 4001 573 810   ; do 
-r.in.gdal in=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/RIVER_NETWORK/unit/UNIT${UNIT}msk.tif     out=UNIT$UNIT   --overwrite  
+r.in.gdal in=/project/fas/sbsc/ga254/dataproces/RIVER_NETWORK/unit/UNIT${UNIT}msk.tif     out=UNIT$UNIT   --overwrite  
 done 
 
-r.in.gdal in=/gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/RIVER_NETWORK/GSHHG/GSHHS_land_mask250m_enlarge_clumpMSKclump_UNIT_noeuroasia.tif   out=UNIT_noeuroasia   --overwrite  
+r.in.gdal in=/gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/GSHHG/GSHHS_land_mask250m_enlarge_clumpMSKclump_UNIT_noeuroasia.tif   out=UNIT_noeuroasia   --overwrite  
 
 # # compute standard deviation 
 

@@ -3,8 +3,8 @@
 #SBATCH -J sc03_watershed_1k.sh
 #SBATCH -n 1 -c 1 -N 1  
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc05_watershed_1k.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc05_watershed_1k.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc05_watershed_1k.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc05_watershed_1k.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 
@@ -56,8 +56,8 @@ exit
 # rm -f $DIR/watershed_poly_nogeo.tif  
 
 # # fatti correre solo  una  volta 
-# # pkfilter  -co COMPRESS=DEFLATE -co ZLEVEL=9  -dx 4 -dy 4 -d 4 -f mode   -i /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHHG/GSHHS_land_mask250m_enlarge_clumpMSKclump_UNIT.tif  -o    $DIR/GSHHS_land_mask250m_enlarge_clumpMSKclump_UNIT.tif  
-# # cp   /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHHG/GSHHS_land_mask250m_enlarge_clumpMSKclump_UNIT.tif  /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_250_v1_0_watershad 
+# # pkfilter  -co COMPRESS=DEFLATE -co ZLEVEL=9  -dx 4 -dy 4 -d 4 -f mode   -i /project/fas/sbsc/ga254/dataproces/GSHHG/GSHHS_land_mask250m_enlarge_clumpMSKclump_UNIT.tif  -o    $DIR/GSHHS_land_mask250m_enlarge_clumpMSKclump_UNIT.tif  
+# # cp   /project/fas/sbsc/ga254/dataproces/GSHHG/GSHHS_land_mask250m_enlarge_clumpMSKclump_UNIT.tif  /project/fas/sbsc/ga254/dataproces/GSHL/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_250_v1_0_watershad 
 
 # pksetmask -co COMPRESS=DEFLATE -co ZLEVEL=9  -m $DIR/GSHHS_land_mask250m_enlarge_clumpMSKclump_UNIT.tif  -msknodata 3767 -nodata 0 -i $DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump.tif  -o $DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump_msk.tif 
 
@@ -67,16 +67,16 @@ exit
 # gdal_translate  -a_nodata 0   -co COMPRESS=DEFLATE -co ZLEVEL=9  -projwin  -180 80 180 -60    $DIR/GSHHS_land_mask250m_enlarge_clumpMSKclump_UNIT4ws_tmp.tif  $DIR/GSHHS_land_mask250m_enlarge_clumpMSKclump_UNIT4ws.tif 
 # rm  $DIR/GSHHS_land_mask250m_enlarge_clumpMSKclump_UNIT4ws_tmp.tif  
 
-source /gpfs/home/fas/sbsc/ga254/scripts/general/create_location_grass7.3-grace2.sh /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/GSHL/grassdb/ cost1k_clump  $DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump_msk.tif    r.in.gdal 
+source /gpfs/home/fas/sbsc/ga254/scripts/general/create_location_grass7.3-grace2.sh /gpfs/scratch60/fas/sbsc/ga254/dataproces/GSHL/grassdb/ cost1k_clump  $DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump_msk.tif    r.in.gdal 
 
 r.clump -d  --overwrite    input=GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump_msk      output=GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump_msk_clump
 r.out.gdal --overwrite nodata=0 -c -f createopt="COMPRESS=DEFLATE,ZLEVEL=9" type=UInt32 format=GTiff input=GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump_msk_clump  output=$DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump_msk_clump.tif 
 
-rm -fr /gpfs/scratch60/fas/sbsc/ga254/grace0/dataproces/GSHL/grassdb/cost1k_clump  $DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump_msk_clump.tif.aux.xml 
+rm -fr /gpfs/scratch60/fas/sbsc/ga254/dataproces/GSHL/grassdb/cost1k_clump  $DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump_msk_clump.tif.aux.xml 
 
 cp $DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump_msk_clump.tif  $DIR/../final_product_1k/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump.tif
 
-DIR=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GSHL/final_product_1k
+DIR=/project/fas/sbsc/ga254/dataproces/GSHL/final_product_1k
 bash /gpfs/home/fas/sbsc/ga254/scripts/general/createct_random.sh  $DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump.tif  $DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump.txt 
 awk '{ if(NR==1 ) {print  0, 0, 0, 0, 255 } else {print $0} }' $DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump.txt > $DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump0.txt 
 gdaldem color-relief -co COMPRESS=DEFLATE -co ZLEVEL=9  $DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump.tif $DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump0.txt $DIR/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_ws_clump_ct.tif

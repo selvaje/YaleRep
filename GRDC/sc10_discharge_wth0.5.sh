@@ -2,8 +2,8 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 8 -N 1
 #SBATCH -t 24:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/grace0/stdout/sc10_discharge_wth0.5.sh.%J.out 
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/grace0/stderr/sc10_discharge_wth0.5.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc10_discharge_wth0.5.sh.%J.out 
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc10_discharge_wth0.5.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc10_discharge_wth0.5.sh
@@ -14,10 +14,10 @@
 # find  /tmp/     -user $USER   2>/dev/null  | xargs -n 1 -P 1 rm -ifr  
 # find  /dev/shm  -user $USER   2>/dev/null  | xargs -n 1 -P 1 rm -ifr  
 
-export GRDC=/project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/GRDC 
+export GRDC=/project/fas/sbsc/ga254/dataproces/GRDC 
 export RAM=/dev/shm
 
-ls /project/fas/sbsc/ga254/grace0.grace.hpc.yale.internal/dataproces/RIVER_NETWORK_MERIT/wth/*_wth.tif   | xargs -n 1 -P 8 bash -c $' 
+ls /project/fas/sbsc/ga254/dataproces/RIVER_NETWORK_MERIT/wth/*_wth.tif   | xargs -n 1 -P 8 bash -c $' 
 file=$1
 filename=$(basename $file .tif  )
 pkfilter -nodata -9999 -nodata 0  -nodata -1   -co COMPRESS=DEFLATE -co ZLEVEL=9 -ot Float32  -dx 600 -dy 600 -d 600  -f mean -i $file -o   $RAM/$filename.tif
