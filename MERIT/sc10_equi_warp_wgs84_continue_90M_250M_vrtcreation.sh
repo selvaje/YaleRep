@@ -22,7 +22,6 @@ sacct  -j   $SLURM_JOB_ID  --format=jobid,MaxVMSize,start,end,CPUTImeRaw,NodeLis
 echo "############################################################"
 
 
-
 P=$SLURM_CPUS_PER_TASK
 export MERIT=/project/fas/sbsc/ga254/dataproces/MERIT
 export SCRATCH=/gpfs/scratch60/fas/sbsc/ga254/dataproces/MERIT
@@ -59,7 +58,7 @@ if [  $TOPO = geom ] ; then OT=Byte       ;  MULT=1 ; NODATA=0  ;  SCALE=1 ;  fi
 # UInt16      0      65,535 
 if [  $TOPO =  aspect ] ; then OT=UInt16    ;  MULT=100    ; NODATA=65535   ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi       #  -min 0           -max 360        OK
 if [  $TOPO =  spi    ] ; then OT=UInt16    ;  MULT=0.1    ; NODATA=65535   ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi       #  -min 9.76709e-06 -max 565981     OK
-if [  $TOPO =  vrm ]    ; then OT=UInt16     ; MULT=100000 ; NODATA=65535   ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi       #  -min -2.97452e-08 -max 0.516682  OK
+if [  $TOPO =  vrm ]    ; then OT=UInt16    ; MULT=100000  ; NODATA=65535   ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi       #  -min -2.97452e-08 -max 0.516682  OK
 
 # Int16    -32,768   32,767 
 if [  $TOPO =  aspect-cosine ]    ; then OT=Int16 ; MULT=10000 ; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min -1           -max 1         OK
@@ -86,14 +85,14 @@ if [  $TOPO =  tpi ]              ; then OT=Int16 ; MULT=10    ; NODATA=-32768  
 if [  $TOPO =  tri ]              ; then OT=Int16 ; MULT=10    ; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min 0            -max 1076.05   OK
 
 
-oft-calc -ot $OT -um $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_msk.tif $MERIT/final250m/${TOPO}_250Mbilinear_MERIT.tif $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT.tif <<EOF
-1
-#1 $MULT *
-EOF
+# oft-calc -ot $OT -um $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_msk.tif $MERIT/final250m/${TOPO}_250Mbilinear_MERIT.tif $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT.tif <<EOF
+# 1
+# #1 $MULT *
+# EOF
 
 pksetmask -ot  $OT -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -co BIGTIFF=YES -m $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_msk.tif -msknodata 0  -nodata $NODATA -i  $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT.tif -o $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_int.tif  
 
-# pkinfo -nodata $NODATA   -mm -i $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_int.tif > $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_int_mm.txt 
+pkinfo -nodata $NODATA   -mm -i $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_int.tif > $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_int_mm.txt 
 
 # start to prepare a cloud-optimized GeoTIFF  as described at https://github.com/Envirometrix/LandGISmaps#cloud-optimized-geotiff 
 

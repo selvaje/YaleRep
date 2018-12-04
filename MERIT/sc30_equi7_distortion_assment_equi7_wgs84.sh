@@ -112,9 +112,7 @@ p <- ggplot( data = df   , aes(x = x , y = y)) +
     theme_bw()
 ggsave("/gpfs/loomis/scratch60/fas/sbsc/ga254/dataproces/MERIT/equi7val/NA_equi_wgs84_slope_south.eps" ,   width=8, height=8)  
 
-n=100
-colR=colorRampPalette(c("blue","green","yellow", "orange" , "red", "brown", "black" ))
-cols=colR(n)
+
 
 NA_equi_south         = raster("/gpfs/loomis/scratch60/fas/sbsc/ga254/dataproces/MERIT/equi7val/NA_equi_south.tif")
 NA_equi_north         = raster("/gpfs/loomis/scratch60/fas/sbsc/ga254/dataproces/MERIT/equi7val/NA_equi_north.tif")
@@ -126,11 +124,30 @@ NA_equi_north_slope         = raster("/gpfs/loomis/scratch60/fas/sbsc/ga254/data
 NA_equi_north_towgs84_slope = raster("/gpfs/loomis/scratch60/fas/sbsc/ga254/dataproces/MERIT/equi7val/NA_equi_north_towgs84_slope.tif")
 NA_equi_south_towgs84_slope = raster("/gpfs/loomis/scratch60/fas/sbsc/ga254/dataproces/MERIT/equi7val/NA_equi_south_towgs84_slope.tif")
 
-for ( tif  in c("NA_equi_south","NA_equi_north","NA_equi_north_towgs84","NA_equi_south_towgs84","NA_equi_south_slope","NA_equi_north_slope","NA_equi_north_towgs84_slope","NA_equi_south_towgs84_slope")) {
+
+# cols=terrain.colors(100, alpha = 1)
+
+n=100
+colR=colorRampPalette(c("#004700", "#00fe00","yellow", "orange" , "brown", "black" ))
+cols=colR(n)
+
+
+for ( tif  in c("NA_equi_south","NA_equi_north","NA_equi_north_towgs84","NA_equi_south_towgs84")) {
 postscript(paste0("/gpfs/loomis/scratch60/fas/sbsc/ga254/dataproces/MERIT/equi7val/",tif,".eps") ,  paper="special" , width=8, height=7.15   )
 par(oma=c(.1,.1,.1,.1) , mar=c(.1,.1,.1,.1) , xpd = NA)
 raster = raster (paste0("/gpfs/loomis/scratch60/fas/sbsc/ga254/dataproces/MERIT/equi7val/",tif,".tif") )
-plot(raster  , col=cols , yaxt="n" , xaxt="n" , xlab="" , ylab="" , legend=FALSE, ,  box=FALSE , axes=FALSE )
+plot(raster  , col=cols , yaxt="n" , xaxt="n" , xlab="" , ylab="" , legend=T, ,  box=FALSE , axes=FALSE )
+}
+
+n=100
+colR=colorRampPalette(c("blue","yellow", "orange" , "red", "brown", "black" ))
+cols=colR(n)
+
+for ( tif  in c("NA_equi_south_slope","NA_equi_north_slope","NA_equi_north_towgs84_slope","NA_equi_south_towgs84_slope")) {
+postscript(paste0("/gpfs/loomis/scratch60/fas/sbsc/ga254/dataproces/MERIT/equi7val/",tif,".eps") ,  paper="special" , width=8, height=7.15   )
+par(oma=c(.1,.1,.1,.1) , mar=c(.1,.1,.1,.1) , xpd = NA)
+raster = raster (paste0("/gpfs/loomis/scratch60/fas/sbsc/ga254/dataproces/MERIT/equi7val/",tif,".tif") )
+plot(raster  , col=cols , yaxt="n" , xaxt="n" , xlab="" , ylab="" , legend=T, ,  box=FALSE , axes=FALSE )
 
 }
 
@@ -140,9 +157,6 @@ EOF
 
 exit 
 
-
-plot(raster, axis.args=list( at=at , labels=labels , line=-0.68, tck=0 , cex.axis=0.56   ) ,  smallplot=c(0.83,0.87, 0.1,0.8), zlim=c( min, max ) , legend.only=TRUE , legend.width=1, legend.shrink=0.75 , col=cols)
-text(-96.99 , 42.405, letter ,  font=2   ,   xpd=TRUE , cex=1.2 ) }
 
 
 
