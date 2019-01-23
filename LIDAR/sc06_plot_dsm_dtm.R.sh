@@ -105,7 +105,7 @@ geom_point( data=DEM , aes(x=mrt , y=dtm) ,   alpha=1, col='red' , size=0.03) +
 geom_smooth(  data=DEM , aes(x=mrt , y=dsm) ,   method='lm',formula=y~x ,col='black'  ,size=0.7  , se=FALSE ) + 
 geom_smooth(  data=DEM , aes(x=mrt , y=dtm) ,   method='lm',formula=y~x ,col='brown'  ,size=0.7  , se=FALSE ) + 
 xlab("MERIT DEM") + ylab("LiDAR DSM") +
-annotate("text", label="LiDAR DTM", x=900, y=1800, vjust=1, hjust=1 , angle=90 , colour = "red") ) + 
+annotate("text", label="LiDAR DTM", x=900, y=1800, vjust=1, hjust=1 , angle=90 , colour = "red")  + 
 theme(plot.title=element_text(size=rel(0.6) ,  hjust=0 ) ,
       axis.title.x = element_text(colour = "black") ,
       axis.title.y = element_text(colour = "blue") ,
@@ -128,10 +128,14 @@ theme(plot.title=element_text(size=rel(0.6) ,  hjust=0 ) ,
 
 
 
+print ("start_mean")
+a = mean( DEM$dtm - DEM$dsm )
+print(a)
+print ("end_mean")
 
 
-#  + annotate("text", x=max-100, y=min+200 , label=as.character(coef_dtm)[1]) + annotate("text", x=max, y=min+200 , label=as.character(coef_dtm)[2]) +
-#     annotate("text", x=max-100, y=min+100 , label=as.character(coef_dsm)[1]) + annotate("text", x=max, y=min+100  , label=as.character(coef_dsm)[2]) 
+
+
 
 print(coef_dtm )
 print(coef_dsm )
@@ -149,7 +153,10 @@ dev.off()
 
 EOF
 
+exit  
+
 gs -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/prepress  -sOutputFile=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/LIDAR/figure/dsm-dtm_vs_merit_plot_low.pdf /gpfs/loomis/project/fas/sbsc/ga254/dataproces/LIDAR/figure/dsm-dtm_vs_merit_plot.pdf
-exit 
+
+
 
 

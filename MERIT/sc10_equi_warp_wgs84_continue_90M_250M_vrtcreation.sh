@@ -12,8 +12,8 @@
 
 # for TOPO in dev-magnitude dev-scale rough-magnitude rough-scale elev-stdev aspect aspect-sine aspect-cosine northness easthness dx dxx dxy dy dyy pcurv roughness slope tcurv tpi tri vrm cti spi convergence geom ; do for RESN in  0.25 ; do sbatch --export=TOPO=$TOPO,RESN=$RESN    /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc10_equi_warp_wgs84_continue_90M_250M_vrtcreation.sh ; done ; done 
 
-# sbatch  --export=TOPO=dx,RESN=0.10 /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc09_equi_warp_wgs84_continue_90M_250M_vrtcreation.sh
-# sbatch  --export=TOPO=dx,RESN=0.25 /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc09_equi_warp_wgs84_continue_90M_250M_vrtcreation.sh
+# sbatch  --export=TOPO=dx,RESN=0.10 /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc10_equi_warp_wgs84_continue_90M_250M_vrtcreation.sh
+# sbatch  --export=TOPO=dx,RESN=0.25 /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc10_equi_warp_wgs84_continue_90M_250M_vrtcreation.sh
 
 echo "############################################################"
 sstat  -j   $SLURM_JOB_ID.batch   --format=JobID,MaxVMSize
@@ -41,15 +41,15 @@ gdal_translate  --config GDAL_CACHEMAX 4000   -co COMPRESS=DEFLATE -co ZLEVEL=9 
 rm -f $RAM/${TOPO}_1KMbilinear_MERIT.vrt 
 fi 
 
-# if [ $RESN = "0.25" ] ; then 
-# gdalbuildvrt -overwrite -srcnodata -9999 -vrtnodata -9999   $RAM/${TOPO}_250Mbilinear_MERIT.vrt  $MERIT/$TOPO/tiles/${TOPO}_250M_MERIT_???????.tif
-# gdal_translate  --config GDAL_CACHEMAX 4000 -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -a_nodata -9999 -co BIGTIFF=YES $RAM/${TOPO}_250Mbilinear_MERIT.vrt   $MERIT/final250m/${TOPO}_250Mbilinear_MERIT.tif
-# rm -f $RAM/${TOPO}_250Mbilinear_MERIT.vrt 
-# fi 
+if [ $RESN = "0.25" ] ; then 
+gdalbuildvrt -overwrite -srcnodata -9999 -vrtnodata -9999   $RAM/${TOPO}_250Mbilinear_MERIT.vrt  $MERIT/$TOPO/tiles/${TOPO}_250M_MERIT_???????.tif
+gdal_translate  --config GDAL_CACHEMAX 4000 -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -a_nodata -9999 -co BIGTIFF=YES $RAM/${TOPO}_250Mbilinear_MERIT.vrt   $MERIT/final250m/${TOPO}_250Mbilinear_MERIT.tif
+rm -f $RAM/${TOPO}_250Mbilinear_MERIT.vrt 
+fi 
 
-# pkinfo -nodata -9999 -mm -i $MERIT/final250m/${TOPO}_250Mbilinear_MERIT.tif > $MERIT/final250m/${TOPO}_250Mbilinear_MERIT_mm.txt 
+pkinfo -nodata -9999 -mm -i $MERIT/final250m/${TOPO}_250Mbilinear_MERIT.tif > $MERIT/final250m/${TOPO}_250Mbilinear_MERIT_mm.txt 
 
-# pkgetmask -min -9998 -max 9999999999 -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -ot Byte -i $MERIT/final250m/${TOPO}_250Mbilinear_MERIT.tif -o $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_msk.tif
+pkgetmask -min -9998 -max 9999999999 -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -ot Byte -i $MERIT/final250m/${TOPO}_250Mbilinear_MERIT.tif -o $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_msk.tif
 
 
 # Byte         0      255  SCALE=1 ; fi 
@@ -85,10 +85,10 @@ if [  $TOPO =  tpi ]              ; then OT=Int16 ; MULT=10    ; NODATA=-32768  
 if [  $TOPO =  tri ]              ; then OT=Int16 ; MULT=10    ; NODATA=-32768  ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi  #  -min 0            -max 1076.05   OK
 
 
-# oft-calc -ot $OT -um $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_msk.tif $MERIT/final250m/${TOPO}_250Mbilinear_MERIT.tif $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT.tif <<EOF
-# 1
-# #1 $MULT *
-# EOF
+oft-calc -ot $OT -um $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_msk.tif $MERIT/final250m/${TOPO}_250Mbilinear_MERIT.tif $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT.tif <<EOF
+1
+#1 $MULT *
+EOF
 
 pksetmask -ot  $OT -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -co BIGTIFF=YES -m $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_msk.tif -msknodata 0  -nodata $NODATA -i  $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT.tif -o $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_int.tif  
 
@@ -96,9 +96,8 @@ pkinfo -nodata $NODATA   -mm -i $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_i
 
 # start to prepare a cloud-optimized GeoTIFF  as described at https://github.com/Envirometrix/LandGISmaps#cloud-optimized-geotiff 
 
-
 gdaladdo -clean  $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_int.tif # usefull in case of re-run 
-# gdaladdo --config GDAL_CACHEMAX 8000 --config COMPRESS_OVERVIEW LZW -r average -ro  $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_int.tif 16  # external overview for assesment 
+gdaladdo --config GDAL_CACHEMAX 8000 --config COMPRESS_OVERVIEW LZW -r average -ro  $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_int.tif 16  # external overview for assesment 
 gdaladdo --config GDAL_CACHEMAX 8000  -r nearest   $SCRATCH/geohub250m/${TOPO}_250Mbilinear_MERIT_int.tif  2 4 8 16 32 64 128 
 
 # Pay attention that I have inserted  also the -co BIGTIFF=YES -co TILED=YES 
@@ -112,7 +111,7 @@ gdal_translate -ot $OT -projwin  -180.00000 87.37000 179.99994 -62.00081 --confi
              # dtm_slope_merit.dem_m_250m_s0..0cm_2017_v1.0.tif
 gdal_edit.py -a_ullr  -180.00000 87.37000 179.99994 -62.00081 \
               -mo "TIFFTAG_ARTIST=Giuseppe Amatulli (giuseppe.amatulli@gmail.com)" \
-              -mo "TIFFTAG_DATETIME=2018" \
+              -mo "TIFFTAG_DATETIME=2019" \
               -mo "TIFFTAG_IMAGEDESCRIPTION= ${TOPO} geomorphometry variable derived from MERIT-DEM - resolution 3 arc-seconds" \
               -mo "Offset=0" -mo "Scale=$SCALE" \
 $MERIT/geohub250m/dtm_${TOPO}_merit.dem_m_250m_s0..0cm_2018_v1.0.tif

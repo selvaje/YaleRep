@@ -43,7 +43,7 @@ rm -rf  $GISDBASE/$LOCATION
 
 echo start importing 
 
-r.in.gdal   in=$file      out=$filename    location=$LOCATION   memory=2000
+r.in.gdal -k    in=$file      out=$filename    location=$LOCATION   memory=2000
 # if [ $imp = "r.external" ] ; then r.external  input=$file   out=$filename  ; fi 
 
 g.mapset   mapset=PERMANENT  location=$LOCATION

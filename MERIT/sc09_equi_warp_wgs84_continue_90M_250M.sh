@@ -10,7 +10,7 @@
 
 # warp equi7 to wgs84 for 90m and 250m, save intermediate tif in scratch then cp to project by getting the mean in case of overalliping 
 
-# for TOPO in dev-magnitute dev-scale rough-magnitute rough-scale elev-stdev aspect aspect-sine aspect-cosine northness easthness dx dxx dxy dy dyy pcurv roughness slope tcurv tpi tri vrm cti spi convergence ; do for RESN in 90 250  ; do sbatch --export=TOPO=$TOPO,RESN=$RESN    /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc09_equi_warp_wgs84_continue_90M_250M.sh ; done ; done 
+# for TOPO in dev-magnitude dev-scale rough-magnitude rough-scale geom elev-stdev aspect aspect-sine aspect-cosine northness easthness dx dxx dxy dy dyy pcurv roughness slope tcurv tpi tri vrm cti spi convergence ; do for RESN in 90  250  ; do sbatch --export=TOPO=$TOPO,RESN=$RESN    /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc09_equi_warp_wgs84_continue_90M_250M.sh ; done ; done 
 
 # sbatch  --export=TOPO=dx,RESN=0.10 /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc09_equi_warp_wgs84_continue_90M_250M.sh
 # sbatch  --export=TOPO=dx,RESN=0.25 /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc09_equi_warp_wgs84_continue_90M_250M.sh
@@ -77,6 +77,8 @@ if [ $BAND -eq 1 ] ; then
 gdal_translate -a_nodata -9999 -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND  $RAM/${TOPO}_CT_${filename}_${RESN}.vrt $MERIT/${TOPO}/tiles/${TOPO}_${RESN}M_MERIT_${filename}.tif ;  rm -f $RAM/${TOPO}_CT_${filename}_${RESN}.vrt 
 else 
 echo start statporfile
+
+
 if [ $TOPO = "aspect" ] || [ $TOPO = "rough-scale" ] || [ $TOPO = "dev-scale" ]  ; then ALG=max ; else ALG=mean ; fi 
 pkstatprofile  -nodata -9999 -of GTiff -f $ALG  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -i $RAM/${TOPO}_CT_${filename}_${RESN}.vrt -o $SCRATCH/$TOPO/tiles/${filename}_E7_tmp_${RESN}.tif
 gdal_translate -a_nodata -9999    -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND  $SCRATCH/$TOPO/tiles/${filename}_E7_tmp_${RESN}.tif   $MERIT/$TOPO/tiles/${TOPO}_${RESN}M_MERIT_${filename}.tif  
@@ -90,7 +92,7 @@ rm -f   $SCRATCH/$TOPO/tiles/*_E7_tmp_${RESN}.tif
 fi 
 
 
-###############  geom  ###########################
+# ###############  geom  ###########################
 
 if [  $TOPO = "geom" ]  ; then 
 
@@ -111,7 +113,7 @@ pksetmask  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -m $EQUI/$CT/GE
 rm -f $RAM/${TOPO}_${CT}_${filename}_${RESN}.tif
 
 MAX=$(pkstat -max -i $RAM/${TOPO}_${CT}_${filename}_msk_${RESN}.tif  | awk \'{ print $2 }\'  )
-if [ $MAX = "-9999"  ] ; then 
+if [ $MAX = "0"  ] ; then 
 rm -f $RAM/${TOPO}_${CT}_${filename}_msk_${RESN}.tif 
 else 
 mv $RAM/${TOPO}_${CT}_${filename}_msk_${RESN}.tif  $SCRATCH/$TOPO/tiles/${TOPO}_${CT}_${filename}_${RESN}.tif ; rm -f  $RAM/${TOPO}_${CT}_${filename}_msk_${RESN}.tif
@@ -124,6 +126,7 @@ done
 ls  $MERIT/input_tif/*_dem.tif    | xargs -n 1 -P $P  bash -c $'
 file=$1 
 filename=$(basename $file _dem.tif)
+filenameG=$(basename $file _dem.tif)
 
 gdalbuildvrt  -overwrite  -separate  $RAM/${TOPO}_CT_${filename}_${RESN}.vrt  $SCRATCH/$TOPO/tiles/${TOPO}_??_${filename}_${RESN}.tif
 BAND=$(pkinfo -nb -i  $RAM/${TOPO}_CT_${filename}_${RESN}.vrt     | awk \'{ print $2 }\' ) 
@@ -131,16 +134,67 @@ BAND=$(pkinfo -nb -i  $RAM/${TOPO}_CT_${filename}_${RESN}.vrt     | awk \'{ prin
 if [ $BAND -eq 1 ] ; then 
 gdal_translate -a_nodata 0 -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND  $RAM/${TOPO}_CT_${filename}_${RESN}.vrt $MERIT/${TOPO}/tiles/${TOPO}_${RESN}M_MERIT_${filename}.tif ;  rm -f $RAM/${TOPO}_CT_${filename}_${RESN}.vrt 
 else 
-echo start statporfile
-pkstatprofile -a_nodata 0 -of GTiff  -f max -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -i $RAM/${TOPO}_CT_${filename}_${RESN}.vrt -o $SCRATCH/$TOPO/tiles/${filename}_E7_tmp_${RESN}.tif
-gdal_translate -a_nodata 0   -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND  $SCRATCH/$TOPO/tiles/${filename}_E7_tmp_${RESN}.tif   $MERIT/$TOPO/tiles/${TOPO}_${RESN}M_MERIT_${filename}.tif  
-rm -f $RAM/${TOPO}_CT_${filename}_${RESN}.vrt  $SCRATCH/$TOPO/tiles/${filename}_E7_tmp_${RESN}.tif
-fi 
 
+echo start grass selection for ${TOPO}_CT_${filename}_${RESN} 
+
+# random raster creation to select in a random way on of the band 
+
+gdal_translate -a_nodata 0 -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND  $RAM/${TOPO}_CT_${filename}_${RESN}.vrt  $RAM/${TOPO}_CT_${filename}_${RESN}.tif 
+rm -f $RAM/${TOPO}_CT_${filename}_${RESN}.vrt 
+# cp   $RAM/${TOPO}_CT_${filename}_${RESN}.tif  $MERIT/${TOPO}/tiles/${TOPO}_${RESN}M_MERIT_${filename}_more1band.tif
+
+source /gpfs/home/fas/sbsc/ga254/scripts/general/create_location_grass7.3-grace2.sh $RAM loc_${TOPO}_CT_${filename}_${RESN} $RAM/${TOPO}_CT_${filename}_${RESN}.tif   
+
+if [ $BAND -eq 2 ] ; then
+r.surf.random -i output=random  min=1  max=2 --overwrite 
+r.mapcalc "random_null = if( isnull(${TOPO}_CT_${filenameG}_${RESN}.1) ||  isnull(${TOPO}_CT_${filenameG}_${RESN}.2), null(), random )"    --o 
+r.mapcalc " ${TOPO}_CT_${filenameG}_${RESN}_sel  = if( random_null  == 1 , ${TOPO}_CT_${filenameG}_${RESN}.1 , ${TOPO}_CT_${filenameG}_${RESN}.2)"  --o 
+r.patch  input=${TOPO}_CT_${filenameG}_${RESN}_sel,${TOPO}_CT_${filenameG}_${RESN}.1,${TOPO}_CT_${filenameG}_${RESN}.2 output=${TOPO}_CT_${filenameG}_${RESN} --o
+
+# r.out.gdal -c createopt="COMPRESS=DEFLATE,ZLEVEL=9,INTERLEAVE=BAND" type=Byte format=GTiff nodata=0 input=random_null  output=$MERIT/$TOPO/tiles/${TOPO}_${RESN}M_MERIT_${filenameG}_random_null.tif  --o
+# r.out.gdal -c createopt="COMPRESS=DEFLATE,ZLEVEL=9,INTERLEAVE=BAND" type=Byte format=GTiff nodata=0 input=${TOPO}_CT_${filenameG}_${RESN}_sel  output=$MERIT/$TOPO/tiles/${TOPO}_${RESN}M_MERIT_${filenameG}_sel.tif  --o
+fi
+
+if [ $BAND -eq 3 ] ; then 
+
+# for the area with 3 overlapping 
+r.surf.random -i output=random3  min=1  max=3 --overwrite 
+r.mapcalc "random_null3 = if( isnull(${TOPO}_CT_${filenameG}_${RESN}.1) || isnull(${TOPO}_CT_${filenameG}_${RESN}.2) || isnull(${TOPO}_CT_${filenameG}_${RESN}.3), null(), random3)"   --o 
+r.mapcalc "${TOPO}_CT_${filenameG}_${RESN}_sel3  = if( random_null3  < 2, ${TOPO}_CT_${filenameG}_${RESN}.1 , ${TOPO}_CT_${filenameG}_${RESN}.2,${TOPO}_CT_${filenameG}_${RESN}.3 )"  --o
+
+# for the area with 2 overlapping 
+r.surf.random -i output=random2  min=1  max=2 --overwrite 
+
+r.mapcalc "random_null2a = if( isnull(${TOPO}_CT_${filenameG}_${RESN}.1) || isnull(${TOPO}_CT_${filenameG}_${RESN}.2),null(), random2)"   --o 
+r.mapcalc "random_null2b = if( isnull(${TOPO}_CT_${filenameG}_${RESN}.3) || isnull(${TOPO}_CT_${filenameG}_${RESN}.2),null(), random2)"   --o 
+r.mapcalc "random_null2c = if( isnull(${TOPO}_CT_${filenameG}_${RESN}.3) || isnull(${TOPO}_CT_${filenameG}_${RESN}.1),null(), random2)"   --o 
+
+r.mapcalc "${TOPO}_CT_${filenameG}_${RESN}_sel2a  = if( random_null2a  == 1 , ${TOPO}_CT_${filenameG}_${RESN}.1, ${TOPO}_CT_${filenameG}_${RESN}.2 )"   --o
+r.mapcalc "${TOPO}_CT_${filenameG}_${RESN}_sel2b  = if( random_null2b  == 1 , ${TOPO}_CT_${filenameG}_${RESN}.3, ${TOPO}_CT_${filenameG}_${RESN}.2 )"  --o
+r.mapcalc "${TOPO}_CT_${filenameG}_${RESN}_sel2c  = if( random_null2c  == 1 , ${TOPO}_CT_${filenameG}_${RESN}.3, ${TOPO}_CT_${filenameG}_${RESN}.1 )"    --o
+ 
+r.patch input=${TOPO}_CT_${filenameG}_${RESN}_sel3,${TOPO}_CT_${filenameG}_${RESN}_sel2a,${TOPO}_CT_${filenameG}_${RESN}_sel2b,${TOPO}_CT_${filenameG}_${RESN}_sel2c,${TOPO}_CT_${filenameG}_${RESN}.1,${TOPO}_CT_${filenameG}_${RESN}.2,${TOPO}_CT_${filenameG}_${RESN}.3 output=${TOPO}_CT_${filenameG}_${RESN} --o
+
+# r.out.gdal -c createopt="COMPRESS=DEFLATE,ZLEVEL=9,INTERLEAVE=BAND" type=Byte format=GTiff nodata=0 input=random_null3  output=$MERIT/$TOPO/tiles/${TOPO}_${RESN}M_MERIT_${filenameG}_random_null3.tif  --o
+# r.out.gdal -c createopt="COMPRESS=DEFLATE,ZLEVEL=9,INTERLEAVE=BAND" type=Byte format=GTiff nodata=0 input=random_null2a  output=$MERIT/$TOPO/tiles/${TOPO}_${RESN}M_MERIT_${filenameG}_random_null2a.tif  --o
+# r.out.gdal -c createopt="COMPRESS=DEFLATE,ZLEVEL=9,INTERLEAVE=BAND" type=Byte format=GTiff nodata=0 input=random_null2b  output=$MERIT/$TOPO/tiles/${TOPO}_${RESN}M_MERIT_${filenameG}_random_null2b.tif  --o
+# r.out.gdal -c createopt="COMPRESS=DEFLATE,ZLEVEL=9,INTERLEAVE=BAND" type=Byte format=GTiff nodata=0 input=random_null2c  output=$MERIT/$TOPO/tiles/${TOPO}_${RESN}M_MERIT_${filenameG}_random_null2c.tif  --o
+
+# r.out.gdal -c createopt="COMPRESS=DEFLATE,ZLEVEL=9,INTERLEAVE=BAND" type=Byte format=GTiff nodata=0 input=${TOPO}_CT_${filenameG}_${RESN}_sel3 output=$MERIT/$TOPO/tiles/${TOPO}_${RESN}M_MERIT_${filenameG}_sel3.tif  --o
+# r.out.gdal -c createopt="COMPRESS=DEFLATE,ZLEVEL=9,INTERLEAVE=BAND" type=Byte format=GTiff nodata=0 input=${TOPO}_CT_${filenameG}_${RESN}_sel2a output=$MERIT/$TOPO/tiles/${TOPO}_${RESN}M_MERIT_${filenameG}_sel2a.tif  --o
+# r.out.gdal -c createopt="COMPRESS=DEFLATE,ZLEVEL=9,INTERLEAVE=BAND" type=Byte format=GTiff nodata=0 input=${TOPO}_CT_${filenameG}_${RESN}_sel2b output=$MERIT/$TOPO/tiles/${TOPO}_${RESN}M_MERIT_${filenameG}_sel2b.tif  --o
+# r.out.gdal -c createopt="COMPRESS=DEFLATE,ZLEVEL=9,INTERLEAVE=BAND" type=Byte format=GTiff nodata=0 input=${TOPO}_CT_${filenameG}_${RESN}_sel2c output=$MERIT/$TOPO/tiles/${TOPO}_${RESN}M_MERIT_${filenameG}_sel2c.tif  --o
+fi
+
+r.out.gdal -c createopt="COMPRESS=DEFLATE,ZLEVEL=9,INTERLEAVE=BAND" type=Byte format=GTiff nodata=0 input=${TOPO}_CT_${filenameG}_${RESN} output=$MERIT/$TOPO/tiles/${TOPO}_${RESN}M_MERIT_${filenameG}.tif  --o
+
+rm -f $RAM/${TOPO}_CT_${filenameG}_${RESN}.vrt 
+rm -r $RAM/loc_${TOPO}_CT_${filenameG}_${RESN}
+fi
 ' _ 
 
-rm -f   $SCRATCH/$TOPO/tiles/*_E7_tmp_${RESN}.tif
 
-fi 
 
-rm -f  $SCRATCH/$TOPO/tiles/${TOPO}_??_*_${RESN}.tif
+fi # fi del geom
+
+# rm -f  $SCRATCH/$TOPO/tiles/${TOPO}_??_*_${RESN}.tif

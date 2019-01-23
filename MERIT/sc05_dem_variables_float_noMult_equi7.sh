@@ -7,9 +7,9 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc05_dem_variables_float_noMult_equi7.sh
-#SBATCH --array=1-806
+#SBATCH --array=1-831
 
-# 806    number of files 
+# 831    number of files 
 # bash    /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc05_dem_variables_float_noMult_equi7.sh
 # sbatch  /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc05_dem_variables_float_noMult_equi7.sh  
 

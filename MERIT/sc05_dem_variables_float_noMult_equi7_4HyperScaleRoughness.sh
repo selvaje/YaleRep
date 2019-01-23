@@ -7,10 +7,10 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc05_dem_variables_float_noMult_equi7_4HyperScaleRoughness.sh
-#SBATCH --array=1-806
+#SBATCH --array=1-831
 #SBATCH --mem-per-cpu=20000
 
-# 806    number of files   special tile 415     176,177,178,415,416  
+# 831    number of files   special tile 415     176,177,178,415,416  
 # bash    /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc05_dem_variables_float_noMult_equi7_4HyperScaleRoughness.sh
 # sbatch  /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc05_dem_variables_float_noMult_equi7_4HyperScaleRoughness.sh
 
@@ -51,10 +51,10 @@ mv $RAM/${filename}_00.tif  $RAM/${filename}_0.tif
 fi
 
 singularity exec /gpfs/home/fas/sbsc/ga254/scripts/MERIT/UbuntuWB.simg  bash <<EOF
-/WBT/whitebox_tools  -r=MultiscaleRoughness  -v --wd="$RAM"  --dem=${filename}_0.tif --out_mag=${filename}_rough-magnitute.tif  --out_scale=${filename}_rough-scale.tif --min_scale=1 --max_scale=2000 --step=3
+/WBT/whitebox_tools  -r=MultiscaleRoughness  -v --wd="$RAM"  --dem=${filename}_0.tif --out_mag=${filename}_rough-magnitude.tif  --out_scale=${filename}_rough-scale.tif --min_scale=1 --max_scale=2000 --step=3
 EOF
 
-for PAR in rough-magnitute rough-scale   ; do
+for PAR in rough-magnitude rough-scale   ; do
 pksetmask -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND  -m $RAM/$filename.tif -nodata -9999 -msknodata -9999 -i $RAM/${filename}_$PAR.tif -o  $RAM/${filename}_${PAR}_msk.tif 
 
 # to mask    #   -32768  of some files 
@@ -69,10 +69,10 @@ rm -f  $RAM/${filename}_${PAR}_msk.tif
 done 
 
 singularity exec /gpfs/home/fas/sbsc/ga254/scripts/MERIT/UbuntuWB.simg  bash <<EOF
-/WBT/whitebox_tools -r=MaxElevationDeviation  -v --wd="$RAM"  --dem=${filename}_0.tif --out_mag=${filename}_dev-magnitute.tif --out_scale=${filename}_dev-scale.tif --min_scale=1 --max_scale=2000 --step=3
+/WBT/whitebox_tools -r=MaxElevationDeviation  -v --wd="$RAM"  --dem=${filename}_0.tif --out_mag=${filename}_dev-magnitude.tif --out_scale=${filename}_dev-scale.tif --min_scale=1 --max_scale=2000 --step=3
 EOF
 
-for PAR in  dev-magnitute dev-scale   ; do 
+for PAR in  dev-magnitude dev-scale   ; do 
 pksetmask -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND  -m $RAM/$filename.tif -nodata -9999 -msknodata -9999 -i  $RAM/${filename}_$PAR.tif -o  $RAM/${filename}_${PAR}_msk.tif 
 rm -f  $RAM/${filename}_${PAR}.tif    
 gdal_translate   -projwin $( getCorners4Gtranslate $file  )     -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND   $RAM/${filename}_${PAR}_msk.tif  $MERIT/${PAR}/tiles/${PAR}_100M_MERIT_${filename}.tif 
