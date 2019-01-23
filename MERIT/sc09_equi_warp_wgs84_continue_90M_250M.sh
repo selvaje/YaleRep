@@ -41,7 +41,7 @@ for CT in  AF AN AS EU NA OC SA ; do
 export CT 
 if [ ! -f $MERIT/$TOPO/tiles/all_${CT}_tif.vrt ] ; then gdalbuildvrt  -overwrite   -srcnodata -99999  -vrtnodata -9999    $MERIT/$TOPO/tiles/all_${CT}_tif.vrt   $MERIT/$TOPO/tiles/${TOPO}_100M_MERIT_${CT}_???_???.tif ; fi 
 
-# warp each single equi7 tile to wgs84 
+# gdalwarp  by bilenear  each  single equi7 tile to wgs84; check if a tile is empty due to the ZONE.shp.mask 
 
 for file in $(cat $EQUI/${CT}/GEOG/EQUI7_V13_${CT}_GEOG_TILEMERIT.txt)  ; do echo $MERIT/input_tif/$file ; done  | xargs -n 1 -P $P bash -c $'
 file=$1 
@@ -65,7 +65,7 @@ fi
 done 
 
 
-# cp to final dir  or get mean of the overlapping tiles 
+# if a tile is covered only by one zone than cp else make the mean of the 2 or 3 rasters.  
 ls  $MERIT/input_tif/*_dem.tif    | xargs -n 1 -P $P  bash -c $'
 file=$1 
 filename=$(basename $file _dem.tif)
@@ -93,6 +93,8 @@ fi
 
 
 # ###############  geom  ###########################
+
+# gdalwarp by near  each single equi7 tile to wgs84; check if a tile is empty due to the ZONE.shp.mask 
 
 if [  $TOPO = "geom" ]  ; then 
 
@@ -122,7 +124,7 @@ fi
 done 
 
 
-# cp to final dir  or get mean of the overlapping tiles 
+# if a tile is covered only by one zone than cp else make the random selection between raster 1 or raster 2 ( or in case raster  rasters)
 ls  $MERIT/input_tif/*_dem.tif    | xargs -n 1 -P $P  bash -c $'
 file=$1 
 filename=$(basename $file _dem.tif)
@@ -150,9 +152,6 @@ r.surf.random -i output=random  min=1  max=2 --overwrite
 r.mapcalc "random_null = if( isnull(${TOPO}_CT_${filenameG}_${RESN}.1) ||  isnull(${TOPO}_CT_${filenameG}_${RESN}.2), null(), random )"    --o 
 r.mapcalc " ${TOPO}_CT_${filenameG}_${RESN}_sel  = if( random_null  == 1 , ${TOPO}_CT_${filenameG}_${RESN}.1 , ${TOPO}_CT_${filenameG}_${RESN}.2)"  --o 
 r.patch  input=${TOPO}_CT_${filenameG}_${RESN}_sel,${TOPO}_CT_${filenameG}_${RESN}.1,${TOPO}_CT_${filenameG}_${RESN}.2 output=${TOPO}_CT_${filenameG}_${RESN} --o
-
-# r.out.gdal -c createopt="COMPRESS=DEFLATE,ZLEVEL=9,INTERLEAVE=BAND" type=Byte format=GTiff nodata=0 input=random_null  output=$MERIT/$TOPO/tiles/${TOPO}_${RESN}M_MERIT_${filenameG}_random_null.tif  --o
-# r.out.gdal -c createopt="COMPRESS=DEFLATE,ZLEVEL=9,INTERLEAVE=BAND" type=Byte format=GTiff nodata=0 input=${TOPO}_CT_${filenameG}_${RESN}_sel  output=$MERIT/$TOPO/tiles/${TOPO}_${RESN}M_MERIT_${filenameG}_sel.tif  --o
 fi
 
 if [ $BAND -eq 3 ] ; then 
@@ -174,21 +173,10 @@ r.mapcalc "${TOPO}_CT_${filenameG}_${RESN}_sel2b  = if( random_null2b  == 1 , ${
 r.mapcalc "${TOPO}_CT_${filenameG}_${RESN}_sel2c  = if( random_null2c  == 1 , ${TOPO}_CT_${filenameG}_${RESN}.3, ${TOPO}_CT_${filenameG}_${RESN}.1 )"    --o
  
 r.patch input=${TOPO}_CT_${filenameG}_${RESN}_sel3,${TOPO}_CT_${filenameG}_${RESN}_sel2a,${TOPO}_CT_${filenameG}_${RESN}_sel2b,${TOPO}_CT_${filenameG}_${RESN}_sel2c,${TOPO}_CT_${filenameG}_${RESN}.1,${TOPO}_CT_${filenameG}_${RESN}.2,${TOPO}_CT_${filenameG}_${RESN}.3 output=${TOPO}_CT_${filenameG}_${RESN} --o
-
-# r.out.gdal -c createopt="COMPRESS=DEFLATE,ZLEVEL=9,INTERLEAVE=BAND" type=Byte format=GTiff nodata=0 input=random_null3  output=$MERIT/$TOPO/tiles/${TOPO}_${RESN}M_MERIT_${filenameG}_random_null3.tif  --o
-# r.out.gdal -c createopt="COMPRESS=DEFLATE,ZLEVEL=9,INTERLEAVE=BAND" type=Byte format=GTiff nodata=0 input=random_null2a  output=$MERIT/$TOPO/tiles/${TOPO}_${RESN}M_MERIT_${filenameG}_random_null2a.tif  --o
-# r.out.gdal -c createopt="COMPRESS=DEFLATE,ZLEVEL=9,INTERLEAVE=BAND" type=Byte format=GTiff nodata=0 input=random_null2b  output=$MERIT/$TOPO/tiles/${TOPO}_${RESN}M_MERIT_${filenameG}_random_null2b.tif  --o
-# r.out.gdal -c createopt="COMPRESS=DEFLATE,ZLEVEL=9,INTERLEAVE=BAND" type=Byte format=GTiff nodata=0 input=random_null2c  output=$MERIT/$TOPO/tiles/${TOPO}_${RESN}M_MERIT_${filenameG}_random_null2c.tif  --o
-
-# r.out.gdal -c createopt="COMPRESS=DEFLATE,ZLEVEL=9,INTERLEAVE=BAND" type=Byte format=GTiff nodata=0 input=${TOPO}_CT_${filenameG}_${RESN}_sel3 output=$MERIT/$TOPO/tiles/${TOPO}_${RESN}M_MERIT_${filenameG}_sel3.tif  --o
-# r.out.gdal -c createopt="COMPRESS=DEFLATE,ZLEVEL=9,INTERLEAVE=BAND" type=Byte format=GTiff nodata=0 input=${TOPO}_CT_${filenameG}_${RESN}_sel2a output=$MERIT/$TOPO/tiles/${TOPO}_${RESN}M_MERIT_${filenameG}_sel2a.tif  --o
-# r.out.gdal -c createopt="COMPRESS=DEFLATE,ZLEVEL=9,INTERLEAVE=BAND" type=Byte format=GTiff nodata=0 input=${TOPO}_CT_${filenameG}_${RESN}_sel2b output=$MERIT/$TOPO/tiles/${TOPO}_${RESN}M_MERIT_${filenameG}_sel2b.tif  --o
-# r.out.gdal -c createopt="COMPRESS=DEFLATE,ZLEVEL=9,INTERLEAVE=BAND" type=Byte format=GTiff nodata=0 input=${TOPO}_CT_${filenameG}_${RESN}_sel2c output=$MERIT/$TOPO/tiles/${TOPO}_${RESN}M_MERIT_${filenameG}_sel2c.tif  --o
 fi
 
 r.out.gdal -c createopt="COMPRESS=DEFLATE,ZLEVEL=9,INTERLEAVE=BAND" type=Byte format=GTiff nodata=0 input=${TOPO}_CT_${filenameG}_${RESN} output=$MERIT/$TOPO/tiles/${TOPO}_${RESN}M_MERIT_${filenameG}.tif  --o
-
-rm -f $RAM/${TOPO}_CT_${filenameG}_${RESN}.vrt 
+rm -f $RAM/${TOPO}_CT_${filenameG}_${RESN}.vrt  
 rm -r $RAM/loc_${TOPO}_CT_${filenameG}_${RESN}
 fi
 ' _ 
