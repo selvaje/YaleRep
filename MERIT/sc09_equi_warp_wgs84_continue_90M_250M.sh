@@ -33,6 +33,7 @@ if [ $RESN = "250" ]  ; then export RES="0.00208333333333333333333333333" ; expo
 if [ $RESN = "1.00" ] ; then export RES="0.00833333333333333333333333333" ; export ERES="1.00" ;  fi     # check this resulution in case running the 1km 
 
 export RESN
+echo $RESN
 
 
 if [ $TOPO != "geom" ]  ; then 
