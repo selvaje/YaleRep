@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -p day
+#SBATCH -p scavenge
 #SBATCH -n 1 -c 12  -N 1  
 #SBATCH -t 24:00:00
 #SBATCH --mail-type=ALL
@@ -7,6 +7,8 @@
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc09_equi_warp_wgs84_continue_90M_250M.sh.%J.out
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc09_equi_warp_wgs84_continue_90M_250M.sh.%J.err
 #SBATCH --mem-per-cpu=2000
+
+ulimit -c 0
 
 # warp equi7 to wgs84 for 90m and 250m, save intermediate tif in scratch then cp to project by getting the mean in case of overalliping 
 
@@ -40,9 +42,9 @@ echo $RESN
 
 if [ $TOPO != "geom" ]  ; then 
 
-for CT in AS EU  AF AN   NA OC SA ; do 
+for CT in AS EU ; do #  AF AN   NA OC SA ; do 
 export CT 
-if [ ! -f $MERIT/$TOPO/tiles/all_${CT}_tif.vrt ]; then gdalbuildvrt -overwrite -srcnodata -99999 -vrtnodata -9999 $MERIT/$TOPO/tiles/all_${CT}_tif.vrt $MERIT/$TOPO/tiles/${TOPO}_100M_MERIT_${CT}_???_???.tif ; fi 
+if [ ! -f $MERIT/$TOPO/tiles/all_${CT}_tif.vrt ]; then gdalbuildvrt -overwrite -srcnodata -9999 -vrtnodata -9999 $MERIT/$TOPO/tiles/all_${CT}_tif.vrt $MERIT/$TOPO/tiles/${TOPO}_100M_MERIT_${CT}_???_???.tif ; fi 
 
 # gdalwarp  by bilenear  each  single equi7 tile to wgs84; check if a tile is empty due to the ZONE.shp.mask 
 
@@ -53,7 +55,8 @@ geostring=$(getCorners4Gwarp $file)
 
 if [ $TOPO = "aspect" ] || [ $TOPO = "rough-scale" ] || [ $TOPO = "dev-scale" ]  ; then ALG=near ; else ALG=bilinear ; fi
 
-gdalwarp --config GDAL_CACHEMAX 1500 -overwrite -wm 1500 -overwrite -overwrite  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -r $ALG -srcnodata -9999 -dstnodata -9999 -tr ${RES} ${RES} -te $geostring -s_srs $EQUI/${CT}/PROJ/EQUI7_V13_${CT}_PROJ_ZONE.prj -t_srs $EQUI/${CT}/GEOG/EQUI7_V13_${CT}_GEOG_ZONE.prj $MERIT/$TOPO/tiles/all_${CT}_tif.vrt $RAM/${TOPO}_${CT}_${filename}_${RESN}.tif
+# $EQUI/${CT}/GEOG/EQUI7_V13_${CT}_GEOG_ZONE.prj 
+gdalwarp --config GDAL_CACHEMAX 1500 -overwrite -wm 1500 -overwrite -overwrite  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -r $ALG -srcnodata -9999 -dstnodata -9999 -tr ${RES} ${RES} -te $geostring -s_srs $EQUI/${CT}/PROJ/EQUI7_V13_${CT}_PROJ_ZONE.prj -t_srs EPSG:4326   $MERIT/$TOPO/tiles/all_${CT}_tif.vrt $RAM/${TOPO}_${CT}_${filename}_${RESN}.tif
 
 pksetmask  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -m $EQUI_AD/$CT/GEOG/EQUI7_V13_${CT}_GEOG_ZONEBUFLARGE_KM${ERES}.tif -msknodata 0 -nodata -9999 -i $RAM/${TOPO}_${CT}_${filename}_${RESN}.tif  -o $RAM/${TOPO}_${CT}_${filename}_msk_${RESN}.tif
 rm -f $RAM/${TOPO}_${CT}_${filename}_${RESN}.tif
@@ -72,7 +75,7 @@ ls  $MERIT/input_tif/*_dem.tif    | xargs -n 1 -P $P  bash -c $'
 file=$1 
 filename=$(basename $file _dem.tif)
 
-gdalbuildvrt  -overwrite  -separate -a_srs EPSG:4326 -allow_projection_difference  $RAM/${TOPO}_CT_${filename}_${RESN}.vrt  $SCRATCH/$TOPO/tiles/${TOPO}_??_${filename}_${RESN}.tif
+gdalbuildvrt  -overwrite  -separate -a_srs EPSG:4326   $RAM/${TOPO}_CT_${filename}_${RESN}.vrt  $SCRATCH/$TOPO/tiles/${TOPO}_{EU,AS}_${filename}_${RESN}.tif
 BAND=$(pkinfo -nb -i  $RAM/${TOPO}_CT_${filename}_${RESN}.vrt     | awk \'{ print $2 }\' ) 
 
 if [ $BAND -eq 1 ] ; then 
@@ -82,14 +85,14 @@ echo start weighted mean
 
 # if [ $TOPO = "aspect" ] || [ $TOPO = "rough-scale" ] || [ $TOPO = "dev-scale" ]  ; then ALG=max ; else ALG=mean ; fi 
 
-gdalbuildvrt -a_srs EPSG:4326 -allow_projection_difference  -overwrite  -separate -te $( getCorners4Gwarp $RAM/${TOPO}_CT_${filename}_${RESN}.vrt ) $RAM/${TOPO}_CT_${filename}_${RESN}_WEIGHT.vrt  $SCRATCH/$TOPO/tiles/${TOPO}_??_${filename}_${RESN}.tif   $EQUI_AD/EU/GEOG/EQUI7_V13_EUAS_GEOG_WEIGHTLARGE.tif
+gdalbuildvrt -a_srs EPSG:4326 -overwrite  -tr ${RES} ${RES} -separate -te $( getCorners4Gwarp $RAM/${TOPO}_CT_${filename}_${RESN}.vrt ) $RAM/${TOPO}_CT_${filename}_${RESN}_WEIGHT.vrt  $SCRATCH/$TOPO/tiles/${TOPO}_??_${filename}_${RESN}.tif   $EQUI_AD/EUAS/GEOG/EQUI7_V13_EUAS_GEOG_WEIGHT_KM0.10.tif
 
-# gdallocationinfo   dx_250M_MERIT_n55e045_WW.tif  600 600 | grep Value ; gdallocationinfo   dx_250M_MERIT_n55e045_B.tif  600 600
+#   gdallocationinfo   dx_250M_MERIT_n55e045_WW.tif  600 600 | grep Value ; gdallocationinfo   dx_250M_MERIT_n55e045_B.tif  600 600
 #   Band 1:  Value:  0.00364719796925783
 #   Band 2:  Value: -0.00865980889648199
 #   Band 3:  Value: 925
 #   result   Value: 0.0027241725474596
-#  ((0.00364719796925783×925 )+ (-0.00865980889648199×75))÷1000
+#   ((0.00364719796925783×925 )+ (-0.00865980889648199×75))÷1000
 
 oft-calc  $RAM/${TOPO}_CT_${filename}_${RESN}_WEIGHT.vrt $RAM/${TOPO}_CT_${filename}_${RESN}_WEIGHT.tif  <<EOF
 1
