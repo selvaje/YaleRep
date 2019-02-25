@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -p day
+#SBATCH -p scavenge
 #SBATCH -n 1 -c 12  -N 1  
 #SBATCH -t 24:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc04_equi7_reproj_dem.sh.%J.out 
@@ -35,12 +35,13 @@ paste <(ogrinfo -al -GEOM=NO  $EQUI7/grids_enlarge/${CT}/PROJ/EQUI7_V13_${CT}_PR
 
 cat $equi7/${CT}/tile_equi7_${CT}_warp.txt  | xargs -n 5 -P 12  bash -c $' 
 
-gdalwarp -srcnodata -9999 -dstnodata -9999 -te $1 $2 $3 $4 -co COMPRESS=DEFLATE -co ZLEVEL=9 -t_srs "$EQUI7/grids/${CT}/PROJ/EQUI7_V13_${CT}_PROJ_ZONE.prj" -tr 100 100 -r bilinear $INDIR/all_tif.vrt /dev/shm/${CT}_${5}_dem.tif -overwrite 
-gdal_translate -a_nodata -9999  -srcwin 8 8 6000 6000 -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND /dev/shm/${CT}_${5}_dem.tif    /dev/shm/${CT}_${5}_dem_crop.tif  
-rm -f /dev/shm/${CT}_${5}_dem.tif  
+gdalwarp -srcnodata -9999 -dstnodata -9999 -te $1 $2 $3 $4 -co COMPRESS=DEFLATE -co ZLEVEL=9 -t_srs "$EQUI7/grids/${CT}/PROJ/EQUI7_V13_${CT}_PROJ_ZONE.prj" -tr 100 100 -r bilinear $INDIR/all_tif.vrt /dev/shm/${CT}_${5}_dem.tif -overwrite
+gdal_translate -a_nodata -9999  -srcwin 8 8 6000 6000 -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND /dev/shm/${CT}_${5}_dem.tif /dev/shm/${CT}_${5}_dem_msk.tif # changed the name for the mask
+rm -f /dev/shm/${CT}_${5}_dem.tif
 
-pksetmask -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -ot Float32  -m $DIR/../EQUI7/grids_enlarge/${CT}/PROJ/EQUI7_V13_${CT}_PROJ_ZONE_KM$KM.tif -msknodata 0 -nodata -9999 -i /dev/shm/${CT}_${5}_dem_crop.tif  -o /dev/shm/${CT}_${5}_dem_msk.tif 
-rm -f /dev/shm/${CT}_${5}_dem_crop.tif 
+# remove the mask we mask later after the warping 
+# pksetmask -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -ot Float32  -m $DIR/../EQUI7/grids_enlarge/${CT}/PROJ/EQUI7_V13_${CT}_PROJ_ZONE_KM$KM.tif -msknodata 0 -nodata -9999 -i /dev/shm/${CT}_${5}_dem_crop.tif  -o /dev/shm/${CT}_${5}_dem_msk.tif
+rm -f /dev/shm/${CT}_${5}_dem_crop.tif
 
 MAX=$(pkstat -max -i  /dev/shm/${CT}_${5}_dem_msk.tif | awk \'{ print $2 }\')
 if [ $MAX ==  "-9999" ] ; then 

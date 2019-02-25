@@ -7,9 +7,9 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc05_dem_variables_float_noMult_equi7.sh
-#SBATCH --array=1-831
+#SBATCH --array=1
 
-# 831    number of files 
+# 863    number of files for all continent 
 # bash    /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc05_dem_variables_float_noMult_equi7.sh
 # sbatch  /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc05_dem_variables_float_noMult_equi7.sh  
 
@@ -18,7 +18,10 @@ module load Apps/GRASS/7.3-beta
 # 
 # file=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/MERIT/equi7/dem/EU/EU_048_000.tif
 
-file=$(ls /gpfs/loomis/project/fas/sbsc/ga254/dataproces/MERIT/equi7/dem/??/??_???_???.tif | head -n $SLURM_ARRAY_TASK_ID | tail -1 )
+# 
+file=$(ls /gpfs/loomis/project/fas/sbsc/ga254/dataproces/MERIT/equi7/dem/AS/AS_048_006.tif   | head -n $SLURM_ARRAY_TASK_ID | tail -1 )
+
+# file=$(ls /gpfs/loomis/project/fas/sbsc/ga254/dataproces/MERIT/equi7/dem/??/??_???_???.tif | head -n $SLURM_ARRAY_TASK_ID | tail -1 )
 # use this if one file is missing
 
 MERIT=/project/fas/sbsc/ga254/dataproces/MERIT
@@ -33,6 +36,7 @@ ulx=$(gdalinfo $file | grep "Upper Left"  | awk '{ gsub ("[(),]"," ") ; printf (
 uly=$(gdalinfo $file | grep "Upper Left"  | awk '{ gsub ("[(),]"," ") ; printf ("%.16f" ,  $4  + (8 * 100 )) }')
 lrx=$(gdalinfo $file | grep "Lower Right" | awk '{ gsub ("[(),]"," ") ; printf ("%.16f" ,  $3  + (8 * 100 )) }')
 lry=$(gdalinfo $file | grep "Lower Right" | awk '{ gsub ("[(),]"," ") ; printf ("%.16f" ,  $4  - (8 * 100 )) }')
+
 
 echo $ulx $uly $lrx $lry
 gdal_translate   -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -projwin  $ulx $uly $lrx $lry  $MERIT/equi7/dem/${CT}/all_${CT}_tif.vrt  $RAM/$filename.tif 
@@ -119,8 +123,6 @@ rm  $MERIT/spi/tiles/${filename}_tmp.tif
 rm -rf $RAM/loc_$filename 
 
 source /gpfs/home/fas/sbsc/ga254/scripts/general/create_location_grass7.3-grace2.sh    $RAM loc_$filename   $RAM/${filename}_0.tif 
-
-filename=$( basename  $file _0.tif )  # necessario per sovrascirve il filename di create location
 
 r.in.gdal in=$RAM/$filename.tif   out=$filename --overwrite  memory=2000 # used later as mask
 

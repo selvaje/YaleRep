@@ -7,10 +7,10 @@
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc05_dem_variables_float_noMult_equi7_4HyperScaleRoughness.sh
-#SBATCH --array=1-831
+#SBATCH --array=1
 #SBATCH --mem-per-cpu=20000
 
-# 831    number of files   special tile 415     176,177,178,415,416  
+# 863    number of files   special tile 415     176,177,178,415,416  
 # bash    /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc05_dem_variables_float_noMult_equi7_4HyperScaleRoughness.sh
 # sbatch  /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc05_dem_variables_float_noMult_equi7_4HyperScaleRoughness.sh
 
@@ -21,7 +21,11 @@
 
 # file=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/MERIT/equi7/dem/EU/EU_048_000.tif
 
-file=$(ls /gpfs/loomis/project/fas/sbsc/ga254/dataproces/MERIT/equi7/dem/??/??_???_???.tif | head -n $SLURM_ARRAY_TASK_ID | tail -1 )
+# AS/AS_048_006.tif tailandia stripe 
+
+file=$(ls /gpfs/loomis/project/fas/sbsc/ga254/dataproces/MERIT/equi7/dem/AS/AS_???_???.tif | head -n $SLURM_ARRAY_TASK_ID | tail -1 )
+# file=$(ls /gpfs/loomis/project/fas/sbsc/ga254/dataproces/MERIT/equi7/dem/??/{AS_006_042,AS_006_048,AS_006_054,AS_012_042,AS_012_048,AS_012_054,AS_000_042,AS_000_048,AS_500_054,EU_078_012,EU_078_006,EU_500_018,EU_072_018,EU_072_012,EU_072_006}.tif | head -n $SLURM_ARRAY_TASK_ID | tail -1 )
+
 # use this if one file is missing
 
 MERIT=/project/fas/sbsc/ga254/dataproces/MERIT
@@ -32,10 +36,10 @@ CT=${filename:0:2}
 echo filename  $filename
 echo file $filename.tif  SLURM_ARRAY_TASK_ID $SLURM_ARRAY_TASK_ID 
 
-ulx=$(gdalinfo $file | grep "Upper Left"  | awk '{ gsub ("[(),]"," ") ; printf ("%i" ,  $3  - (2010 * 100 )) }')
-uly=$(gdalinfo $file | grep "Upper Left"  | awk '{ gsub ("[(),]"," ") ; printf ("%i" ,  $4  + (2010 * 100 )) }')
-lrx=$(gdalinfo $file | grep "Lower Right" | awk '{ gsub ("[(),]"," ") ; printf ("%i" ,  $3  + (2010 * 100 )) }')
-lry=$(gdalinfo $file | grep "Lower Right" | awk '{ gsub ("[(),]"," ") ; printf ("%i" ,  $4  - (2010 * 100 )) }')
+ulx=$(gdalinfo $file | grep "Upper Left"  | awk '{ gsub ("[(),]"," ") ; printf ("%i" ,  $3  - (4010 * 100 )) }')
+uly=$(gdalinfo $file | grep "Upper Left"  | awk '{ gsub ("[(),]"," ") ; printf ("%i" ,  $4  + (4010 * 100 )) }')
+lrx=$(gdalinfo $file | grep "Lower Right" | awk '{ gsub ("[(),]"," ") ; printf ("%i" ,  $3  + (4010 * 100 )) }')
+lry=$(gdalinfo $file | grep "Lower Right" | awk '{ gsub ("[(),]"," ") ; printf ("%i" ,  $4  - (4010 * 100 )) }')
 
 echo $ulx $uly $lrx $lry
 gdal_translate   -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -projwin  $ulx $uly $lrx $lry  $MERIT/equi7/dem/${CT}/all_${CT}_tif.vrt  $RAM/$filename.tif 
@@ -45,13 +49,14 @@ gdal_edit.py  -a_nodata 0  $RAM/${filename}_0.tif
 # ./whitebox_tools   --toolhelp="MultiscaleRoughness" 
 # ./whitebox_tools   --toolhelp="MaxElevationDeviation" 
 
-if [ $filename = "AS_006_042" ] || [ $filename = "AS_006_048" ] || [ $filename = "AS_006_054" ] || [ $filename = "EU_078_012" ] || [ $filename = "EU_078_006" ] ; then 
+if [ $filename = "AS_006_042" ] || [ $filename = "AS_006_048" ] || [ $filename = "AS_006_054" ] || [ $filename = "AS_012_042" ] || [ $filename = "AS_012_048" ] || [ $filename = "AS_012_054" ] || [ $filename = "AS_000_042" ] || [ $filename = "AS_000_048" ] || [ $filename = "AS_500_054" ] || [ $filename = "EU_078_012" ] || [ $filename = "EU_078_006" ] || [ $filename = "EU_500_018" ] || [ $filename = "EU_072_018" ] || [ $filename = "EU_072_012" ] || [ $filename = "EU_072_006" ]  ; then 
+
 pksetmask -m  $RAM/${filename}_0.tif  -msknodata  -20  -nodata  -20  -p  "<"  -i $RAM/${filename}_0.tif -o $RAM/${filename}_00.tif
 mv $RAM/${filename}_00.tif  $RAM/${filename}_0.tif  
 fi
 
 singularity exec /gpfs/home/fas/sbsc/ga254/scripts/MERIT/UbuntuWB.simg  bash <<EOF
-/WBT/whitebox_tools  -r=MultiscaleRoughness  -v --wd="$RAM"  --dem=${filename}_0.tif --out_mag=${filename}_rough-magnitude.tif  --out_scale=${filename}_rough-scale.tif --min_scale=1 --max_scale=2000 --step=3
+/WBT/whitebox_tools  -r=MultiscaleRoughness  -v --wd="$RAM"  --dem=${filename}_0.tif --out_mag=${filename}_rough-magnitude.tif  --out_scale=${filename}_rough-scale.tif --min_scale=1 --max_scale=4000 --step=3
 EOF
 
 for PAR in rough-magnitude rough-scale   ; do
@@ -69,7 +74,7 @@ rm -f  $RAM/${filename}_${PAR}_msk.tif
 done 
 
 singularity exec /gpfs/home/fas/sbsc/ga254/scripts/MERIT/UbuntuWB.simg  bash <<EOF
-/WBT/whitebox_tools -r=MaxElevationDeviation  -v --wd="$RAM"  --dem=${filename}_0.tif --out_mag=${filename}_dev-magnitude.tif --out_scale=${filename}_dev-scale.tif --min_scale=1 --max_scale=2000 --step=3
+/WBT/whitebox_tools -r=MaxElevationDeviation  -v --wd="$RAM"  --dem=${filename}_0.tif --out_mag=${filename}_dev-magnitude.tif --out_scale=${filename}_dev-scale.tif --min_scale=1 --max_scale=4000 --step=3
 EOF
 
 for PAR in  dev-magnitude dev-scale   ; do 

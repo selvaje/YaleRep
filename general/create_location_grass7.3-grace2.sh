@@ -6,21 +6,21 @@
 
 export GISDBASE=$1
 export LOCATION=$2
-export file=$3
+export FILE=$3
 
-export filename=$(basename  $file .tif)
+export FILENAME=$(basename  $FILE .tif)
 
 rm -rf  $GISDBASE/$LOCATION $GISDBASE/${LOCATION}_tmp$$
 
 mkdir -p  $GISDBASE/${LOCATION}_tmp$$/tmp
 
-echo "LOCATION_NAME: ${LOCATION}_tmp$$"             > $HOME/.grass7/rc_$filename
-echo "GISDBASE: $1"                                >> $HOME/.grass7/rc_$filename
-echo "MAPSET: tmp"                                 >> $HOME/.grass7/rc_$filename
-echo "GRASS_GUI: text"                             >> $HOME/.grass7/rc_$filename
+echo "LOCATION_NAME: ${LOCATION}_tmp$$"             > $HOME/.grass7/rc_$FILENAME
+echo "GISDBASE: $1"                                >> $HOME/.grass7/rc_$FILENAME
+echo "MAPSET: tmp"                                 >> $HOME/.grass7/rc_$FILENAME
+echo "GRASS_GUI: text"                             >> $HOME/.grass7/rc_$FILENAME
 
-# path to GRASS settings file
-export GISRC=$HOME/.grass7/rc_$filename
+# path to GRASS settings FILE
+export GISRC=$HOME/.grass7/rc_$FILENAME
 export GRASS_PYTHON=python
 export GRASS_MESSAGE_FORMAT=plain
 export GRASS_PAGER=cat
@@ -43,8 +43,8 @@ rm -rf  $GISDBASE/$LOCATION
 
 echo start importing 
 
-r.in.gdal -k    in=$file      out=$filename    location=$LOCATION   memory=2000
-# if [ $imp = "r.external" ] ; then r.external  input=$file   out=$filename  ; fi 
+r.in.gdal -k    in=$FILE      out=$FILENAME    location=$LOCATION   memory=2000
+# if [ $imp = "r.external" ] ; then r.external  input=$FILE   out=$FILENAME  ; fi 
 
 g.mapset   mapset=PERMANENT  location=$LOCATION
 
