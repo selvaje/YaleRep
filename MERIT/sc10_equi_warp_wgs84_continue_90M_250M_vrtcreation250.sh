@@ -4,16 +4,16 @@
 #SBATCH -t 24:00:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc10_equi_warp_wgs84_continue_90M_250M_vrtcreation.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc10_equi_warp_wgs84_continue_90M_250M_vrtcreation.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc10_equi_warp_wgs84_continue_90M_250M_vrtcreation250.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc10_equi_warp_wgs84_continue_90M_250M_vrtcreation250.sh.%J.err
 #SBATCH --mem-per-cpu=10000
 
 # intensity exposition range variance elongation azimuth extend width 
 
-# for TOPO in geom dev-magnitude dev-scale rough-magnitude rough-scale elev-stdev aspect aspect-sine aspect-cosine northness eastness dx dxx dxy dy dyy pcurv roughness slope tcurv tpi tri vrm cti spi convergence ; do for RESN in 250 ; do sbatch --export=TOPO=$TOPO,RESN=$RESN    /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc10_equi_warp_wgs84_continue_90M_250M_vrtcreation.sh ; done ; done 
+# for TOPO in geom dev-magnitude dev-scale rough-magnitude rough-scale elev-stdev aspect aspect-sine aspect-cosine northness eastness dx dxx dxy dy dyy pcurv roughness slope tcurv tpi tri vrm cti spi convergence ; do for RESN in 250 ; do sbatch --export=TOPO=$TOPO,RESN=$RESN    /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc10_equi_warp_wgs84_continue_90M_250M_vrtcreation250.sh ; done ; done 
 
-# sbatch  --export=TOPO=dx,RESN=0.10 /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc10_equi_warp_wgs84_continue_90M_250M_vrtcreation.sh
-# sbatch  --export=TOPO=dx,RESN=250  /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc10_equi_warp_wgs84_continue_90M_250M_vrtcreation.sh
+# sbatch  --export=TOPO=dx,RESN=0.10 /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc10_equi_warp_wgs84_continue_90M_250M_vrtcreation250.sh
+# sbatch  --export=TOPO=dx,RESN=250  /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc10_equi_warp_wgs84_continue_90M_250M_vrtcreation250.sh
 
 echo "############################################################"
 sstat  -j   $SLURM_JOB_ID.batch   --format=JobID,MaxVMSize
@@ -69,7 +69,7 @@ if [ $TOPO = dxx ]           ; then OT=Int16 ; MULT=10000 ; NODATA=-32768 ; SCAL
 if [ $TOPO = dxy ]           ; then OT=Int16 ; MULT=100000; NODATA=-32768 ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi # -min -0.0403883 -max 0.0424977 OK
 if [ $TOPO = dy ]            ; then OT=Int16 ; MULT=1000  ; NODATA=-32768 ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi # -min -8.01632   -max 8.7637  OK
 if [ $TOPO = dyy ]           ; then OT=Int16 ; MULT=10000 ; NODATA=-32768 ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi # -min -0.0786815 -max 0.162356 OK
-if [ $TOPO = easthness ]     ; then OT=Int16 ; MULT=10000 ; NODATA=-32768 ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi # -min -0.971806  -max 0.975874 OK
+if [ $TOPO = eastness ]     ; then OT=Int16 ; MULT=10000 ; NODATA=-32768 ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi # -min -0.971806  -max 0.975874 OK
 if [ $TOPO = elev-stdev ]    ; then OT=Int16 ; MULT=10    ; NODATA=-32768 ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi # -min 0          -max 847.221  OK
 if [ $TOPO = northness ]     ; then OT=Int16 ; MULT=10000 ; NODATA=-32768 ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi # -min -0.965886  -max 0.982116 OK
 if [ $TOPO = pcurv ]         ; then OT=Int16 ; MULT=100000; NODATA=-32768 ; SCALE=$(awk -v MULT=$MULT 'BEGIN {print 1/MULT}') ; fi # -min -0.0671902 -max 0.0295959 OK

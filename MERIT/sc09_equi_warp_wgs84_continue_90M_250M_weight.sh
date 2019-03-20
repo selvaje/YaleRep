@@ -12,7 +12,7 @@ ulimit -c 0
 
 # warp equi7 to wgs84 for 90m and 250m, save intermediate tif in scratch then cp to project by getting the mean in case of overalliping 
 
-# for TOPO in dev-magnitude dev-scale rough-magnitude rough-scale elev-stdev aspect aspect-sine aspect-cosine northness easthness dx dxx dxy dy dyy pcurv roughness slope tcurv tpi tri vrm cti spi convergence ; do for RESN in 90  250  ; do sbatch --export=TOPO=$TOPO,RESN=$RESN    /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc09_equi_warp_wgs84_continue_90M_250M_weight.sh ; done ; done 
+# for TOPO in dev-magnitude dev-scale rough-magnitude rough-scale elev-stdev aspect aspect-sine aspect-cosine northness eastness dx dxx dxy dy dyy pcurv roughness slope tcurv tpi tri vrm cti spi convergence ; do for RESN in 90  250  ; do sbatch --export=TOPO=$TOPO,RESN=$RESN    /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc09_equi_warp_wgs84_continue_90M_250M_weight.sh ; done ; done 
 
 # sbatch  --export=TOPO=dx,RESN=90 /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc09_equi_warp_wgs84_continue_90M_250M_weight.sh
 # sbatch  --export=TOPO=dx,RESN=250  /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc09_equi_warp_wgs84_continue_90M_250M_weight.sh
@@ -37,7 +37,7 @@ P=4
 
 if [ $RESN = "90" ]  ;  then export RES="0.00083333333333333333333333333" ; export ERES="0.10" ;  fi 
 if [ $RESN = "250" ]  ; then export RES="0.00208333333333333333333333333" ; export ERES="0.25" ;  fi  
-if [ $RESN = "1.00" ] ; then export RES="0.00833333333333333333333333333" ; export ERES="1.00" ;  fi     # check this resulution in case running the 1km 
+
 
 if [ $TOPO != "geom" ]  ; then 
 
@@ -140,7 +140,7 @@ fi
 ############ EUASAF with OC  #########################
 ######################################################
 
-cat  <( for file in  $SCRATCH/$TOPO/tiles/${TOPO}_OC_*_${RESN}.tif  ; do filename=$(basename $file _250.tif) ; echo ${filename: -7}  ; done )   <(  for file in  $SCRATCH/$TOPO/tiles_EUAS/${TOPO}_${RESN}M_MERIT_*.tif ; do filename=$(basename $file .tif  )   ; echo ${filename: -7}  ; done ) | sort | uniq  | xargs -n 1 -P $P  bash -c $' 
+cat  <( for file in  $SCRATCH/$TOPO/tiles/${TOPO}_OC_*_${RESN}.tif  ; do filename=$(basename $file _$RESN.tif) ; echo ${filename: -7}  ; done )   <(  for file in  $SCRATCH/$TOPO/tiles_EUAS/${TOPO}_${RESN}M_MERIT_*.tif ; do filename=$(basename $file .tif  )   ; echo ${filename: -7}  ; done ) | sort | uniq  | xargs -n 1 -P $P  bash -c $' 
 
 filename=$1 
                                                                                               

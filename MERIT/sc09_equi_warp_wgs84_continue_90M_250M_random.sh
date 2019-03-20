@@ -149,7 +149,7 @@ fi
 ############ EUASAF with OC  #########################
 ######################################################
 
-cat  <( for file in  $SCRATCH/$TOPO/tiles/${TOPO}_OC_*_${RESN}.tif  ; do filename=$(basename $file _250.tif) ; echo ${filename: -7}  ; done )   <(  for file in  $SCRATCH/$TOPO/tiles_EUAS/${TOPO}_${RESN}M_MERIT_*.tif ; do filename=$(basename $file .tif  )   ; echo ${filename: -7}  ; done ) | sort | uniq  | xargs -n 1 -P $P  bash -c $' 
+cat  <( for file in  $SCRATCH/$TOPO/tiles/${TOPO}_OC_*_${RESN}.tif  ; do filename=$(basename $file _${RESN}.tif) ; echo ${filename: -7}  ; done )   <(  for file in  $SCRATCH/$TOPO/tiles_EUAS/${TOPO}_${RESN}M_MERIT_*.tif ; do filename=$(basename $file .tif  )   ; echo ${filename: -7}  ; done ) | sort | uniq  | xargs -n 1 -P $P  bash -c $' 
 
 filename=$1 
                                                                                               

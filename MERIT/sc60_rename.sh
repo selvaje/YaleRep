@@ -14,7 +14,7 @@ for TOPO in aspect ; do for file in $TOPO/tiles/??_???_???_sin.tif ; do filename
 for TOPO in aspect ; do for file in $TOPO/tiles/??_???_???_cos.tif ; do filename=$(basename $file _cos.tif) ;  mv $file  $TOPO/tiles/${TOPO}-cosine_100M_MERIT_$filename.tif ; done ; done
 
 for TOPO in aspect ; do for file in $TOPO/tiles/??_???_???_Nw.tif ; do filename=$(basename $file _Nw.tif) ;  mv $file  northness/tiles/northness_100M_MERIT_$filename.tif ; done ; done
-for TOPO in aspect ; do for file in $TOPO/tiles/??_???_???_Ew.tif ; do filename=$(basename $file _Ew.tif) ;  mv $file  easthness/tiles/easthness_100M_MERIT_$filename.tif ; done ; done
+for TOPO in aspect ; do for file in $TOPO/tiles/??_???_???_Ew.tif ; do filename=$(basename $file _Ew.tif) ;  mv $file  eastness/tiles/eastness_100M_MERIT_$filename.tif ; done ; done
 
 
 for TOPO in stdev  ; do for file in $TOPO/tiles/??_???_???.tif ; do filename=$(basename $file .tif) ;  mv $file  $TOPO/tiles/elev-stdev_100M_MERIT_$filename.tif ; done ; done

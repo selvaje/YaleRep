@@ -12,7 +12,7 @@ ulimit -c 0
 
 # warp equi7 to wgs84 for 90m and 250m, save intermediate tif in scratch then cp to project by getting the mean in case of overalliping 
 
-# for TOPO in dx dxx dxy dy dyy aspect-sine aspect-cosine northness easthness dev-magnitude dev-scale rough-magnitude rough-scale geom elev-stdev aspect  pcurv roughness slope tcurv tpi tri vrm cti spi convergence ; do for RESN in 90  250  ; do sbatch --export=TOPO=$TOPO,RESN=$RESN    /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc08_equi_warp_wgs84_continue_90M_250M_tiles.sh ; done ; done 
+# for TOPO in dx dxx dxy dy dyy aspect-sine aspect-cosine northness eastness dev-magnitude dev-scale rough-magnitude rough-scale geom elev-stdev aspect  pcurv roughness slope tcurv tpi tri vrm cti spi convergence ; do for RESN in 90  250  ; do sbatch --export=TOPO=$TOPO,RESN=$RESN    /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc08_equi_warp_wgs84_continue_90M_250M_tiles.sh ; done ; done 
 
 # sbatch  --export=TOPO=dx,RESN=90   /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc08_equi_warp_wgs84_continue_90M_250M_tiles.sh
 # sbatch  --export=TOPO=dx,RESN=250  /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc08_equi_warp_wgs84_continue_90M_250M_tiles.sh

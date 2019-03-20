@@ -10,7 +10,7 @@
 
 # intensity exposition range variance elongation azimuth extend width 
 
-# for TOPO in dev-magnitude dev-scale rough-magnitude rough-scale elev-stdev aspect aspect-sine aspect-cosine northness easthness dx dxx dxy dy dyy pcurv roughness slope tcurv tpi tri vrm cti spi convergence geom ; do for RESN in  0.25 ; do sbatch --export=TOPO=$TOPO,RESN=$RESN    /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc99_crop.sh ; done ; done 
+# for TOPO in dev-magnitude dev-scale rough-magnitude rough-scale elev-stdev aspect aspect-sine aspect-cosine northness eastness dx dxx dxy dy dyy pcurv roughness slope tcurv tpi tri vrm cti spi convergence geom ; do for RESN in  0.25 ; do sbatch --export=TOPO=$TOPO,RESN=$RESN    /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc99_crop.sh ; done ; done 
 
 P=$SLURM_CPUS_PER_TASK
 export MERIT=/project/fas/sbsc/ga254/dataproces/MERIT

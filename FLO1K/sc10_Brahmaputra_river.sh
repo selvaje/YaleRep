@@ -13,6 +13,11 @@ DIR=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/FLO1K
 # https://www.google.com/maps/place/26%C2%B024'45.7%22N+92%C2%B010'11.3%22E/@26.428006,92.1490225,12.83z/data=!4m5!3m4!1s0x0:0x0!8m2!3d26.4127!4d92.1698                                                                                    
 # https://www.google.com/maps/place/29%C2%B016'15.2%22N+95%C2%B012'12.6%22E/@29.255042,95.2081115,13.75z/data=!4m5!3m4!1s0x0:0x0!8m2!3d29.2709!4d95.2035
 
+
+
+
+
+
 # gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -projwin 81.5 26    82.5 25   FLO1K.ts.1960.2015.qav_mean.tif  allahabad/FLO1K.ts.1960.2015.qav_mean_allahabad.tif                                                                        
 
 # paste  <(seq 1960 2015)  <(gdallocationinfo -geoloc -valonly $DIR/FLO1K.ts.1960.2015.qmi_invertlatlong.nc 89.6850  24.0050) <(gdallocationinfo -geoloc -valonly  $DIR/FLO1K.ts.1960.2015.qav_invertlatlong.nc 89.6850 24.0050) <(gdallocationinfo -geoloc -valonly  $DIR/FLO1K.ts.1960.2015.qma_invertlatlong.nc 89.6850 24.0050) > $DIR/brahmaputra/bera_min_mean_max.txt
@@ -22,6 +27,8 @@ DIR=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/FLO1K
 # paste  <(seq 1960 2015)  <(gdallocationinfo -geoloc -valonly $DIR/FLO1K.ts.1960.2015.qmi_invertlatlong.nc 92.16980 26.4127) <(gdallocationinfo -geoloc -valonly  $DIR/FLO1K.ts.1960.2015.qav_invertlatlong.nc 92.16980 26.4127) <(gdallocationinfo -geoloc -valonly  $DIR/FLO1K.ts.1960.2015.qma_invertlatlong.nc 92.16980 26.4127) > $DIR/brahmaputra/guwahati_min_mean_max.txt
 
 paste  <(seq 1960 2015)  <(gdallocationinfo -geoloc -valonly $DIR/FLO1K.ts.1960.2015.qmi_invertlatlong.nc 95.2035 29.2709) <(gdallocationinfo -geoloc -valonly  $DIR/FLO1K.ts.1960.2015.qav_invertlatlong.nc 95.2035 29.2709) <(gdallocationinfo -geoloc -valonly  $DIR/FLO1K.ts.1960.2015.qma_invertlatlong.nc 95.2035 29.2709) > $DIR/brahmaputra/beiben_min_mean_max.txt
+paste  <(seq 1960 2015)  <(gdallocationinfo -geoloc -valonly $DIR/FLO1K.ts.1960.2015.qmi_invertlatlong.nc 95.2035 29.2709) <(gdallocationinfo -geoloc -valonly  $DIR/FLO1K.ts.1960.2015.qav_invertlatlong.nc 95.2035 29.2709) <(gdallocationinfo -geoloc -valonly  $DIR/FLO1K.ts.1960.2015.qma_invertlatlong.nc 93.3400 26.7100) > $DIR/brahmaputra/tzpur_min_mean_max.txt
+paste  <(seq 1960 2015)  <(gdallocationinfo -geoloc -valonly $DIR/FLO1K.ts.1960.2015.qmi_invertlatlong.nc 95.2035 29.2709) <(gdallocationinfo -geoloc -valonly  $DIR/FLO1K.ts.1960.2015.qav_invertlatlong.nc 95.2035 29.2709) <(gdallocationinfo -geoloc -valonly  $DIR/FLO1K.ts.1960.2015.qma_invertlatlong.nc 89.7361 25.6823) > $DIR/brahmaputra/kurig_min_mean_max.txt
 
 
 

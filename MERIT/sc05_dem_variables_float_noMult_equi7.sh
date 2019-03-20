@@ -78,7 +78,7 @@ gdal_calc.py  --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9  --co=INTE
 
 echo   Ew  Nw   median  
 
-gdal_calc.py --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9 --co=INTERLEAVE=BAND -A $MERIT/slope/tiles/slope_100M_MERIT_${filename}.tif -B $MERIT/aspect-sine/tiles/aspect-sine_100M_MERIT_${filename}.tif --calc="((sin(A.astype(float) * 3.141592 / 180)) * B.astype(float))" --outfile  $MERIT/easthness/tiles/easthness_100M_MERIT_${filename}.tif --overwrite --type=Float32
+gdal_calc.py --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9 --co=INTERLEAVE=BAND -A $MERIT/slope/tiles/slope_100M_MERIT_${filename}.tif -B $MERIT/aspect-sine/tiles/aspect-sine_100M_MERIT_${filename}.tif --calc="((sin(A.astype(float) * 3.141592 / 180)) * B.astype(float))" --outfile  $MERIT/eastness/tiles/eastness_100M_MERIT_${filename}.tif --overwrite --type=Float32
 gdal_calc.py --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9 --co=INTERLEAVE=BAND -A $MERIT/slope/tiles/slope_100M_MERIT_${filename}.tif -B $MERIT/aspect-cosine/tiles/aspect-cosine_100M_MERIT_${filename}.tif  --calc="((sin(A.astype(float) * 3.141592 / 180)) * B.astype(float))" --outfile  $MERIT/northness/tiles/northness_100M_MERIT_${filename}.tif --overwrite --type=Float32
 
 echo  generate a Terrain Ruggedness Index TRI  with file   $file 
