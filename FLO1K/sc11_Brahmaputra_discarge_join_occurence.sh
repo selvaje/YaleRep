@@ -18,6 +18,7 @@ export  EXT=/project/fas/sbsc/ga254/dataproces/FLO1K/brahmaputra/extract_flo1k
 export  RAM=/dev/shm 
 
 
+# attach the year to the discarge
 for file in $EXT/point*_max.txt ; do 
 filename=$(basename $file .txt )
 paste -d " " <(seq 1960 2015 )  $file  >  $EXT/${filename}_year.txt 
@@ -26,7 +27,7 @@ done
 
 for point in $(seq 1 10)      ; do
 for year  in $(seq 2005 2015) ; do
-awk -v year=$year   'BEGIN { printf (year - 1" ") }  { if ($2==1) printf ("%i " , $3) } END {printf ("\n") } '  brahmaputra${year}_ct.txt  
+awk -v year=$year -v point=$point  'BEGIN { printf (year - 1" ") }  { if ($2 == point) printf ("%i " , $3) } END {printf ("\n") } '  brahmaputra${year}_ct.txt  
 done  > point${point}_occurance.txt 
 done 
 
