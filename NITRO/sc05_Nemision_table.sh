@@ -30,7 +30,7 @@ export RAM=/dev/shm
 # ' _   &
 
 #####################################################################
-################# transform from tif to txt FLO1k  concentration ####
+################# transform from tif to txt FLO1K Q  ####
 #####################################################################
 
 # ls  $DIR/FLO1K/{FLO1K.ts.1960.2015.qav_mean_fill_msk.tif,FLO1K.ts.1960.2015.qma_max_fill_msk.tif,FLO1K.ts.1960.2015.qmi_min_fill_msk.tif} | xargs -n 1 -P 3 bash -c $'
@@ -71,7 +71,7 @@ export RAM=/dev/shm
 # rm -f $DIR/global_wsheds/global_grid_ID.txt 
 
 #############################################################################
-####  transform from tif to txt area-cell and use the map_pred_NO3_mask.tif to mask out temperature pixel 
+####  transform from tif to txt area-cell and use the map_pred_NO3_mask.tif to mask out area-cell 
 ############################################################################
 
 # gdal_translate --config GDAL_CACHEMAX 10000 -co COMPRESS=DEFLATE -co ZLEVEL=9 -a_srs EPSG:4326 -projwin $(getCorners4Gtranslate $DIR/global_wsheds/global_grid_ID.tif) /gpfs/loomis/project/fas/sbsc/ga254/dataproces/GEO_AREA/area_tif/30arc-sec-Area_prj6842.tif $DIR/global_wsheds/30arc-sec-Area_prj6842_crop.tif
