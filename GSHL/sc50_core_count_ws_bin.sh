@@ -1,0 +1,47 @@
+#!/bin/bash
+#SBATCH -p day
+#SBATCH -J sc50_core_count_ws_bin.sh 
+#SBATCH -n 1 -c 1 -N 1  
+#SBATCH -t 24:00:00
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc50_core_count_ws_bin.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc50_core_count_ws_bin.sh.%J.err
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=email
+#SBATCH --mem-per-cpu=50000
+
+# sbatch  /gpfs/home/fas/sbsc/ga254/scripts/GSHL/sc50_core_count_ws_bin.sh 
+
+
+DIR=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/GSHL
+
+# rm -f $DIR/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0_sel.* 
+# ogr2ogr  -sql "select ID_HDC_G0  from  GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0"  $DIR/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0_sel.shp  $DIR/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0.shp
+
+# gdal_rasterize  -co COMPRESS=DEFLATE -co ZLEVEL=9     -te $(  getCorners4Gwarp    $DIR/final_product_1k/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_bin1-9_clump.tif )  -a_nodata 0 -ot UInt32  -tr 0.00833333333333  0.00833333333333  -a "ID_HDC_G0" -l  GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0_sel   $DIR/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0_sel.shp     $DIR/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0_sel.tif 
+
+# echo count bin 
+# rm -f $DIR/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0_count_bin.txt 
+# /gpfs/loomis/project/fas/sbsc/ga254/dataproces/GSHL/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0/count_uniq.py  -input1_no_data 0  -input2_no_data 0  $DIR/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0_sel.tif  $DIR/final_product_1k/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_bin1-9_clump.tif    $DIR/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0_count_bin.txt 
+
+
+# echo count ws 
+
+# pksetmask -co COMPRESS=DEFLATE -co ZLEVEL=9  -m $DIR/final_product_1k/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_bin1-9_clump.tif -msknodata 0 -nodata 0 -i  $DIR/final_product_1k/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_ws_clump.tif -o   $DIR/final_product_1k/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_ws_clump_mskbin.tif
+
+# rm -f $DIR/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0_count_ws.txt 
+# /gpfs/loomis/project/fas/sbsc/ga254/dataproces/GSHL/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0/count_uniq.py  -input1_no_data 0  -input2_no_data 0  $DIR/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0_sel.tif    $DIR/final_product_1k/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_ws_clump_mskbin.tif   $DIR/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0_count_ws.txt 
+# rm  $DIR/final_product_1k/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_ws_clump_mskbin.tif
+
+
+# paste <(awk '{ print $1}' $DIR/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0_count_bin.txt | sort -g | uniq -c)  <(awk '{ print $1}' $DIR/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0_count_ws.txt | sort -g | uniq -c  ) | awk '{ print $2 , $1, $3 , $1/$3 }'  > $DIR/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0_count_bin_ws.txt
+
+
+awk '{ print $1 , $4 }'   $DIR/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0_count_bin_ws.txt | sort -k 1,1   >  $DIR/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0_count_bin_ws_reclass.txt
+pkstat -hist -i  $DIR/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0_sel.tif | grep -v " 0" | awk '{ print $1 }' | sort -k 1,1  >   $DIR/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0_sel_hist.txt
+
+join -a 1 -e 0 -o auto -1 1 -2 1  $DIR/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0_sel_hist.txt  $DIR/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0_count_bin_ws_reclass.txt >  $DIR/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0_count_bin_ws_reclass0.txt 
+
+echo pkreclass
+pkreclass  -nodata 0  -ot Float32  -co COMPRESS=DEFLATE -co ZLEVEL=9 -code $DIR/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0_count_bin_ws_reclass0.txt -i  $DIR/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0_sel.tif  -o  $DIR/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0_sel_binDIVws.tif 
+
+rm -f $DIR/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0_count_bin_ws_reclass.txt $DIR/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0/GHS_STAT_UCDB2015MT_GLOBE_R2019A_V1_0_count_bin_ws_reclass0.txt

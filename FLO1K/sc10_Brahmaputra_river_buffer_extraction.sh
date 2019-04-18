@@ -17,11 +17,11 @@ export  SHP=/project/fas/sbsc/ga254/dataproces/FLO1K/brahmaputra/shp
 export  EXT=/project/fas/sbsc/ga254/dataproces/FLO1K/brahmaputra/extract_flo1k
 export  RAM=/dev/shm 
 
-# ogrinfo -al  $SHP/point.shp  | grep POINT | awk '{ gsub ("[(),]"," ") ; print  $2 , $3   }'  >  $SHP/point.txt 
+# paste -d " " <(ogrinfo -al $SHP/point.shp | grep " id" | awk '{ print $4 }' ) <(ogrinfo -al $SHP/point.shp | grep POINT | awk '{ gsub ("[(),]"," ") ; print $2, $3 }') | sort -g | awk '{  print $2 , $3  }' >  $SHP/point.txt 
 
-# for P in $(seq 1 10 ) ; do 
-# gdallocationinfo -geoloc -valonly $FLO/FLO1K.ts.1960.2015.qma_invertlatlong.nc  < <( head -$P $SHP/point.txt | tail -1  ) > $EXT/point${P}_max.txt 
-# done 
+for P in $(seq 1 10 ) ; do 
+gdallocationinfo -geoloc -valonly $FLO/FLO1K.ts.1960.2015.qma_invertlatlong.nc  < <( head -$P $SHP/point.txt | tail -1  ) > $EXT/point${P}_max.txt 
+done 
 
 # gdal_rasterize -a_srs EPSG:4326 -a_nodata 0 -co COMPRESS=DEFLATE -co ZLEVEL=9 -a ID  -init 0 -l buffer_point   -a_srs EPSG:4326 -tr 0.000277777777778 0.000277777777778 \
 #  -te $(getCorners4Gwarp /gpfs/loomis/project/fas/sbsc/ga254/dataproces/GSW/brahmaputra/brahmaputra2015_ct.tif)   -ot Byte $SHP/buffer_point.shp $SHP/buffer_point_tif.tif 

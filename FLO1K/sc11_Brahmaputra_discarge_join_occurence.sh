@@ -26,18 +26,18 @@ done
 
 
 for point in $(seq 1 10)      ; do
-for year  in $(seq 2005 2015) ; do
-awk -v year=$year -v point=$point  'BEGIN { printf (year - 1" ") }  { if ($2 == point) printf ("%i " , $3) } END {printf ("\n") } '  brahmaputra${year}_ct.txt  
+for year  in $(seq 1988 1993) $(echo 1995 )   $(seq 1999 2015) ; do
+awk -v year=$year -v point=$point  'BEGIN { printf (year - 1" ") }  { if ($2 == point) printf ("%i " , $3) } END {printf ("\n") } ' $EXT/brahmaputra${year}_ct.txt  
 done  > point${point}_occurance.txt 
 done 
 
 
 
 for point in $(seq 1 10)      ; do
-join -1 1 -2 1  point${point}_max_year.txt   point${point}_occurance.txt > point${point}_year_flo1k_oc0_oc1_oc2_oc3.txt 
+join -1 1 -2 1 $EXT/point${point}_max_year.txt $EXT/point${point}_occurance.txt > $EXT/point${point}_year_flo1k_oc0_oc1_oc2_oc3.txt 
 done 
 
-
+cat  point?_year_flo1k_oc0_oc1_oc2_oc3.txt    point??_year_flo1k_oc0_oc1_oc2_oc3.txt   > point_all_year_flo1k_oc0_oc1_oc2_oc3.txt
 
 
 
