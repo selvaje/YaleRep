@@ -9,7 +9,7 @@
 #SBATCH --job-name=sc03_dem_variables_float_noMult.sh
 #SBATCH --array=1-98
 
-# # bash /gpfs/home/fas/sbsc/ga254/scripts/NED/sc03_dem_variables_float_noMult.sh /project/fas/sbsc/ga254/dataproces/NED/input_tif/n10w095.tif 
+# # bash /gpfs/home/fas/sbsc/ga254/scripts/NED/sc03_dem_variables_float_noMult.sh /project/fas/sbsc/ga254/dataproces/NED/input_tif/NA_066_048.tif 
 
 # 98  number of files 
 # sbatch   /gpfs/home/fas/sbsc/ga254/scripts/NED/sc03_dem_variables_float_noMult.sh  
@@ -19,8 +19,8 @@ module load Apps/GRASS/7.3-beta
 ## create directory 
 ## for VAR in forms aspect dx dxx dxy dy dyy pcurv roughness slope tcurv  tpi  tri vrm spi tci convergence  intensity exposition range variance elongation azimuth extend width   ; do for MATH in min max mean median  stdev tiles ; do for  KM in 1 5 10 50 100  ; do mkdir -p  $VAR/$MATH/tiles_km$KM ; done ; done ; done
 
-file=$(ls /project/fas/sbsc/ga254/dataproces/NED/input_tif/NA*.tif  | head  -n  $SLURM_ARRAY_TASK_ID | tail  -1 )
-# file=$1
+#file=$(ls /project/fas/sbsc/ga254/dataproces/NED/input_tif/NA*.tif  | head  -n  $SLURM_ARRAY_TASK_ID | tail  -1 )
+file=$1
 # use this if one file is missing 
 
 MERIT=/project/fas/sbsc/ga254/dataproces/MERIT 
@@ -61,15 +61,15 @@ rm -f $RAM/aspect_${filename}_crop.tif $RAM/aspect_${filename}_0.tif
 
 echo sin and cos of slope and aspect $file 
 
-gdal_calc.py  --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9  --co=INTERLEAVE=BAND -A $NED/aspect/tiles/${filename}.tif --calc="(sin(A.astype(float) * 3.141592 / 180))" --outfile   $NED/aspect/tiles/${filename}_sin.tif --overwrite --type=Float32
-gdal_calc.py  --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9  --co=INTERLEAVE=BAND -A $NED/aspect/tiles/${filename}.tif --calc="(cos(A.astype(float) * 3.141592 / 180))" --outfile   $NED/aspect/tiles/${filename}_cos.tif --overwrite --type=Float32
+gdal_calc.py  --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9  --co=INTERLEAVE=BAND -A $NED/aspect/tiles/${filename}.tif --calc="(sin(A.astype(float) * 3.141592 / 180))" --outfile   $NED/aspect-sine/tiles/${filename}.tif --overwrite --type=Float32
+gdal_calc.py  --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9  --co=INTERLEAVE=BAND -A $NED/aspect/tiles/${filename}.tif --calc="(cos(A.astype(float) * 3.141592 / 180))" --outfile   $NED/aspect-cosine/tiles/${filename}.tif --overwrite --type=Float32
 gdal_calc.py  --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9  --co=INTERLEAVE=BAND -A $NED/slope/tiles/${filename}.tif  --calc="(sin(A.astype(float) * 3.141592 / 180))" --outfile   $NED/slope/tiles/${filename}_sin.tif  --overwrite --type=Float32
 gdal_calc.py  --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9  --co=INTERLEAVE=BAND -A $NED/slope/tiles/${filename}.tif  --calc="(cos(A.astype(float) * 3.141592 / 180))" --outfile   $NED/slope/tiles/${filename}_cos.tif  --overwrite --type=Float32
 
-echo   Ew  Nw   median  
+echo   eastness  northness   median  
 
-gdal_calc.py --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9 --co=INTERLEAVE=BAND -A $NED/slope/tiles/${filename}.tif -B $NED/aspect/tiles/${filename}_sin.tif --calc="((sin(A.astype(float) * 3.141592 / 180)) * B.astype(float))" --outfile  $NED/aspect/tiles/${filename}_Ew.tif --overwrite --type=Float32
-gdal_calc.py --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9 --co=INTERLEAVE=BAND -A $NED/slope/tiles/${filename}.tif -B $NED/aspect/tiles/${filename}_cos.tif --calc="((sin(A.astype(float) * 3.141592 / 180)) * B.astype(float))" --outfile  $NED/aspect/tiles/${filename}_Nw.tif --overwrite --type=Float32
+gdal_calc.py --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9 --co=INTERLEAVE=BAND -A $NED/slope/tiles/${filename}.tif -B $NED/aspect-sine/tiles/${filename}.tif --calc="((sin(A.astype(float) * 3.141592 / 180)) * B.astype(float))" --outfile  $NED/eastness/tiles/${filename}.tif --overwrite --type=Float32
+gdal_calc.py --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9 --co=INTERLEAVE=BAND -A $NED/slope/tiles/${filename}.tif -B $NED/aspect-cosine/tiles/${filename}.tif --calc="((sin(A.astype(float) * 3.141592 / 180)) * B.astype(float))" --outfile  $NED/northness/tiles/${filename}.tif --overwrite --type=Float32
 
 echo  generate a Terrain Ruggedness Index TRI  with file   $file 
 gdaldem TRI -co COMPRESS=DEFLATE -co ZLEVEL=9  -co INTERLEAVE=BAND  $RAM/${filename}_0.tif   $RAM/tri_${filename}_0.tif
@@ -99,9 +99,9 @@ rm -f $RAM/roughness_${filename}_crop.tif $RAM/roughness_${filename}_0.tif
 
 ##  echo  generate tci with file $filename.tifx
 
-gdal_calc.py --overwrite --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9 --co=INTERLEAVE=BAND  -B $NED/slope/tiles/${filename}.tif -A  $MERIT/equi7/upa/NA/${filename}.tif    --outfile=$NED/tci/tiles/${filename}_tmp.tif    --calc="( log  (      A.astype(float) / (tan(  B.astype(float) * 3.141592 / 180) + 0.01 ) )  )"
- pksetmask   -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -m   $NED/slope/tiles/${filename}.tif   -msknodata -9999 -nodata -9999 -i $NED/tci/tiles/${filename}_tmp.tif  -o $NED/tci/tiles/${filename}.tif
- rm  $NED/tci/tiles/${filename}_tmp.tif
+gdal_calc.py --overwrite --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9 --co=INTERLEAVE=BAND  -B $NED/slope/tiles/${filename}.tif -A  $MERIT/equi7/upa/NA/${filename}.tif    --outfile=$NED/cti/tiles/${filename}_tmp.tif    --calc="( log  (      A.astype(float) / (tan(  B.astype(float) * 3.141592 / 180) + 0.01 ) )  )"
+ pksetmask   -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -m   $NED/slope/tiles/${filename}.tif   -msknodata -9999 -nodata -9999 -i $NED/cti/tiles/${filename}_tmp.tif  -o $NED/cti/tiles/${filename}.tif
+ rm  $NED/cti/tiles/${filename}_tmp.tif
 
 echo  generate spi with file $filename.tif
  gdal_calc.py --overwrite --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9 --co=INTERLEAVE=BAND  -B $NED/slope/tiles/${filename}.tif -A $MERIT/equi7/upa/NA/${filename}.tif --outfile=$NED/spi/tiles/${filename}_tmp.tif --calc="(    A.astype(float) *  (tan(  B.astype(float) * 3.141592 / 180) + 0.01 ) )"
