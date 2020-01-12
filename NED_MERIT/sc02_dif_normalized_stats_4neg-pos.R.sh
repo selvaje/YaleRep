@@ -19,7 +19,8 @@ cd /project/fas/sbsc/ga254/dataproces/NED_MERIT
 #   NA_072_048.tif  
 #   NA_072_018.tif 
 
-# cat <(echo elevation aspect-cosine aspect-sine eastness northness slope dx dxx dxy dy dyy pcurv roughness tcurv tpi tri vrm spi cti convergence | xargs -n 1 -P 1 bash -c $' echo $1 $(pkinfo -nodata -9999 -stats -i $1/tiles/NA_072_048_dif_norm.tif    )  ' _   ) >  txt/NA_072_048_dif_norm_stats.txt 
+
+# create the stat file for the _dif_neg_norm.tif calculate the standard deviation without consider the 0
 
 # cat <( echo elevation aspect-cosine aspect-sine eastness northness slope dx dxx dxy dy dyy pcurv roughness tcurv tpi tri vrm spi cti convergence | xargs -n 1 -P 1 bash -c $' 
 # pksetmask -m $1/tiles/NA_072_048_dif_neg_norm.tif -msknodata -9999 -nodata 0   -i $1/tiles/NA_072_048_dif_neg_norm.tif  -o $1/tiles/NA_072_048_dif_neg_norm_msk.tif &>/dev/null
@@ -27,7 +28,6 @@ cd /project/fas/sbsc/ga254/dataproces/NED_MERIT
 # echo $1 $( pkinfo   -nodata 0 -stats -i $1/tiles/NA_072_048_dif_neg_norm_msk.tif)  $( pkinfo -nodata 0 -stats -i $1/tiles/NA_072_048_dif_pos_norm_msk.tif) ; rm  $1/tiles/NA_072_048_dif_neg_norm_msk.tif $1/tiles/NA_072_048_dif_pos_norm_msk.tif 
 #  ' _   ) >  txt/NA_072_048_dif_norm_stats_pos-neg.txt 
 
-# cat <(echo elevation aspect-cosine aspect-sine eastness northness slope dx dxx dxy dy dyy pcurv roughness tcurv tpi tri vrm spi cti convergence | xargs -n 1 -P 1 bash -c $' echo $1 $(  pkinfo   -nodata -9999 -stats -i $1/tiles/NA_072_018_dif_norm.tif    )  ' _   ) >  txt/NA_072_018_dif_norm_stats.txt 
 
 # cat <( echo elevation aspect-cosine aspect-sine eastness northness slope dx dxx dxy dy dyy pcurv roughness tcurv tpi tri vrm spi cti convergence | xargs -n 1 -P 1 bash -c $' 
 # pksetmask -m $1/tiles/NA_072_018_dif_neg_norm.tif -msknodata -9999 -nodata 0   -i $1/tiles/NA_072_018_dif_neg_norm.tif  -o $1/tiles/NA_072_018_dif_neg_norm_msk.tif &>/dev/null
@@ -38,8 +38,7 @@ cd /project/fas/sbsc/ga254/dataproces/NED_MERIT
 R  --vanilla --no-readline   -q  <<EOF
 library(ggplot2) 
 
-NA_072_048 = read.table("txt/NA_072_048_dif_norm_stats.txt")
-NA_072_018 = read.table("txt/NA_072_018_dif_norm_stats.txt")
+
 
 NA_072_048_stdev = read.table("txt/NA_072_048_dif_norm_stats_pos-neg.txt")  
 NA_072_018_stdev = read.table("txt/NA_072_018_dif_norm_stats_pos-neg.txt")

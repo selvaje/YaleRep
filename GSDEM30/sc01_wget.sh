@@ -11,9 +11,9 @@
 # sbatch ~/scripts/GSDEM30/sc01_wget.sh
 
 cd /gpfs/scratch60/fas/sbsc/ga254/dataproces/GSDEM30/input
-rm -r *
+# rm -r *
 wget -A .html  http://sendimage.whu.edu.cn/res/DEM_share/GSDEM30/
-grep ","  index.html  | awk -F '"'  '{ print $8 }'   > list_dir.txt 
+grep ","  index.html  | awk -F '"'  '{ print $8 }'  | grep N60   > list_dir.txt 
 
 for DIR in $(cat list_dir.txt  ) ; do
 wget -N -A .tif  -r   -e robots=off   --cut-dirs=3 --no-parent  -R "index.html*"    http://sendimage.whu.edu.cn/res/DEM_share/GSDEM30/$DIR

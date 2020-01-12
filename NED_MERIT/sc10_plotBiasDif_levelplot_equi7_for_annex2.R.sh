@@ -8,7 +8,7 @@
 #SBATCH --mail-user=email
 #SBATCH -J sc10_plotDerv_levelplot_equi7_for_annex2.R.sh
 
-# bash /gpfs/home/fas/sbsc/ga254/scripts/NED_MERIT/sc10_plotNormDif_levelplot_equi7_for_annex2.R.sh
+# bash /gpfs/home/fas/sbsc/ga254/scripts/NED_MERIT/sc10_plotBiasDif_levelplot_equi7_for_annex2.R.sh
 
 # module load Apps/R/3.3.2-generic
 module load R/3.4.4-foss-2018a-X11-20180131  # new path 
@@ -56,11 +56,13 @@ elev_N
 elev_dif = elev_N - elev_M
 
 for ( dir in c("elevation","roughness","tri","tpi","vrm","cti","spi","slope","pcurv","tcurv","dx","dy","dxx","dyy","dxy","convergence","aspectcosine","aspectsine","eastness","northness")) { 
-     raster  <- raster(paste0( dir,"/tiles/","/NA_066_048_dif_norm.tif") ) 
+     raster  <- raster(paste0( dir,"/tiles/","/NA_066_048_bias_msk.tif") ) 
      raster = crop (raster , e)
      raster[raster == -9999 ] <- NA
  assign(paste0(dir) , raster  )
 }
+
+summary(elevation)
 
 print("start to plot")
 
@@ -71,7 +73,7 @@ cols=colR(n)
 options(scipen=10)
 trunc <- function(x, ..., prec = 0) base::trunc(x * 10^prec, ...) / 10^prec
 
-pdf(paste0("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NED_MERIT/figure/NormDif_all_var_plot_equi7_for_annex2.pdf") , width=6, height=7.5   )
+pdf(paste0("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/NED_MERIT/figure/BiasDif_all_var_plot_equi7_for_annex2.pdf") , width=6, height=7.5   )
 par (oma=c(2,2,2,1) , mar=c(0.4,0.5,1,1.9) , cex.lab=0.5 , cex=0.6 , cex.axis=0.4  ,   mfrow=c(6,4) ,  xpd=NA    )
 
 
@@ -79,34 +81,33 @@ for ( dir in c("elev_N","elev_M","elev_cor","elev_dif","elevation","roughness","
 if ( dir != "elev_cor" ) { 
 raster=get(dir)
 
-
 if(dir == "elev_N"   ) { des="Elevation 3DEP"  ;  max=elev_N@data@max ; min=elev_N@data@min ; at=c( round(min)+10, round(max)-10);labels=c( round(min),round(max) ) ; letter="b" }
 if(dir == "elev_N"   ) { des="Elevation 3DEP"  ; maxN=elev_N@data@max ; minN=elev_N@data@min    }
 if(dir == "elev_M"   ) { des="Elevation MERIT" ; max=elev_M@data@max ; min=elev_M@data@min ; at=c( round(min)+10, round(max)-10);labels=c( round(min),round(max) ) ; letter="a" }
 if(dir == "elev_M"   ) { des="Elevation MERIT" ; maxM=elev_M@data@max ; minM=elev_M@data@min  }
-if(dir == "elev_dif" ) { des="Elevation diff.  3DEP - MERIT" ; max=round(elev_dif@data@max) ; min=round(elev_dif@data@min) ; at=c( min,0,max); labels=c(min,0 ,  max ) ; letter="d" }
+if(dir == "elev_dif" ) { des="Elevation diff. 3DEP - MERIT" ; max=round(elev_dif@data@max) ; min=round(elev_dif@data@min) ; at=c( min,0,max); labels=c(min,0 ,  max ) ; letter="d" }
 
 # normalized  
-if(dir == "elevation" )  { des="Elevation"                ; max=1 ; min=-1 ;  at=c( -1,-0.5,0,+0.5,+1 ) ; labels=c(-1,-0.5,0,+0.5,+1) ; letter="e" ; raster[raster >  0.6 ] <-  0.6 ; raster[raster < -0.6 ] <- -0.6 }
-if(dir == "roughness" )  { des="Roughness"                ; max=1 ; min=-1 ;  at=c( -1,-0.5,0,+0.5,+1 ) ; labels=c(-1,-0.5,0,+0.5,+1) ; letter="f" ; raster[raster >  0.6 ] <-  0.6 ; raster[raster < -0.6 ] <- -0.6   }
-if(dir == "tri" )      { des="Terrain roughness index"    ; max=1 ; min=-1 ;  at=c( -1,-0.5,0,+0.5,+1 ) ; labels=c(-1,-0.5,0,+0.5,+1) ; letter="g" ; raster[raster >  0.6 ] <-  0.6 ; raster[raster < -0.6 ] <- -0.6   }
-if(dir == "tpi" )      { des="Topographic position index" ; max=1 ; min=-1 ;  at=c( -1,-0.5,0,+0.5,+1 ) ; labels=c(-1,-0.5,0,+0.5,+1) ; letter="h" ; raster[raster >  0.6 ] <-  0.6 ; raster[raster < -0.6 ] <- -0.6   }
-if(dir == "vrm" )      { des="Vector ruggedness measure"  ; max=1 ; min=-1 ;  at=c( -1,-0.5,0,+0.5,+1 ) ; labels=c(-1,-0.5,0,+0.5,+1) ; letter="i" ; raster[raster >  0.6 ] <-  0.6 ; raster[raster < -0.6 ] <- -0.6   }
-if(dir == "cti" )      { des="Compound topographic index" ; max=1 ; min=-1 ;  at=c( -1,-0.5,0,+0.5,+1 ) ; labels=c(-1,-0.5,0,+0.5,+1) ; letter="j" ; raster[raster >  0.6 ] <-  0.6 ; raster[raster < -0.6 ] <- -0.6   }
-if(dir == "spi" )      { des="Stream power index"         ; max=1 ; min=-1 ;  at=c( -1,-0.5,0,+0.5,+1 ) ; labels=c(-1,-0.5,0,+0.5,+1) ; letter="k" ; raster[raster >  0.6 ] <-  0.6 ; raster[raster < -0.6 ] <- -0.6   }
-if(dir == "aspectcosine" )    { des="Aspect cosine"       ; max=1 ; min=-1 ;  at=c( -1,-0.5,0,+0.5,+1 ) ; labels=c(-1,-0.5,0,+0.5,+1) ; letter="l" ; raster[raster >  0.6 ] <-  0.6 ; raster[raster < -0.6 ] <- -0.6   } 
-if(dir == "aspectsine" )      { des="Aspect sine"         ; max=1 ; min=-1 ;  at=c( -1,-0.5,0,+0.5,+1 ) ; labels=c(-1,-0.5,0,+0.5,+1) ; letter="m" ; raster[raster >  0.6 ] <-  0.6 ; raster[raster < -0.6 ] <- -0.6   }
-if(dir == "slope" )           { des="Slope"               ; max=1 ; min=-1 ;  at=c( -1,-0.5,0,+0.5,+1 ) ; labels=c(-1,-0.5,0,+0.5,+1) ; letter="n" ; raster[raster >  0.6 ] <-  0.6 ; raster[raster < -0.6 ] <- -0.6   }
-if(dir == "eastness")         { des="Eastness"            ; max=1 ; min=-1 ;  at=c( -1,-0.5,0,+0.5,+1 ) ; labels=c(-1,-0.5,0,+0.5,+1) ; letter="o" ; raster[raster >  0.6 ] <-  0.6 ; raster[raster < -0.6 ] <- -0.6   }
-if(dir == "northness" )       { des="Northness"           ; max=1 ; min=-1 ;  at=c( -1,-0.5,0,+0.5,+1 ) ; labels=c(-1,-0.5,0,+0.5,+1) ; letter="p" ; raster[raster >  0.6 ] <-  0.6 ; raster[raster < -0.6 ] <- -0.6    }
-if(dir == "pcurv" )    { des="Profile curvature"          ; max=1 ; min=-1 ;  at=c( -1,-0.5,0,+0.5,+1 ) ; labels=c(-1,-0.5,0,+0.5,+1) ; letter="q" ; raster[raster >  0.6 ] <-  0.6 ; raster[raster < -0.6 ] <- -0.6   }
-if(dir == "tcurv" )    { des="Tangential curvature"       ; max=1 ; min=-1 ;  at=c( -1,-0.5,0,+0.5,+1 ) ; labels=c(-1,-0.5,0,+0.5,+1) ; letter="r" ; raster[raster >  0.6 ] <-  0.6 ; raster[raster < -0.6 ] <- -0.6   } 
-if(dir == "dx" )       { des="1st partial derivative (E-W slope)" ; max=1 ; min=-1 ; at=c( -1,-0.5,0,+0.5,+1 ) ; labels=c(-1,-0.5,0,+0.5,+1) ; letter="s" ; raster[raster >  0.6 ] <-  0.6 ; raster[raster < -0.6 ] <- -0.6   }
-if(dir == "dy" )       { des="1st partial derivative (N-S slope)" ; max=1 ; min=-1 ; at=c( -1,-0.5,0,+0.5,+1 ) ; labels=c(-1,-0.5,0,+0.5,+1) ; letter="t" ; raster[raster >  0.6 ] <-  0.6 ; raster[raster < -0.6 ] <- -0.6   } 
-if(dir == "dxx" )      { des="2nd partial derivative (E-W slope)" ; max=1 ; min=-1 ; at=c( -1,-0.5,0,+0.5,+1 ) ; labels=c(-1,-0.5,0,+0.5,+1) ; letter="u" ; raster[raster >  0.6 ] <-  0.6 ; raster[raster < -0.6 ] <- -0.6   }
-if(dir == "dyy" )      { des="2nd partial derivative (N-S slope)" ; max=1 ; min=-1 ; at=c( -1,-0.5,0,+0.5,+1 ) ; labels=c(-1,-0.5,0,+0.5,+1) ; letter="v" ; raster[raster >  0.6 ] <-  0.6 ; raster[raster < -0.6 ] <- -0.6   }
-if(dir == "dxy" )      { des="2nd partial derivative"             ; max=1 ; min=-1 ; at=c( -1,-0.5,0,+0.5,+1 ) ; labels=c(-1,-0.5,0,+0.5,+1) ; letter="w" ; raster[raster >  0.6 ] <-  0.6 ; raster[raster < -0.6 ] <- -0.6   }
-if(dir == "convergence" ) { des="Convergence"                     ; max=1 ; min=-1 ; at=c( -1,-0.5,0,+0.5,+1 ) ; labels=c(-1,-0.5,0,+0.5,+1) ; letter="x" ; raster[raster >  0.6 ] <-  0.6 ; raster[raster < -0.6 ] <- -0.6   }
+if(dir == "elevation" )  { des="Elevation"                ; max=100 ; min=-100 ;  at=c( -100,-50,0,+50,+100) ; labels=c("<-100","-50","0","+50",">+100") ; letter="e" ;  }
+if(dir == "roughness" )  { des="Roughness"                ; max=100 ; min=-100 ;  at=c( -100,-50,0,+50,+100) ; labels=c("<-100","-50","0","+50",">+100") ; letter="f" ;    }
+if(dir == "tri" )      { des="Terrain roughness index"    ; max=100 ; min=-100 ;  at=c( -100,-50,0,+50,+100) ; labels=c("<-100","-50","0","+50",">+100") ; letter="g" ;    }
+if(dir == "tpi" )      { des="Topographic position index" ; max=100 ; min=-100 ;  at=c( -100,-50,0,+50,+100) ; labels=c("<-100","-50","0","+50",">+100") ; letter="h" ;    }
+if(dir == "vrm" )      { des="Vector ruggedness measure"  ; max=100 ; min=-100 ;  at=c( -100,-50,0,+50,+100) ; labels=c("<-100","-50","0","+50",">+100") ; letter="i" ;    }
+if(dir == "cti" )      { des="Compound topographic index" ; max=100 ; min=-100 ;  at=c( -100,-50,0,+50,+100) ; labels=c("<-100","-50","0","+50",">+100") ; letter="j" ;    }
+if(dir == "spi" )      { des="Stream power index"         ; max=100 ; min=-100 ;  at=c( -100,-50,0,+50,+100) ; labels=c("<-100","-50","0","+50",">+100") ; letter="k" ;    }
+if(dir == "aspectcosine" )    { des="Aspect cosine"       ; max=100 ; min=-100 ;  at=c( -100,-50,0,+50,+100) ; labels=c("<-100","-50","0","+50",">+100") ; letter="l" ;    } 
+if(dir == "aspectsine" )      { des="Aspect sine"         ; max=100 ; min=-100 ;  at=c( -100,-50,0,+50,+100) ; labels=c("<-100","-50","0","+50",">+100") ; letter="m" ;    }
+if(dir == "slope" )           { des="Slope"               ; max=100 ; min=-100 ;  at=c( -100,-50,0,+50,+100) ; labels=c("<-100","-50","0","+50",">+100") ; letter="n" ;    }
+if(dir == "eastness")         { des="Eastness"            ; max=100 ; min=-100 ;  at=c( -100,-50,0,+50,+100) ; labels=c("<-100","-50","0","+50",">+100") ; letter="o" ;    }
+if(dir == "northness" )       { des="Northness"           ; max=100 ; min=-100 ;  at=c( -100,-50,0,+50,+100) ; labels=c("<-100","-50","0","+50",">+100") ; letter="p" ;     }
+if(dir == "pcurv" )    { des="Profile curvature"          ; max=100 ; min=-100 ;  at=c( -100,-50,0,+50,+100) ; labels=c("<-100","-50","0","+50",">+100") ; letter="q" ;    }
+if(dir == "tcurv" )    { des="Tangential curvature"       ; max=100 ; min=-100 ;  at=c( -100,-50,0,+50,+100) ; labels=c("<-100","-50","0","+50",">+100") ; letter="r" ;    } 
+if(dir == "dx" )       { des="1st partial derivative (E-W slope)" ; max=100 ; min=-100 ; at=c( -100,-50,0,+50,+100) ; labels=c("<-100","-50","0","+50",">+100") ; letter="s" ;    }
+if(dir == "dy" )       { des="1st partial derivative (N-S slope)" ; max=100 ; min=-100 ; at=c( -100,-50,0,+50,+100) ; labels=c("<-100","-50","0","+50",">+100") ; letter="t" ;    } 
+if(dir == "dxx" )      { des="2nd partial derivative (E-W slope)" ; max=100 ; min=-100 ; at=c( -100,-50,0,+50,+100) ; labels=c("<-100","-50","0","+50",">+100") ; letter="u" ;    }
+if(dir == "dyy" )      { des="2nd partial derivative (N-S slope)" ; max=100 ; min=-100 ; at=c( -100,-50,0,+50,+100) ; labels=c("<-100","-50","0","+50",">+100") ; letter="v" ;    }
+if(dir == "dxy" )      { des="2nd partial derivative"             ; max=100 ; min=-100 ; at=c( -100,-50,0,+50,+100) ; labels=c("<-100","-50","0","+50",">+100") ; letter="w" ;    }
+if(dir == "convergence" ) { des="Convergence"                     ; max=100 ; min=-100 ; at=c( -100,-50,0,+50,+100) ; labels=c("<-100","-50","0","+50",">+100") ; letter="x" ;    }
 print(dir)
 print(max)
 print(min)
@@ -117,6 +118,8 @@ print(min)
 #           labels and axis line.  Note that ‘mgp[1]’ affects ‘title’
 #           whereas ‘mgp[2:3]’ affect ‘axis’.  The default is ‘c(3, 1,
 #           0)’.
+
+
 
 if ( dir == "elev_cor" ) {
 plot( elev_M, elev_N, pch = 16, cex = .1 , xaxt = "n" , yaxt = "n" , main="Elevation 3DEP vs MERIT", cex.main=0.65 , font.main=2 )
@@ -130,6 +133,7 @@ text( 1200 , 2420 , "3DEP (m)"    , font=2 ,  srt=90 ,  xpd=TRUE , cex=0.6 )
 text( 2470 , 1220 , "MERIT (m)"   , font=2 ,  srt=0  ,  xpd=TRUE , cex=0.6 )
 
 }
+
 
 
 if (( dir != "elev_cor" ) &&  (  dir != "dxx"   )     ) { 

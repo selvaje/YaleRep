@@ -54,7 +54,7 @@ gdal_translate  -a_nodata -9999  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAV
 echo slope with $filename
 
 gdal_calc.py  --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9  --co=INTERLEAVE=BAND -A   $RAM/${filename}_${VAR}_M.tif -B   $RAM/${filename}_${VAR}_N.tif \
- --calc="( A.astype(float) - B.astype(float) )" --outfile   $NM/${VAR}/tiles/${filename}_dif.tif --overwrite --type=Float32
+ --calc="( B.astype(float) - A.astype(float) )" --outfile   $NM/${VAR}/tiles/${filename}_dif.tif --overwrite --type=Float32
 gdal_edit.py  -a_nodata -9999  $NM/${VAR}/tiles/${filename}_dif.tif 
 
 if [ $filename != "NA_066_048" ] ; then 
@@ -94,14 +94,19 @@ pksetmask -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -m  $NM/${VAR}/t
 rm  -f $NM/${VAR}/tiles/${filename}_dif_norm1.tif  
 gdal_edit.py  -a_nodata -9999  $NM/${VAR}/tiles/${filename}_dif_norm.tif 
 
-# gdaldem slope  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND  $NM/${VAR}/tiles/${filename}_dif.tif  $RAM/${filename}_${VAR}_der.tif 
-# gdal_translate   -srcwin 8 8 6000 6000  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND $RAM/${filename}_${VAR}_der.tif $NM/${VAR}/tiles/${filename}_der.tif  
+#  NED : dif = 100 : x   = where x is the bias in percentage
+gdal_calc.py --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9 --co=INTERLEAVE=BAND -A  $RAM/${filename}_${VAR}_N.tif -B $NM/${VAR}/tiles/${filename}_dif.tif --calc="((B.astype(float) * 100)/(A.astype(float) + 0.01))"  --outfile   $NM/${VAR}/tiles/${filename}_bias.tif --overwrite --type=Float32
+gdal_edit.py  -a_nodata -9999   $NM/${VAR}/tiles/${filename}_bias.tif
+
+pksetmask -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND \
+       -m  $NM/${VAR}/tiles/${filename}_bias.tif -msknodata  100 -p ">" -nodata 100  \
+       -m  $NM/${VAR}/tiles/${filename}_bias.tif -msknodata -100 -p "<" -nodata -100 \
+       -i  $NM/${VAR}/tiles/${filename}_bias.tif -o  $NM/${VAR}/tiles/${filename}_bias_msk.tif
+gdal_edit.py  -a_nodata -9999   $NM/${VAR}/tiles/${filename}_bias_msk.tif
 
 rm -f  $RAM/${filename}_${VAR}_?.tif   $RAM/${filename}_${VAR}_dif.tif  $RAM/${filename}_${VAR}_der.tif  $NM/${VAR}/tiles/${filename}*.tif.aux.xml 
 
-
 ' _ 
-
 
 VAR=elevation
   
@@ -111,7 +116,7 @@ gdal_translate  -a_nodata -9999  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAV
 echo slope with $filename
 
 gdal_calc.py  --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9  --co=INTERLEAVE=BAND -A   $RAM/${filename}_${VAR}_M.tif -B   $RAM/${filename}_${VAR}_N.tif \
- --calc="( A.astype(float) - B.astype(float) )" --outfile   $NM/${VAR}/tiles/${filename}_dif.tif --overwrite --type=Float32
+ --calc="( B.astype(float) - A.astype(float) )" --outfile   $NM/${VAR}/tiles/${filename}_dif.tif --overwrite --type=Float32
 gdal_edit.py  -a_nodata -9999  $NM/${VAR}/tiles/${filename}_dif.tif 
 
 if [ $filename != "NA_066_048" ] ; then 
@@ -149,5 +154,16 @@ gdal_calc.py --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9 --co=INTERL
 pksetmask -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -m  $NM/${VAR}/tiles/${filename}_dif.tif   -msknodata -9999 -nodata -9999 -i $NM/${VAR}/tiles/${filename}_dif_norm1.tif  -o $NM/${VAR}/tiles/${filename}_dif_norm.tif 
 rm  -f $NM/${VAR}/tiles/${filename}_dif_norm1.tif  
 gdal_edit.py  -a_nodata -9999  $NM/${VAR}/tiles/${filename}_dif_norm.tif 
+
+gdal_calc.py --NoDataValue=-9999 --co=COMPRESS=DEFLATE --co=ZLEVEL=9 --co=INTERLEAVE=BAND -A  $RAM/${filename}_${VAR}_N.tif -B $NM/${VAR}/tiles/${filename}_dif.tif --calc="((B.astype(float) * 100)/(A.astype(float) + 0.01))"  --outfile   $NM/${VAR}/tiles/${filename}_bias.tif --overwrite --type=Float32
+gdal_edit.py  -a_nodata -9999   $NM/${VAR}/tiles/${filename}_bias.tif
+
+pksetmask -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND \
+       -m  $NM/${VAR}/tiles/${filename}_bias.tif -msknodata  100 -p ">" -nodata 100  \
+       -m  $NM/${VAR}/tiles/${filename}_bias.tif -msknodata -100 -p "<" -nodata -100 \
+       -i  $NM/${VAR}/tiles/${filename}_bias.tif -o  $NM/${VAR}/tiles/${filename}_bias_msk.tif
+gdal_edit.py  -a_nodata -9999   $NM/${VAR}/tiles/${filename}_bias_msk.tif
+
+
 
 rm -f  $RAM/${filename}_${VAR}_?.tif   $RAM/${filename}_${VAR}_dif.tif  $RAM/${filename}_${VAR}_der.tif     $NM/${VAR}/tiles/${filename}*.tif.aux.xml  
