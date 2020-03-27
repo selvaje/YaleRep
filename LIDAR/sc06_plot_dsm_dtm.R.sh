@@ -1,4 +1,5 @@
 
+
 # bash /gpfs/home/fas/sbsc/ga254/scripts/LIDAR/sc06_plot_dsm_dtm.R.sh 
 
 
@@ -69,9 +70,9 @@ MERIT=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/MERIT/equi7/dem/NA
 # done
 
 
+source ~/bin/gdal
+module load R/3.4.4-foss-2018a-X11-20180131
 
-
-module load Apps/R/3.3.2-generic
 
 R --vanilla --no-readline -q  <<'EOF'
 library(rgdal)
@@ -101,6 +102,9 @@ min=(min(DEM$dtm,na.rm = TRUE))
 
 if (var == "a" ){ 
 plot = ggplot    ( data=DEM , aes(x=mrt , y=dsm  )) + geom_point(alpha=1, col='blue', size=0.03) +             
+theme_bw() +
+ylim(900,2100) + 
+xlim(900,2100) + 
 geom_point( data=DEM , aes(x=mrt , y=dtm) ,   alpha=1, col='red' , size=0.03) +                         
 geom_smooth(  data=DEM , aes(x=mrt , y=dsm) ,   method='lm',formula=y~x ,col='black'  ,size=0.7  , se=FALSE ) + 
 geom_smooth(  data=DEM , aes(x=mrt , y=dtm) ,   method='lm',formula=y~x ,col='brown'  ,size=0.7  , se=FALSE ) + 
@@ -114,6 +118,9 @@ theme(plot.title=element_text(size=rel(0.6) ,  hjust=0 ) ,
 )
 } else {
 plot = ggplot    ( data=DEM , aes(x=mrt , y=dsm  )) + geom_point(alpha=1, col='blue', size=0.03) +             
+theme_bw() +
+ylim(900,2100) + 
+xlim(900,2100) + 
 geom_point( data=DEM , aes(x=mrt , y=dtm) ,   alpha=1, col='red' , size=0.03) +                         
 geom_smooth(  data=DEM , aes(x=mrt , y=dsm) ,   method='lm',formula=y~x ,col='black'  ,size=0.7  , se=FALSE ) + 
 geom_smooth(  data=DEM , aes(x=mrt , y=dtm) ,   method='lm',formula=y~x ,col='brown'  ,size=0.7  , se=FALSE ) + 
@@ -153,7 +160,7 @@ dev.off()
 
 EOF
 
-exit  
+ 
 
 gs -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/prepress  -sOutputFile=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/LIDAR/figure/dsm-dtm_vs_merit_plot_low.pdf /gpfs/loomis/project/fas/sbsc/ga254/dataproces/LIDAR/figure/dsm-dtm_vs_merit_plot.pdf
 

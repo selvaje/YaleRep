@@ -6,62 +6,68 @@ export SCRATCH=/gpfs/scratch60/fas/sbsc/ga254/dataproces/MERIT
 export EQUI7=/gpfs/loomis/project/fas/sbsc/ga254/dataproces/EQUI7/grids
 export RAM=/dev/shm
 
+source ~/bin/gdal
+export GDAL_CACHEMAX=2000
 
 # rm $SCRATCH/equi7val/*
-#                       #   9996100 216900  10010400 202900
-#  gdal_translate -projwin   9950000 270000  10010000 210000  $MERIT/equi7/dem/NA/NA_096_000.tif   $SCRATCH/equi7val/NA_equi_south.tif 
-#  gdaltindex  $SCRATCH/equi7val/NA_equi_south_shp.shp   $SCRATCH/equi7val/NA_equi_south.tif 
+                      #   9996100 216900  10010400 202900
+gdal_translate -projwin   9950000 270000  10010000 210000  $MERIT/equi7/dem/NA/NA_096_000.tif   $SCRATCH/equi7val/NA_equi_south.tif 
+gdaltindex  $SCRATCH/equi7val/NA_equi_south_shp.shp   $SCRATCH/equi7val/NA_equi_south.tif 
 
-#  gdal_translate  -a_ullr  9950000 8060000  10010000 8000000 $SCRATCH/equi7val/NA_equi_south.tif  $SCRATCH/equi7val/NA_equi_north.tif 
-#  gdaltindex  $SCRATCH/equi7val/NA_equi_north_shp.shp   $SCRATCH/equi7val/NA_equi_north.tif 
- # from equi7 to wgs84
+gdal_translate  -a_ullr  9950000 8060000  10010000 8000000 $SCRATCH/equi7val/NA_equi_south.tif  $SCRATCH/equi7val/NA_equi_north.tif 
+gdaltindex  $SCRATCH/equi7val/NA_equi_north_shp.shp   $SCRATCH/equi7val/NA_equi_north.tif 
 
-# gdalwarp -co COMPRESS=DEFLATE -co ZLEVEL=9  -s_srs  $EQUI7/NA/PROJ/EQUI7_V13_NA_PROJ_ZONE.prj -t_srs $EQUI7/NA/GEOG/EQUI7_V13_NA_GEOG_ZONE.prj -tr 0.000833333333333333333  0.000833333333333333333   -r bilinear  -overwrite    $SCRATCH/equi7val/NA_equi_north.tif     $SCRATCH/equi7val/NA_equi_north_towgs84.tif 
+#  from equi7 to wgs84
 
-# gdalwarp -co COMPRESS=DEFLATE -co ZLEVEL=9  -s_srs  $EQUI7/NA/PROJ/EQUI7_V13_NA_PROJ_ZONE.prj -t_srs $EQUI7/NA/GEOG/EQUI7_V13_NA_GEOG_ZONE.prj -tr 0.000833333333333333333  0.000833333333333333333   -r bilinear  -overwrite    $SCRATCH/equi7val/NA_equi_south.tif     $SCRATCH/equi7val/NA_equi_south_towgs84.tif 
+gdalwarp -co COMPRESS=DEFLATE -co ZLEVEL=9  -s_srs  $EQUI7/NA/PROJ/EQUI7_V13_NA_PROJ_ZONE.prj -t_srs $EQUI7/NA/GEOG/EQUI7_V13_NA_GEOG_ZONE.prj -tr 0.000833333333333333333  0.000833333333333333333   -r bilinear  -overwrite    $SCRATCH/equi7val/NA_equi_north.tif     $SCRATCH/equi7val/NA_equi_north_towgs84.tif 
 
-
-
-# # calculate slope and tri  
-
-# for var in slope tri ; do 
-
-# if [ $var = tri ]   ; then varn=TRI   ; fi  
-# if [ $var = slope ] ; then varn=slope ; fi  
-
-# gdaldem ${varn} -s 111120    -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND    $SCRATCH/equi7val/NA_equi_south_towgs84.tif     $SCRATCH/equi7val/NA_equi_south_towgs84_${var}.tif 
-# gdaldem ${varn} -s 111120    -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND    $SCRATCH/equi7val/NA_equi_north_towgs84.tif     $SCRATCH/equi7val/NA_equi_north_towgs84_${var}.tif 
-
-# gdaldem ${varn}    -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND     $SCRATCH/equi7val/NA_equi_north.tif     $SCRATCH/equi7val/NA_equi_north_${var}.tif 
-# gdaldem ${varn}    -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND     $SCRATCH/equi7val/NA_equi_south.tif     $SCRATCH/equi7val/NA_equi_south_${var}.tif 
-
-# gdalwarp -te $( getCorners4Gwarp  $SCRATCH/equi7val/NA_equi_north_${var}.tif )   -co COMPRESS=DEFLATE -co ZLEVEL=9  -t_srs  $EQUI7/NA/PROJ/EQUI7_V13_NA_PROJ_ZONE.prj -s_srs $EQUI7/NA/GEOG/EQUI7_V13_NA_GEOG_ZONE.prj -tr 100 100   -r bilinear  -overwrite  $SCRATCH/equi7val/NA_equi_north_towgs84_${var}.tif   $SCRATCH/equi7val/NA_equi_north_towgs84_${var}_toequi.tif 
-
-# gdalwarp -te $( getCorners4Gwarp  $SCRATCH/equi7val/NA_equi_south_${var}.tif )    -co COMPRESS=DEFLATE -co ZLEVEL=9  -t_srs  $EQUI7/NA/PROJ/EQUI7_V13_NA_PROJ_ZONE.prj -s_srs $EQUI7/NA/GEOG/EQUI7_V13_NA_GEOG_ZONE.prj -tr 100 100   -r bilinear  -overwrite  $SCRATCH/equi7val/NA_equi_south_towgs84_${var}.tif   $SCRATCH/equi7val/NA_equi_south_towgs84_${var}_toequi.tif 
-
-# gdal_translate  -srcwin 10  10  580 580      $SCRATCH/equi7val/NA_equi_north_${var}.tif      $SCRATCH/equi7val/NA_equi_north_${var}_crop.tif 
-# gdal_translate  -srcwin 10  10  580 580      $SCRATCH/equi7val/NA_equi_south_${var}.tif      $SCRATCH/equi7val/NA_equi_south_${var}_crop.tif 
-
-# gdal_translate  -srcwin 10  10  580 580      $SCRATCH/equi7val/NA_equi_north.tif      $SCRATCH/equi7val/NA_equi_north_crop.tif 
-# gdal_translate  -srcwin 10  10  580 580      $SCRATCH/equi7val/NA_equi_south.tif      $SCRATCH/equi7val/NA_equi_south_crop.tif 
+gdalwarp -co COMPRESS=DEFLATE -co ZLEVEL=9  -s_srs  $EQUI7/NA/PROJ/EQUI7_V13_NA_PROJ_ZONE.prj -t_srs $EQUI7/NA/GEOG/EQUI7_V13_NA_GEOG_ZONE.prj -tr 0.000833333333333333333  0.000833333333333333333   -r bilinear  -overwrite    $SCRATCH/equi7val/NA_equi_south.tif     $SCRATCH/equi7val/NA_equi_south_towgs84.tif 
 
 
-# gdal_translate -projwin $(getCorners4Gtranslate $SCRATCH/equi7val/NA_equi_north_${var}_crop.tif) $SCRATCH/equi7val/NA_equi_north_towgs84_${var}_toequi.tif $SCRATCH/equi7val/NA_equi_north_towgs84_${var}_toequi_crop.tif 
-# gdal_translate -projwin $(getCorners4Gtranslate $SCRATCH/equi7val/NA_equi_south_${var}_crop.tif) $SCRATCH/equi7val/NA_equi_south_towgs84_${var}_toequi.tif $SCRATCH/equi7val/NA_equi_south_towgs84_${var}_toequi_crop.tif 
 
-# gdal_translate -projwin $(getCorners4Gtranslate $SCRATCH/equi7val/NA_equi_north_${var}_crop.tif) $SCRATCH/equi7val/NA_equi_north_towgs84_${var}_toequi.tif $SCRATCH/equi7val/NA_equi_north_towgs84_${var}_toequi_crop.tif 
-# gdal_translate -projwin $(getCorners4Gtranslate $SCRATCH/equi7val/NA_equi_south_${var}_crop.tif) $SCRATCH/equi7val/NA_equi_south_towgs84_${var}_toequi.tif $SCRATCH/equi7val/NA_equi_south_towgs84_${var}_toequi_crop.tif 
+# calculate slope and tri  
 
-# gdal_translate -of XYZ  $SCRATCH/equi7val/NA_equi_north_towgs84_${var}_toequi_crop.tif  $SCRATCH/equi7val/NA_equi_north_towgs84_${var}_toequi_crop.txt 
-# gdal_translate -of XYZ  $SCRATCH/equi7val/NA_equi_south_towgs84_${var}_toequi_crop.tif  $SCRATCH/equi7val/NA_equi_south_towgs84_${var}_toequi_crop.txt 
+for var in slope  ; do 
 
-# gdal_translate -of XYZ  $SCRATCH/equi7val/NA_equi_north_${var}_crop.tif  $SCRATCH/equi7val/NA_equi_north_${var}_crop.txt 
-# gdal_translate -of XYZ  $SCRATCH/equi7val/NA_equi_south_${var}_crop.tif  $SCRATCH/equi7val/NA_equi_south_${var}_crop.txt 
+if [ $var = tri ]   ; then varn=TRI   ; fi  
+if [ $var = slope ] ; then varn=slope ; fi  
 
-# paste <(awk '{ print $3  }'   $SCRATCH/equi7val/NA_equi_north_${var}_crop.txt )  <(awk '{ print $3  }'   $SCRATCH/equi7val/NA_equi_north_towgs84_${var}_toequi_crop.txt ) >   $SCRATCH/equi7val/NA_equi_wgs84_${var}_north.txt  
-# paste <(awk '{ print $3  }'   $SCRATCH/equi7val/NA_equi_south_${var}_crop.txt )  <(awk '{ print $3  }'   $SCRATCH/equi7val/NA_equi_south_towgs84_${var}_toequi_crop.txt ) >   $SCRATCH/equi7val/NA_equi_wgs84_${var}_south.txt  
+gdaldem ${varn} -s 111120    -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND    $SCRATCH/equi7val/NA_equi_south_towgs84.tif     $SCRATCH/equi7val/NA_equi_south_towgs84_${var}.tif 
+gdaldem ${varn} -s 111120    -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND    $SCRATCH/equi7val/NA_equi_north_towgs84.tif     $SCRATCH/equi7val/NA_equi_north_towgs84_${var}.tif 
 
-# done 
+gdaldem ${varn}    -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND     $SCRATCH/equi7val/NA_equi_north.tif     $SCRATCH/equi7val/NA_equi_north_${var}.tif 
+gdaldem ${varn}    -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND     $SCRATCH/equi7val/NA_equi_south.tif     $SCRATCH/equi7val/NA_equi_south_${var}.tif 
+
+gdalwarp -te $( getCorners4Gwarp  $SCRATCH/equi7val/NA_equi_north_${var}.tif )   -co COMPRESS=DEFLATE -co ZLEVEL=9  -t_srs  $EQUI7/NA/PROJ/EQUI7_V13_NA_PROJ_ZONE.prj -s_srs $EQUI7/NA/GEOG/EQUI7_V13_NA_GEOG_ZONE.prj -tr 100 100   -r bilinear  -overwrite  $SCRATCH/equi7val/NA_equi_north_towgs84_${var}.tif   $SCRATCH/equi7val/NA_equi_north_towgs84_${var}_toequi.tif 
+
+gdalwarp -te $( getCorners4Gwarp  $SCRATCH/equi7val/NA_equi_south_${var}.tif )    -co COMPRESS=DEFLATE -co ZLEVEL=9  -t_srs  $EQUI7/NA/PROJ/EQUI7_V13_NA_PROJ_ZONE.prj -s_srs $EQUI7/NA/GEOG/EQUI7_V13_NA_GEOG_ZONE.prj -tr 100 100   -r bilinear  -overwrite  $SCRATCH/equi7val/NA_equi_south_towgs84_${var}.tif   $SCRATCH/equi7val/NA_equi_south_towgs84_${var}_toequi.tif 
+
+gdal_translate  -srcwin 10  10  580 580      $SCRATCH/equi7val/NA_equi_north_${var}.tif      $SCRATCH/equi7val/NA_equi_north_${var}_crop.tif 
+gdal_translate  -srcwin 10  10  580 580      $SCRATCH/equi7val/NA_equi_south_${var}.tif      $SCRATCH/equi7val/NA_equi_south_${var}_crop.tif 
+
+gdal_translate  -srcwin 10  10  580 580      $SCRATCH/equi7val/NA_equi_north.tif      $SCRATCH/equi7val/NA_equi_north_crop.tif 
+gdal_translate  -srcwin 10  10  580 580      $SCRATCH/equi7val/NA_equi_south.tif      $SCRATCH/equi7val/NA_equi_south_crop.tif 
+
+
+gdal_translate -projwin $(getCorners4Gtranslate $SCRATCH/equi7val/NA_equi_north_${var}_crop.tif) $SCRATCH/equi7val/NA_equi_north_towgs84_${var}_toequi.tif $SCRATCH/equi7val/NA_equi_north_towgs84_${var}_toequi_crop.tif 
+gdal_translate -projwin $(getCorners4Gtranslate $SCRATCH/equi7val/NA_equi_south_${var}_crop.tif) $SCRATCH/equi7val/NA_equi_south_towgs84_${var}_toequi.tif $SCRATCH/equi7val/NA_equi_south_towgs84_${var}_toequi_crop.tif 
+
+gdal_translate -projwin $(getCorners4Gtranslate $SCRATCH/equi7val/NA_equi_north_${var}_crop.tif) $SCRATCH/equi7val/NA_equi_north_towgs84_${var}_toequi.tif $SCRATCH/equi7val/NA_equi_north_towgs84_${var}_toequi_crop.tif 
+gdal_translate -projwin $(getCorners4Gtranslate $SCRATCH/equi7val/NA_equi_south_${var}_crop.tif) $SCRATCH/equi7val/NA_equi_south_towgs84_${var}_toequi.tif $SCRATCH/equi7val/NA_equi_south_towgs84_${var}_toequi_crop.tif 
+
+gdal_translate -of XYZ  $SCRATCH/equi7val/NA_equi_north_towgs84_${var}_toequi_crop.tif  $SCRATCH/equi7val/NA_equi_north_towgs84_${var}_toequi_crop.txt 
+gdal_translate -of XYZ  $SCRATCH/equi7val/NA_equi_south_towgs84_${var}_toequi_crop.tif  $SCRATCH/equi7val/NA_equi_south_towgs84_${var}_toequi_crop.txt 
+
+gdal_translate -of XYZ  $SCRATCH/equi7val/NA_equi_north_${var}_crop.tif  $SCRATCH/equi7val/NA_equi_north_${var}_crop.txt 
+gdal_translate -of XYZ  $SCRATCH/equi7val/NA_equi_south_${var}_crop.tif  $SCRATCH/equi7val/NA_equi_south_${var}_crop.txt 
+
+paste <(awk '{ print $3  }'   $SCRATCH/equi7val/NA_equi_north_${var}_crop.txt )  <(awk '{ print $3  }'   $SCRATCH/equi7val/NA_equi_north_towgs84_${var}_toequi_crop.txt ) >   $SCRATCH/equi7val/NA_equi_wgs84_${var}_north.txt  
+paste <(awk '{ print $3  }'   $SCRATCH/equi7val/NA_equi_south_${var}_crop.txt )  <(awk '{ print $3  }'   $SCRATCH/equi7val/NA_equi_south_towgs84_${var}_toequi_crop.txt ) >   $SCRATCH/equi7val/NA_equi_wgs84_${var}_south.txt  
+
+done 
+
+exit 
+
 
 module load Apps/R/3.3.2-generic
 

@@ -1,24 +1,26 @@
 #!/bin/bash
 #SBATCH -p day 
-#SBATCH -n 1 -c 20  -N 1  
-#SBATCH -t 10:00:00
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc31_equi_multiRougDevaggregation4figure.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc31_equi_multiRougDevaggregation4figure.sh.%J.err
+#SBATCH -n 1 -c 1  -N 1  
+#SBATCH -t 24:00:00
+#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc32_equi_dev-magnitude_vaggregation4figure_ploting.R.sh.%J.out
+#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc32_equi_dev-magnitude_vaggregation4figure_ploting.R.sh.%J.err
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
-#SBATCH --job-name=sc31_equi_multiRougDevaggregation4figure.sh
+#SBATCH --job-name=sc32_equi_dev-magnitude_vaggregation4figure_ploting.R.sh
+#SBATCH --mem=80G
 
-# sbatch   /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc32_equi_multiRougDevaggregation4figure_ploting.R.sh
+
+# sbatch   /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc32_equi_dev-magnitude_vaggregation4figure_ploting.R.sh
 
 export MERIT=/project/fas/sbsc/ga254/dataproces/MERIT
-export SCRATCH=/gpfs/scratch60/fas/sbsc/ga254/dataproces/MERIT_BK
+export SCRATCH=/gpfs/scratch60/fas/sbsc/ga254/dataproces/MERIT
 export RAM=/dev/shm
-export KM=5.00
+export KM=1.00
 
-module load Apps/R/3.3.2-generic
+source ~/bin/gdal
 
 
-
+module load R/3.4.4-foss-2018a-X11-20180131
 
 
 R --vanilla --no-readline   -q  <<'EOF'
@@ -29,17 +31,17 @@ library(rasterVis)
 
 for ( CT  in c("AF", "AN", "AS", "EU", "NA", "OC", "SA")  ) {
 
-raster =raster(paste0("/gpfs/loomis/scratch60/fas/sbsc/ga254/dataproces/MERIT_BK/deviation/",CT,"_devi_5km.tif"))
+raster =raster(paste0("/project/fas/sbsc/ga254/dataproces/MERIT/gdrive100m/dev-magnitude_1km/",CT,"_dev-magnitude_1km.tif"))
 
-pdf(paste("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/MERIT/figure/",CT,"_multiroughnes.pdf", sep=""))
+pdf(paste("/gpfs/loomis/project/fas/sbsc/ga254/dataproces/MERIT/figure/",CT,"_dev-magnitude.pdf", sep=""))
 
 n=100
 colR=colorRampPalette(c("blue","green","yellow", "orange" , "red", "brown", "black" ))
 cols=colR(n)
-res=1e8             # res=1e4 for testing and res=1e6 for the final product
+res=1e7             # res=1e4 for testing and res=1e6 for the final product
 
-min=-1
-max=1
+min=-2
+max=2
 
 raster[raster>max] <- max
 raster[raster<min] <- min
