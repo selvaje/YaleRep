@@ -79,8 +79,12 @@ done
 ###  hybas_au_lev02_v1c_ID5020054880.tif 62160 39600 2461536000 2.46154
 
 
+####  hybas_ar_lev02_v1c.shp     8020020760   -180 eliminato 
+####  hybas_si_lev03_v1c_sel.shp 3030011770   +180 eliminato 
+
+
 cd $TIF 
-for file in $( ls *.tif | grep -v hybas_au_lev02_v1c_ID5020049720.tif | grep -v hybas_gr_lev02_v1c_ID9020000010.tif | grep -v hybas_si_lev02_v1c_ID3020009320.tif  | grep -v hybas_na_lev02_v1c_ID7020000010.tif  | grep -v hybas_af_lev02_v1c_ID1020000010.tif | grep -v hybas_af_lev02_v1c_ID1020027430.tif   | grep -v hybas_au_lev02_v1c_ID5020054880.tif   ) ; do echo $file $( gdalinfo $file  | grep "Size is" | \
+for file in $( ls *.tif | grep -v hybas_au_lev02_v1c_ID5020049720.tif | grep -v hybas_gr_lev02_v1c_ID9020000010.tif | grep -v hybas_si_lev02_v1c_ID3020009320.tif  | grep -v hybas_na_lev02_v1c_ID7020000010.tif  | grep -v hybas_af_lev02_v1c_ID1020000010.tif | grep -v hybas_af_lev02_v1c_ID1020027430.tif   | grep -v hybas_au_lev02_v1c_ID5020054880.tif | grep -v hybas_au_lev03_v1c_ID5030055130.tif  | grep -v hybas_ar_lev02_v1c_ID8020020760.tif  | grep -v hybas_si_lev03_v1c_ID3030011770.tif | grep -v hybas_si_lev03_v1c_ID3030024180.tif  | grep -v hybas_as_lev02_v1c_ID4020050470.tif | grep -v hybas_si_lev02_v1c_ID3020024310.tif | grep -v hybas_si_lev03_v1c_ID3030022480.tif  | grep -v hybas_af_lev03_v1c_ID1030027430.tif | grep -v hybas_af_lev02_v1c_ID1020034170.tif | grep -v hybas_af_lev02_v1c_ID1020018110.tif | grep -v hybas_af_lev03_v1c_ID1030003990.tif | grep -v hybas_au_lev03_v1c_ID5030087590.tif | grep -v hybas_au_lev03_v1c_ID5030087600.tif  ) ; do echo $file $( gdalinfo $file  | grep "Size is" | \
 awk '{ gsub(","," ") ;  print $3 , $4 , $3 * $4 , $3 * $4 / 1000000000 }' )  ; done |  sort -g -k 5,5 > $TIF/tif_size.txt 
 
 exit 

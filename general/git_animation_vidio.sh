@@ -1,0 +1,1 @@
+ gource --file-idle-time 0 -s 1 --auto-skip-seconds 1 --stop-at-end --title BTClient --output-ppm-stream - -r 25 /tmp/.git/ | ffmpeg -y -r 25  -f image2pipe -vcodec ppm -i -  -vcodec libx264 -preset medium -vprofile baseline -level 3.0 -pix_fmt yuv420p gource.mp4
