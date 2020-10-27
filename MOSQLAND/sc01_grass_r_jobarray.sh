@@ -3,15 +3,15 @@
 #SBATCH -J sc01_grass_r.sh
 #SBATCH -n 1 -c 16 -N 1
 #SBATCH -t 24:00:00 
-#SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc01_grass_r.sh.%J.out
-#SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc01_grass_r.sh.%J.err
+#SBATCH -o /gpfs/scratch60/fas/powell/esp38/stdout/sc01_grass_r.sh.%A_%a.out
+#SBATCH -e /gpfs/scratch60/fas/powell/esp38/stderr/sc01_grass_r.sh.%A_%a.err
 #SBATCH --mail-type=ALL
-#SBATCH --mail-user=email
+#SBATCH --mail-user=evlyn.pless@yale.edu
+#SBATCH --array=1-38
 #SBATCH --mem=80G
 
-####### for point in  $(seq 1 38 )  ; do sbatch --export=point=$point   /gpfs/loomis/home.grace/ga254/scripts/MOSQLAND/sc01_grass_r.sh ; done
-####### for point in  $(seq 1 1  )  ; do sbatch --export=point=$point   /gpfs/loomis/home.grace/ga254/scripts/MOSQLAND/sc01_grass_r.sh ; done
-######  bash /gpfs/loomis/home.grace/ga254/scripts/MOSQLAND/sc01_grass_r.sh
+####### sbatch  /home/fas/powell/esp38/scripts/MOSQLAND/RF/sc01_grass_r.sh
+###### 
 
 module load GEOS/3.6.2-foss-2018a-Python-3.6.4
 module load GDAL/3.1.0-foss-2018a-Python-3.6.4
@@ -28,23 +28,23 @@ export IN_MSQ=/project/fas/powell/esp38/dataproces/MOSQLAND
 export RAM=/dev/shm
 export CPU=$SLURM_CPUS_ON_NODE
 
-#### giuseppe output location
-export OUT_TXT=/gpfs/loomis/project/sbsc/ga254/dataproces/MOSQLAND/TrainingTesting
-export point=$point
+#### evie output location
+export OUT_TXT=/project/fas/powell/esp38/dataproces/MOSQLAND/consland/TrainingTesting
+export point=$SLURM_ARRAY_TASK_ID
 ###  export point=1
 
 ###  spliting in training and testing. Select only one point (all the pairwise from that point)  for the testing
 
 #Evie: I can  update FST_list_NAmRF3.csv so it has the new Houston data
 
-echo "index,V1,V2,locality1,locality2,lat1,long1,lat2,long2,FST_lin,CSE,Resd" > $OUT_TXT/FST_list_NAmRF3_Test$point.csv
-awk -v point=$point  -F ","  '{ if ($2==point || $3==point ) print }' $OUT_TXT/FST_list_NAmRF3_linux.csv  >> $OUT_TXT/FST_list_NAmRF3_Test$point.csv
-awk -v point=$point  -F ","  '{ if ($2!=point && $3!=point ) print }' $OUT_TXT/FST_list_NAmRF3_linux.csv  > $OUT_TXT/FST_list_NAmRF3_Trai$point.csv
+echo "index,V1,V2,locality1,locality2,lat1,long1,lat2,long2,FST_lin,CSE,Resd" > ${OUT_TXT}_${point}/FST_list_NAmRF3_Test$point.csv
+awk -v point=$point  -F ","  '{ if ($2==point || $3==point ) print }' $IN_TXT/FST_list_NAmRF3_linux.csv  >> ${OUT_TXT}_${point}/FST_list_NAmRF3_Test$point.csv
+awk -v point=$point  -F ","  '{ if ($2!=point && $3!=point ) print }' $IN_TXT/FST_list_NAmRF3_linux.csv  > ${OUT_TXT}_${point}/FST_list_NAmRF3_Trai$point.csv
 
 #### create the start-end points for each line
 
-awk -F "," '{ if(NR>1) printf ("%f %f\n%f %f\n%s\n" , $(NF-5), $(NF-6), $(NF-3), $(NF-4), "NaN NaN" ) }' $OUT_TXT/FST_list_NAmRF3_Test$point.csv > $OUT_TXT/FST_line_NAmRF3_Test$point.txt
-awk -F "," '{ if(NR>1) printf ("%f %f\n%f %f\n%s\n" , $(NF-5), $(NF-6), $(NF-3), $(NF-4), "NaN NaN" ) }' $OUT_TXT/FST_list_NAmRF3_Trai$point.csv > $OUT_TXT/FST_line_NAmRF3_Trai$point.txt 
+awk -F "," '{ if(NR>1) printf ("%f %f\n%f %f\n%s\n" , $(NF-5), $(NF-6), $(NF-3), $(NF-4), "NaN NaN" ) }' ${OUT_TXT}_${point}/FST_list_NAmRF3_Test$point.csv > ${OUT_TXT}_${point}/FST_line_NAmRF3_Test$point.txt
+awk -F "," '{ if(NR>1) printf ("%f %f\n%f %f\n%s\n" , $(NF-5), $(NF-6), $(NF-3), $(NF-4), "NaN NaN" ) }' ${OUT_TXT}_${point}/FST_list_NAmRF3_Trai$point.csv > ${OUT_TXT}_${point}/FST_line_NAmRF3_Trai$point.txt 
 
 ### enter in grass and get the mean under straight line
 
@@ -93,8 +93,8 @@ r.external  input=$RAM/grassdb$point/KernelRas_100m_fnl.tif  output=kernel100   
 
 ## add all the predictors 
 
-v.in.lines input=$OUT_TXT/FST_line_NAmRF3_Test$point.txt output=FST_line_NAmRF3_Test$point  separator=" " --overwrite
-v.in.lines input=$OUT_TXT/FST_line_NAmRF3_Trai$point.txt output=FST_line_NAmRF3_Trai$point  separator=" " --overwrite
+v.in.lines input=${OUT_TXT}_${point}/FST_line_NAmRF3_Test$point.txt output=FST_line_NAmRF3_Test$point  separator=" " --overwrite
+v.in.lines input=${OUT_TXT}_${point}/FST_line_NAmRF3_Trai$point.txt output=FST_line_NAmRF3_Trai$point  separator=" " --overwrite
 
 echo addtable for Test and Trai 
 
@@ -106,16 +106,16 @@ echo  extract mean for straight line in FST_line_NAmRF3_Test$point and FST_line_
 for VAR in Trai Test ; do 
 
 export VAR=$VAR
-echo "index,arid,access,prec,meantemp,humandensity,friction,mintemp,Needleleaf,EvBroadleaf,DecBroadleaf,MiscTrees,Shrubs,Herb,Crop,Flood,Urban,Snow,Barren,Water,Slope,Altitude,PET,DailyTempRange,maxtemp,AnnualTempRange,precwet,precdry,GPP,kernel100" > $OUT_TXT/FST_list_NAmRF3_Predict${VAR}$point.csv 
+echo "index,arid,access,prec,meantemp,humandensity,friction,mintemp,Needleleaf,EvBroadleaf,DecBroadleaf,MiscTrees,Shrubs,Herb,Crop,Flood,Urban,Snow,Barren,Water,Slope,Altitude,PET,DailyTempRange,maxtemp,AnnualTempRange,precwet,precdry,GPP,kernel100" > ${OUT_TXT}_${point}/FST_list_NAmRF3_Predict${VAR}$point.csv 
 
-awk -F "," '{ if (NR>1)  print NR-1 , $1   }'   $OUT_TXT/FST_list_NAmRF3_${VAR}$point.csv | xargs -n 2 -P $CPU  bash -c $' 
+awk -F "," '{ if (NR>1)  print NR-1 , $1   }'   ${OUT_TXT}_${point}/FST_list_NAmRF3_${VAR}$point.csv | xargs -n 2 -P $CPU  bash -c $' 
 CAT=$1
 INDEX=$2 
 v.to.rast  input=FST_line_NAmRF3_${VAR}$point where="cat == $CAT " output=raster$CAT  use="cat" --o   2>/dev/null 
 
 echo $INDEX","$(for rast in arid access prec meantemp humandensity friction mintemp Needleleaf EvBroadleaf DecBroadleaf MiscTrees Shrubs Herb Crop Flood Urban Snow Barren Water Slope Altitude PET DailyTempRange maxtemp AnnualTempRange precwet precdry GPP ; do  r.univar -t map=$rast    zones=raster$CAT separator=comma 2>/dev/null | awk  -F , \' { if (NR==2)  printf  ("%s," , $8 ) } \'  ; done )$(r.univar -t map=kernel100   zones=raster$CAT  separator=comma 2>/dev/null   | awk  -F ,   \' { if (NR==2)  printf  ("%s\\n",$8 ) } \' )
 g.remove -f  type=raster name=raster$CAT  2>/dev/null
-' _   >> $OUT_TXT/FST_list_NAmRF3_Predict${VAR}$point.csv 
+' _   >> ${OUT_TXT}_${point}/FST_list_NAmRF3_Predict${VAR}$point.csv 
 
 done
 
@@ -125,11 +125,11 @@ EOF
 
 ##### extract kernel values at point level 
 
-paste -d ","  <(awk -F , '{  if(NR>1) print $2 }' $OUT_TXT/FST_list_NAmRF3_Test$point.csv | uniq )   <(gdallocationinfo -geoloc -wgs84  -valonly   $IN_MSQ/consland/kernel/KernelRas_100m_fnl.tif  $(awk -F , '{  if(NR>1) print  $(NF-5), $(NF-6) }'   $OUT_TXT/FST_list_NAmRF3_Test$point.csv | uniq )) >  $OUT_TXT/FST_list_NAmRF3_KernelTest$point.csv 
+paste -d ","  <(awk -F , '{  if(NR>1) print $2 }' ${OUT_TXT}_${point}/FST_list_NAmRF3_Test$point.csv | uniq )   <(gdallocationinfo -geoloc -wgs84  -valonly   $IN_MSQ/consland/kernel/KernelRas_100m_fnl.tif  $(awk -F , '{  if(NR>1) print  $(NF-5), $(NF-6) }'   ${OUT_TXT}_${point}/FST_list_NAmRF3_Test$point.csv | uniq )) >  ${OUT_TXT}_${point}/FST_list_NAmRF3_KernelTest$point.csv 
 
-awk -F , '{ if(NR>1) print  $(NF-5), $(NF-6) }'   $OUT_TXT/FST_list_NAmRF3_Trai$point.csv | uniq > $OUT_TXT/FST_list_NAmRF3_LatLongTrai$point.txt 
-paste -d ","  <(awk -F , '{ if(NR>1) print $2 }'  $OUT_TXT/FST_list_NAmRF3_Trai$point.csv | uniq) <(gdallocationinfo -geoloc -wgs84  -valonly   $IN_MSQ/consland/kernel/KernelRas_100m_fnl.tif  < $OUT_TXT/FST_list_NAmRF3_LatLongTrai$point.txt )   >  $OUT_TXT/FST_list_NAmRF3_KernelTrai$point.csv
-rm $OUT_TXT/FST_list_NAmRF3_LatLongTrai$point.txt  
+awk -F , '{ if(NR>1) print  $(NF-5), $(NF-6) }'   ${OUT_TXT}_${point}/FST_list_NAmRF3_Trai$point.csv | uniq > ${OUT_TXT}_${point}/FST_list_NAmRF3_LatLongTrai$point.txt 
+paste -d ","  <(awk -F , '{ if(NR>1) print $2 }'  ${OUT_TXT}_${point}/FST_list_NAmRF3_Trai$point.csv | uniq) <(gdallocationinfo -geoloc -wgs84  -valonly   $IN_MSQ/consland/kernel/KernelRas_100m_fnl.tif  < ${OUT_TXT}_${point}/FST_list_NAmRF3_LatLongTrai$point.txt )   >  ${OUT_TXT}_${point}/FST_list_NAmRF3_KernelTrai$point.csv
+rm ${OUT_TXT}_${point}/FST_list_NAmRF3_LatLongTrai$point.txt  
 
 echo start to process in R 
 
@@ -142,12 +142,12 @@ library("gdistance")
 
 point <- Sys.getenv(c('point'))
 
-Env.table.train <- read.table(paste0("/gpfs/loomis/project/sbsc/ga254/dataproces/MOSQLAND/TrainingTesting/FST_list_NAmRF3_PredictTrai" , point , ".csv"), sep=",", header=T)
+Env.table.train <- read.table(paste0("/project/fas/powell/esp38/dataproces/MOSQLAND/consland/TrainingTesting_", point, "/FST_list_NAmRF3_PredictTrai" , point , ".csv"), sep=",", header=T)
 ## select only index and CSE
-Gen.table.train <- read.table(paste0("/gpfs/loomis/project/sbsc/ga254/dataproces/MOSQLAND/TrainingTesting/FST_list_NAmRF3_Trai", point         , ".csv"), sep=",", header=T)[,c( 1, 11)]
+Gen.table.train <- read.table(paste0("/project/fas/powell/esp38/dataproces/MOSQLAND/consland/TrainingTesting_", point, "/FST_list_NAmRF3_Trai", point         , ".csv"), sep=",", header=T)[,c( 1, 11)]
 
-Env.table.test <- read.table(paste0("/gpfs/loomis/project/sbsc/ga254/dataproces/MOSQLAND/TrainingTesting/FST_list_NAmRF3_PredictTest" , point , ".csv"), sep=",", header=T)
-Gen.table.test <- read.table(paste0("/gpfs/loomis/project/sbsc/ga254/dataproces/MOSQLAND/TrainingTesting/FST_list_NAmRF3_Test", point         , ".csv"), sep=",", header=T)[,c( 1, 11)]
+Env.table.test <- read.table(paste0("/project/fas/powell/esp38/dataproces/MOSQLAND/consland/TrainingTesting_", point, "/FST_list_NAmRF3_PredictTest" , point , ".csv"), sep=",", header=T)
+Gen.table.test <- read.table(paste0("/project/fas/powell/esp38/dataproces/MOSQLAND/consland/TrainingTesting_", point, "/FST_list_NAmRF3_Test", point         , ".csv"), sep=",", header=T)[,c( 1, 11)]
 
 ###  Rename columns 
 
@@ -184,22 +184,29 @@ importance=TRUE, mtry = mtry_opt, na.action=na.omit, data=Env.table.train)
 
 Straight_RF
 
-pred.cond <-  1 / (  predict(env, Straight_RF)  
+Cor1 = cor(Straight_RF$predicted, Env.table.train$CSE)
+Cor2 = cor(predict(Straight_RF, Env.table.test), Env.table.test$CSE)
 
-writeRaster(pred.cond,"/gpfs/loomis/project/sbsc/ga254/dataproces/MOSQLAND/TrainingTesting/prediction.tif",options=c("COMPRESS=DEFLATE","ZLEVEL=9") , format="GTiff", overwrite=TRUE  )
+paste ("Cor1" , Cor1 )
+paste ("Cor2" , Cor2 )
+
+pred.cond <-  1 /  predict(env, Straight_RF)  
+
+#come back to this
+writeRaster(pred.cond, paste0("/project/fas/powell/esp38/dataproces/MOSQLAND/consland/TrainingTesting_", point, "/prediction.tif"), options=c("COMPRESS=DEFLATE","ZLEVEL=9") , format="GTiff", overwrite=TRUE  )
 
 # writeRaster(trNAm1,"/gpfs/loomis/project/sbsc/ga254/dataproces/MOSQLAND/TrainingTesting/trNAm1.tif",options=c("COMPRESS=DEFLATE","ZLEVEL=9") , format="GTiff", overwrite=TRUE  )
 
 EOF
 
-pksetmask -co COMPRESS=DEFLATE -co ZLEVEL=9 -m $OUT_TXT/prediction.tif -msknodata -1 -p "<" -nodata -1 -i $OUT_TXT/prediction.tif -o $OUT_TXT/prediction_msk0.tif
-rm $OUT_TXT/prediction.tif 
-cp $OUT_TXT/prediction_msk0.tif $OUT_TXT/prediction_msk.tif
+pksetmask -co COMPRESS=DEFLATE -co ZLEVEL=9 -m ${OUT_TXT}_${point}/prediction.tif -msknodata -1 -p "<" -nodata -1 -i ${OUT_TXT}_${point}/prediction.tif -o ${OUT_TXT}_${point}/prediction_msk0.tif
+rm ${OUT_TXT}_${point}/prediction.tif 
+cp ${OUT_TXT}_${point}/prediction_msk0.tif ${OUT_TXT}_${point}/prediction_msk.tif
 
 
 ### Test and Train  start and stop coordinates 
-awk -F "," '{ if(NR>1) print $1 , $(NF-5),  $(NF-6) ,  $(NF-3),  $(NF-4) }' $OUT_TXT/FST_list_NAmRF3_Test$point.csv | uniq > $OUT_TXT/FST_line_NAmRF3_StartStopTest$point.txt
-awk -F "," '{ if(NR>1) print $1 , $(NF-5),  $(NF-6) ,  $(NF-3),  $(NF-4) }' $OUT_TXT/FST_list_NAmRF3_Trai$point.csv | uniq > $OUT_TXT/FST_line_NAmRF3_StartStopTrai$point.txt
+awk -F "," '{ if(NR>1) print $1 , $(NF-5),  $(NF-6) ,  $(NF-3),  $(NF-4) }' ${OUT_TXT}_${point}/FST_list_NAmRF3_Test$point.csv | uniq > ${OUT_TXT}_${point}/FST_line_NAmRF3_StartStopTest$point.txt
+awk -F "," '{ if(NR>1) print $1 , $(NF-5),  $(NF-6) ,  $(NF-3),  $(NF-4) }' ${OUT_TXT}_${point}/FST_list_NAmRF3_Trai$point.csv | uniq > ${OUT_TXT}_${point}/FST_line_NAmRF3_StartStopTrai$point.txt
 
 for ITER in $(seq 1 10 ) ; do  
 export ITER=$ITER
@@ -207,13 +214,13 @@ export ITER=$ITER
 echo Start Iteration $ITER  GRASS 
 
 grass78 -f -text $RAM/grassdb$point/loc$point/PERMANENT   <<'EOF'
-r.external  input=$OUT_TXT/prediction_msk.tif    output=prediction   --overwrite
+r.external  input=${OUT_TXT}_${point}/prediction_msk.tif    output=prediction   --overwrite
 
 for VAR in Trai Test ; do 
 export VAR=$VAR
-echo "index,arid,access,prec,meantemp,humandensity,friction,mintemp,Needleleaf,EvBroadleaf,DecBroadleaf,MiscTrees,Shrubs,Herb,Crop,Flood,Urban,Snow,Barren,Water,Slope,Altitude,PET,DailyTempRange,maxtemp,AnnualTempRange,precwet,precdry,GPP,kernel100" > $OUT_TXT/FST_list_NAmRF3_Iter${ITER}LeastPath${VAR}$point.csv
+echo "index,arid,access,prec,meantemp,humandensity,friction,mintemp,Needleleaf,EvBroadleaf,DecBroadleaf,MiscTrees,Shrubs,Herb,Crop,Flood,Urban,Snow,Barren,Water,Slope,Altitude,PET,DailyTempRange,maxtemp,AnnualTempRange,precwet,precdry,GPP,kernel100" > ${OUT_TXT}_${point}/FST_list_NAmRF3_Iter${ITER}LeastPath${VAR}$point.csv
 
-cat $OUT_TXT/FST_line_NAmRF3_StartStop${VAR}$point.txt   | xargs -n 5 -P $CPU  bash -c $'
+cat ${OUT_TXT}_${point}/FST_line_NAmRF3_StartStop${VAR}$point.txt   | xargs -n 5 -P $CPU  bash -c $'
 INDEX=$1 
 
 r.cost -n -k  input=prediction  output=cost$INDEX  outdir=dir$INDEX    start_coordinates=$2,$3  memory=200  --o --q
@@ -224,7 +231,7 @@ g.remove -f  type=raster name=dir$INDEX  2>/dev/null
 echo $INDEX","$(for rast in arid access prec meantemp humandensity friction mintemp Needleleaf EvBroadleaf DecBroadleaf MiscTrees Shrubs Herb Crop Flood Urban Snow Barren Water Slope Altitude PET DailyTempRange maxtemp AnnualTempRange precwet precdry GPP ; do  r.univar -t map=$rast    zones=least_path$INDEX separator=comma 2>/dev/null | awk  -F , \' { if (NR==2)  printf  ("%s,", $8) } \' ; done )$(r.univar -t map=kernel100 zones=least_path$INDEX separator=comma 2>/dev/null | awk  -F , \' { if (NR==2)  printf  ("%s\\n",$8 ) } \') 
 g.remove -f  type=raster name=least_path$INDEX  2>/dev/null
 
-' _  >> $OUT_TXT/FST_list_NAmRF3_Iter${ITER}LeastPath${VAR}$point.csv
+' _  >> ${OUT_TXT}_${point}/FST_list_NAmRF3_Iter${ITER}LeastPath${VAR}$point.csv
 done
 
 EOF
@@ -241,11 +248,11 @@ library("gdistance")
 point <- Sys.getenv(c('point'))
 ITER  <- Sys.getenv(c('ITER'))
 
-Env.table.train <- read.table(paste0("/gpfs/loomis/project/sbsc/ga254/dataproces/MOSQLAND/TrainingTesting/FST_list_NAmRF3_Iter",ITER,"LeastPathTrai",point,".csv"), sep=",", header=T)
-Gen.table.train <- read.table(paste0("/gpfs/loomis/project/sbsc/ga254/dataproces/MOSQLAND/TrainingTesting/FST_list_NAmRF3_Trai",point,".csv"), sep=",", header=T)[,c( 1, 11)]
+Env.table.train <- read.table(paste0("/project/fas/powell/esp38/dataproces/MOSQLAND/consland/TrainingTesting_", point, "/FST_list_NAmRF3_Iter",ITER,"LeastPathTrai",point,".csv"), sep=",", header=T)
+Gen.table.train <- read.table(paste0("/project/fas/powell/esp38/dataproces/MOSQLAND/consland/TrainingTesting_", point, "/FST_list_NAmRF3_Trai",point,".csv"), sep=",", header=T)[,c( 1, 11)]
 
-Env.table.test <- read.table(paste0("/gpfs/loomis/project/sbsc/ga254/dataproces/MOSQLAND/TrainingTesting/FST_list_NAmRF3_Iter",ITER,"LeastPathTest",point,".csv"), sep=",", header=T) 
-Gen.table.test <- read.table(paste0("/gpfs/loomis/project/sbsc/ga254/dataproces/MOSQLAND/TrainingTesting/FST_list_NAmRF3_Test",point, ".csv"), sep=",", header=T)[,c( 1, 11)]
+Env.table.test <- read.table(paste0("/project/fas/powell/esp38/dataproces/MOSQLAND/consland/TrainingTesting_", point, "/FST_list_NAmRF3_Iter",ITER,"LeastPathTest",point,".csv"), sep=",", header=T) 
+Gen.table.test <- read.table(paste0("/project/fas/powell/esp38/dataproces/MOSQLAND/consland/TrainingTesting_", point, "/FST_list_NAmRF3_Test",point, ".csv"), sep=",", header=T)[,c( 1, 11)]
 
 ### Add genetic distance column to the new data frame
 
@@ -284,18 +291,25 @@ importance=TRUE, mtry = mtry_opt, na.action=na.omit, data=Env.table.train)
 
 LeastPath_RF
 
+Cor1 = cor(LeastPath_RF$predicted, Env.table.train$CSE)                         
+Cor2 = cor(predict(LeastPath_RF, Env.table.test), Env.table.test$CSE)           
+                                                                               
+paste ( "ITER" , ITER , "Cor1" , Cor1 )                                                                           
+paste ( "ITER" , ITER , "Cor2" , Cor2 )                              
+
 pred.cond <- 1 / predict(env, LeastPath_RF) 
 
-writeRaster(pred.cond,"/gpfs/loomis/project/sbsc/ga254/dataproces/MOSQLAND/TrainingTesting/prediction.tif",options=c("COMPRESS=DEFLATE","ZLEVEL=9") , format="GTiff", overwrite=TRUE  )
+#come back to this
+writeRaster(pred.cond, paste0("/project/fas/powell/esp38/dataproces/MOSQLAND/consland/TrainingTesting_", point, "/prediction.tif"), options=c("COMPRESS=DEFLATE","ZLEVEL=9") , format="GTiff", overwrite=TRUE  )
 EOF
 
-pksetmask -co COMPRESS=DEFLATE -co ZLEVEL=9 -m $OUT_TXT/prediction.tif -msknodata -1 -p "<" -nodata -1 -i $OUT_TXT/prediction.tif -o $OUT_TXT/prediction_msk$ITER.tif
-rm $OUT_TXT/prediction.tif 
-cp $OUT_TXT/prediction_msk$ITER.tif $OUT_TXT/prediction_msk.tif
+pksetmask -co COMPRESS=DEFLATE -co ZLEVEL=9 -m ${OUT_TXT}_${point}/prediction.tif -msknodata -1 -p "<" -nodata -1 -i ${OUT_TXT}_${point}/prediction.tif -o ${OUT_TXT}_${point}/prediction_msk$ITER.tif
+rm ${OUT_TXT}_${point}/prediction.tif 
+cp ${OUT_TXT}_${point}/prediction_msk$ITER.tif ${OUT_TXT}_${point}/prediction_msk.tif
 
 done   # close the iteration loop  
 
-rm $OUT_TXT/prediction_msk.tif 
-rm -rf $OUT_TXT/grassdb$point/loc$point 
-cp -r $RAM/grassdb$point/loc$point  $OUT_TXT/grassdb$point/
+rm ${OUT_TXT}_${point}/prediction_msk.tif 
+rm -rf ${OUT_TXT}_${point}/grassdb$point/loc$point 
+cp -r $RAM/grassdb$point/loc$point  ${OUT_TXT}_${point}/grassdb$point/
 rm -rf $RAM/grassdb$point/loc$point

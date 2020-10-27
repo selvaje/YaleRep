@@ -10,7 +10,7 @@
 #SBATCH --mem=80G
 
 ####### for point in  $(seq 1 38 )  ; do sbatch --export=point=$point   /gpfs/loomis/home.grace/ga254/scripts/MOSQLAND/sc01_grass_r.sh ; done
-####### for point in  $(seq 1 1  )  ; do sbatch --export=point=$point   /gpfs/loomis/home.grace/ga254/scripts/MOSQLAND/sc01_grass_r.sh ; done
+####### for point in  $(seq 1 1  )  ; do sbatch --export=point=$point   /gpfs/loomis/home.grace/ga254/scripts/MOSQLAND/sc01_grass_r_fast.sh ; done
 ######  bash /gpfs/loomis/home.grace/ga254/scripts/MOSQLAND/sc01_grass_r.sh
 
 module load GEOS/3.6.2-foss-2018a-Python-3.6.4
@@ -35,7 +35,7 @@ export point=$point
 
 ###  spliting in training and testing. Select only one point (all the pairwise from that point)  for the testing
 
-#Evie: I can  update FST_list_NAmRF3.csv so it has the new Houston data
+###  Evie: I can  update FST_list_NAmRF3.csv so it has the new Houston data
 
 echo "index,V1,V2,locality1,locality2,lat1,long1,lat2,long2,FST_lin,CSE,Resd" > $OUT_TXT/FST_list_NAmRF3_Test$point.csv
 awk -v point=$point  -F ","  '{ if ($2==point || $3==point ) print }' $OUT_TXT/FST_list_NAmRF3_linux.csv  >> $OUT_TXT/FST_list_NAmRF3_Test$point.csv
@@ -54,7 +54,6 @@ rm -fr $RAM/grassdb$point
 mkdir  $RAM/grassdb$point
 
 ls $IN_MSQ/consland/ARIDITY/NAm_clip/AI_annual_NAmClip2_Int16.tif $IN_MSQ/consland/access/NAm_clip/accessibility_to_cities_2015_v1.0_NAmClip2_Int16.tif $IN_MSQ/consland/chelsa/bio12/NAm_clip/bio12_mean_NAmClip2_Int16.tif $IN_MSQ/consland/chelsa/bio1/NAm_clip/bio1_NAmClip2_Int16.tif $IN_MSQ/consland/GSHL/NAm_clip/GHS_BUILT_LDS2014_GLOBE_R2016A_54009_1k_v1_0_WGS84_NAmClip2.tif $IN_MSQ/consland/friction/NAm_clip/friction_surface_2015_v1.0_NAmClip2.tif $IN_MSQ/consland/chelsa/bio6/NAm_clip/bio6_mean_NAmClip2_Int16.tif $IN_MSQ/consland/landcov/NAm_clip/consensus_full_class_1_NAmClip2.tif $IN_MSQ/consland/landcov/NAm_clip/consensus_full_class_2_NAmClip2.tif $IN_MSQ/consland/landcov/NAm_clip/consensus_full_class_3_NAmClip2.tif $IN_MSQ/consland/landcov/NAm_clip/consensus_full_class_4_NAmClip2.tif $IN_MSQ/consland/landcov/NAm_clip/consensus_full_class_5_NAmClip2.tif $IN_MSQ/consland/landcov/NAm_clip/consensus_full_class_6_NAmClip2.tif $IN_MSQ/consland/landcov/NAm_clip/consensus_full_class_7_NAmClip2.tif $IN_MSQ/consland/landcov/NAm_clip/consensus_full_class_8_NAmClip2.tif $IN_MSQ/consland/landcov/NAm_clip/consensus_full_class_9_NAmClip2.tif $IN_MSQ/consland/landcov/NAm_clip/consensus_full_class_10_NAmClip2.tif $IN_MSQ/consland/landcov/NAm_clip/consensus_full_class_11_NAmClip2.tif $IN_MSQ/consland/landcov/NAm_clip/consensus_full_class_12_NAmClip2.tif $IN_MSQ/consland/MERIT/slope/NAm_clip/slope_1KMmedian_MERIT_NAmClip2.tif $IN_MSQ/consland/MERIT/altitude/NAm_clip/altitude_1KMmedian_MERIT_NAmClip2_Int16.tif $IN_MSQ/consland/PET/NAm_clip/pet_mean_NAmClip2.tif $IN_MSQ/consland/chelsa/bio2/NAm_clip/bio2_mean_NAmClip2_Int16.tif $IN_MSQ/consland/chelsa/bio5/NAm_clip/bio5_mean_NAmClip2_Int16.tif $IN_MSQ/consland/chelsa/bio7/NAm_clip/bio7_mean_NAmClip2_Int16.tif $IN_MSQ/consland/chelsa/bio13/NAm_clip/bio13_mean_NAmClip2_Int16.tif $IN_MSQ/consland/chelsa/bio14/NAm_clip/bio14_mean_NAmClip2.tif $IN_MSQ/consland/GPP/mnth/monthly_mean/NAm_clip/GPP_mean_NAmClip2_Int16.tif $IN_MSQ/consland/kernel/KernelRas_100m_fnl.tif | xargs -n 1 -P $CPU bash -c $' cp $1 $RAM/grassdb$point  ' _ 
-
 
 # rm -r $OUT_TXT/grassdb$point/loc$point
 # grass78 -f -text -c $RAM/grassdb$point/AI_annual_NAmClip2_Int16.tif  $OUT_TXT/grassdb$point/loc$point   <<'EOF'
@@ -184,7 +183,7 @@ importance=TRUE, mtry = mtry_opt, na.action=na.omit, data=Env.table.train)
 
 Straight_RF
 
-pred.cond <-  1 / (  predict(env, Straight_RF)  
+pred.cond <-  1 /   predict(env, Straight_RF)  
 
 writeRaster(pred.cond,"/gpfs/loomis/project/sbsc/ga254/dataproces/MOSQLAND/TrainingTesting/prediction.tif",options=c("COMPRESS=DEFLATE","ZLEVEL=9") , format="GTiff", overwrite=TRUE  )
 
@@ -213,18 +212,28 @@ for VAR in Trai Test ; do
 export VAR=$VAR
 echo "index,arid,access,prec,meantemp,humandensity,friction,mintemp,Needleleaf,EvBroadleaf,DecBroadleaf,MiscTrees,Shrubs,Herb,Crop,Flood,Urban,Snow,Barren,Water,Slope,Altitude,PET,DailyTempRange,maxtemp,AnnualTempRange,precwet,precdry,GPP,kernel100" > $OUT_TXT/FST_list_NAmRF3_Iter${ITER}LeastPath${VAR}$point.csv
 
-cat $OUT_TXT/FST_line_NAmRF3_StartStop${VAR}$point.txt   | xargs -n 5 -P $CPU  bash -c $'
-INDEX=$1 
 
-r.cost -n -k  input=prediction  output=cost$INDEX  outdir=dir$INDEX    start_coordinates=$2,$3  memory=200  --o --q
-g.remove -f  type=raster name=cost$INDEX  2>/dev/null
-r.path input=dir$INDEX  raster_path=least_path$INDEX start_coordinates=$4,$5 --o --q 
-g.remove -f  type=raster name=dir$INDEX  2>/dev/null
+awk '{ print $2 , $3  }'  $OUT_TXT/FST_line_NAmRF3_StartStop${VAR}$point.txt | uniq | awk '{ print NR , $1 , $2  }'  | xargs -n 3 -P 1   bash -c $'  
+export NR=$1
+export LAT=$2
+export LON=$3
 
-echo $INDEX","$(for rast in arid access prec meantemp humandensity friction mintemp Needleleaf EvBroadleaf DecBroadleaf MiscTrees Shrubs Herb Crop Flood Urban Snow Barren Water Slope Altitude PET DailyTempRange maxtemp AnnualTempRange precwet precdry GPP ; do  r.univar -t map=$rast    zones=least_path$INDEX separator=comma 2>/dev/null | awk  -F , \' { if (NR==2)  printf  ("%s,", $8) } \' ; done )$(r.univar -t map=kernel100 zones=least_path$INDEX separator=comma 2>/dev/null | awk  -F , \' { if (NR==2)  printf  ("%s\\n",$8 ) } \') 
+r.cost -n -k  input=prediction  output=cost$NR  outdir=dir$NR    start_coordinates=$LAT,$LON  memory=200  --o --q
+g.remove -f  type=raster name=cost$NR  2>/dev/null
+
+awk -v  LAT=$LAT -v LON=$LON   \' { if($2 == LAT  &&  $3 == LON ) print   }\'  $OUT_TXT/FST_line_NAmRF3_StartStop${VAR}$point.txt   | xargs -n 5 -P $CPU  bash -c $\'
+INDEX=$1
+r.path input=dir$NR  raster_path=least_path$INDEX start_coordinates=$4,$5 --o --q 
+
+echo $INDEX","$(for rast in arid access prec meantemp humandensity friction mintemp Needleleaf EvBroadleaf DecBroadleaf MiscTrees Shrubs Herb Crop Flood Urban Snow Barren Water Slope Altitude PET DailyTempRange maxtemp AnnualTempRange precwet precdry GPP ; do  r.univar -t map=$rast    zones=least_path$INDEX separator=comma 2>/dev/null | awk  -F , \\\' { if (NR==2)  printf  ("%s,", $8) } \\\' ; done )$(r.univar -t map=kernel100 zones=least_path$INDEX separator=comma 2>/dev/null | awk  -F , \\\' { if (NR==2)  printf  ("%s\\\\n",$8)} \\\') 
 g.remove -f  type=raster name=least_path$INDEX  2>/dev/null
 
-' _  >> $OUT_TXT/FST_list_NAmRF3_Iter${ITER}LeastPath${VAR}$point.csv
+\' _  >> $OUT_TXT/FST_list_NAmRF3_Iter${ITER}LeastPath${VAR}$point.csv
+
+g.remove -f  type=raster name=dir$NR  2>/dev/null
+
+' _ 
+
 done
 
 EOF
