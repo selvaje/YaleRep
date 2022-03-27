@@ -4,7 +4,6 @@
 #SBATCH -t 24:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc05_dem_variables_float_noMult_equi7_4HyperScaleRoughness.sh.%A_%a.out
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc05_dem_variables_float_noMult_equi7_4HyperScaleRoughness.sh.%A_%a.err
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc05_dem_variables_float_noMult_equi7_4HyperScaleRoughness.sh
 #SBATCH --array=1

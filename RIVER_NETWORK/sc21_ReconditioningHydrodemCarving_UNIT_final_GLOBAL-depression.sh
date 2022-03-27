@@ -2,7 +2,6 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 1 -N 1  
 #SBATCH -t 24:00:00
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 
 # sacct -j 623622   --format=jobid,MaxVMSize,start,end,CPUTImeRaw,NodeList,ReqCPUS,ReqMem,Elapsed,Timelimit 

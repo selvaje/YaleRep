@@ -4,7 +4,6 @@
 #SBATCH -t 1:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc02_month_mean_calculation.sh.%A.%a.err
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc02_month_mean_calculation.sh.%A.%a.err
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc02_month_mean_calculation.sh
 #SBATCH --array=1-34

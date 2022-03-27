@@ -4,7 +4,6 @@
 #SBATCH -t 24:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc20_build_dem_location_4streamMacroTile.sh.%A_%a.out
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc20_build_dem_location_4streamMacroTile.sh.%A_%a.err
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc20_build_dem_location_4streamMacroTile.sh
 #SBATCH --array=1-24

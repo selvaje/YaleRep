@@ -4,7 +4,6 @@
 #SBATCH -t 168:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc01b_dem_stdev_tile.%J.out
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc01b_dem_stdev_tile.%J.err
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 
 # sacct -j 623622   --format=jobid,MaxVMSize,start,end,CPUTImeRaw,NodeList,ReqCPUS,ReqMem,Elapsed,Timelimit 

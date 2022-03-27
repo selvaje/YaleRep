@@ -4,7 +4,6 @@
 #SBATCH -t 24:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc09_additional_analysis.sh%J.out 
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc09_additional_analysis.sh%J.err
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc09_additional_analysis.sh
 

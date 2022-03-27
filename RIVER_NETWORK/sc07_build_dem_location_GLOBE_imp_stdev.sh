@@ -4,7 +4,6 @@
 #SBATCH -t 24:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc07_build_dem_location_GLOBE_imp_stdev.sh.%J.out 
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc07_build_dem_location_GLOBE_imp_stdev.sh.%J.err
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 
 # sacct -j 623622   --format=jobid,MaxVMSize,start,end,CPUTImeRaw,NodeList,ReqCPUS,ReqMem,Elapsed,Timelimit 

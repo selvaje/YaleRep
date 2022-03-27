@@ -2,7 +2,6 @@
 #SBATCH -p scavenge
 #SBATCH -n 1 -c 12  -N 1  
 #SBATCH -t 24:00:00
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc09_equi_warp_wgs84_continue_90M_250M_random.sh.%J.out
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc09_equi_warp_wgs84_continue_90M_250M_random.sh.%J.err

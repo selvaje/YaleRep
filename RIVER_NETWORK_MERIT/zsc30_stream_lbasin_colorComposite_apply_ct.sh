@@ -4,7 +4,6 @@
 #SBATCH -t 4:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc30_stream_lbasin_colorComposite_apply_ct.sh.%A_%a.out  
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc30_stream_lbasin_colorComposite_apply_ct.sh.%A_%a.err
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc30_stream_lbasin_colorComposite_apply_ct.sh 
 #SBATCH --array=1-126

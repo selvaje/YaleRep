@@ -4,7 +4,6 @@
 #SBATCH -t 5:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc03_dem_variables_float_noMult.sh.%A_%a.out
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc03_dem_variables_float_noMult.sh.%A_%a.err
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc03_dem_variables_float_noMult.sh
 #SBATCH --array=1-98

@@ -4,7 +4,6 @@
 #SBATCH -t 24:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc32_equi_dev-magnitude_vaggregation4figure_ploting.R.sh.%J.out
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc32_equi_dev-magnitude_vaggregation4figure_ploting.R.sh.%J.err
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc32_equi_dev-magnitude_vaggregation4figure_ploting.R.sh
 #SBATCH --mem=80G

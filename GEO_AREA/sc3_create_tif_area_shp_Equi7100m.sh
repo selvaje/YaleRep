@@ -3,7 +3,6 @@
 #SBATCH -n 1 -c 6  -N 1  
 #SBATCH --array=1-70
 #SBATCH -t 4:00:00
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH -e  /gpfs/scratch60/fas/sbsc/ga254/stderr/sc3_create_tif_area_shp_Equi7100m.sh%A_%a.err
 #SBATCH -o  /gpfs/scratch60/fas/sbsc/ga254/stdout/sc3_create_tif_area_shp_Equi7100m.sh%A_%a.out

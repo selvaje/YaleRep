@@ -5,7 +5,6 @@
 #SBATCH -t 24:00:00 
 #SBATCH -o /gpfs/scratch60/fas/powell/esp38/stdout/sc01_grass_r.sh.%A_%a.out
 #SBATCH -e /gpfs/scratch60/fas/powell/esp38/stderr/sc01_grass_r.sh.%A_%a.err
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=evlyn.pless@yale.edu
 #SBATCH --array=1-38
 #SBATCH --mem=80G

@@ -5,7 +5,6 @@
 #SBATCH -t 24:00:00  
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc06_prediction_Nemision.sh.%J.out
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc06_prediction_Nemision.sh.%J.err
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 
 

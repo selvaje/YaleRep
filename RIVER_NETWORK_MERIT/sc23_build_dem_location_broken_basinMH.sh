@@ -4,7 +4,6 @@
 #SBATCH -t 168:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc23_build_dem_location_broken_basin.sh.%A_%a.out 
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc23_build_dem_location_broken_basin.sh.%A_%a.err
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc23_build_dem_location_broken_basin.sh
 #SBATCH --mem-per-cpu=110000

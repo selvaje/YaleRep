@@ -4,7 +4,6 @@
 #SBATCH -t 168:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc20_stream_length_order_ds641_nasqan_wbd12.sh.%A_%a.out  
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc20_stream_length_order_ds641_nasqan_wbd12.sh.%A_%a.err
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc20_stream_length_order_ds641_nasqan_wbd12.sh
 #SBATCH --array=27-27

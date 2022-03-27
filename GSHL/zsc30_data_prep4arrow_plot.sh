@@ -4,7 +4,6 @@
 #SBATCH -t 24:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc30_data_prep4arrow_plot.%J.out
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc30_data_prep4arrow_plot.%J.err
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH -J sc30_data_prep4arrow_plot.sh
 

@@ -2,7 +2,6 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 8  -N 1  
 #SBATCH -t 24:00:00
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --mem-per-cpu=2000
 

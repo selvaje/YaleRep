@@ -4,7 +4,6 @@
 #SBATCH -t 6:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc20_crete_carving_layer_inmapset_GLOBE.sh.%J.out
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc20_crete_carving_layer_inmapset_GLOBE.sh.%J.err
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 
 # best combination 200 log ; 120 depth ;  151 diamiter stdev ;  30798730 

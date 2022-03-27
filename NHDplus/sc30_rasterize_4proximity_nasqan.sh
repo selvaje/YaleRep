@@ -4,7 +4,6 @@
 #SBATCH -t 24:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc30_rasterize_4proximity_nasqan.sh.%J.out
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc30_rasterize_4proximity_nasqan.sh.%J.out
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc30_rasterize_4proximity_nasqan.sh
 

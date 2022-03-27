@@ -2,7 +2,6 @@
 #SBATCH -p scavenge
 #SBATCH -n 1 -c 7  -N 1  
 #SBATCH -t 10:00:00
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --mem-per-cpu=2000
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc09_equi_warp_wgs84_continue_1_100KM.sh.%J.out

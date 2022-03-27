@@ -4,7 +4,6 @@
 #SBATCH -t 8:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc50_direction_MERIT_GRASS.sh.%J.out   
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc50_direction_MERIT_GRASS.sh.%J.err
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc50_direction_MERIT_GRASS.sh
 #SBATCH --mem-per-cpu=2000

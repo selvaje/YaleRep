@@ -4,7 +4,6 @@
 #SBATCH -t 10:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc27_tiling_merge_lbasin_intb_broken_no-oft.sh.%A_%a.out
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc27_tiling_merge_lbasin_intb_broken_no-oft.sh.%A_%a.err
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc27_tiling_merge_lbasin_intb_broken_no-oft.sh
 #SBATCH --array=1-24

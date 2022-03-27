@@ -4,7 +4,6 @@
 #SBATCH -t 24:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc28_tiling20d_aggregate.sh.%A_%a.out 
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc28_tiling20d_aggregate.sh.%A_%a.err
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc28_tiling20d_aggregate.sh
 #SBATCH --array=1-126

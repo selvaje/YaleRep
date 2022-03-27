@@ -4,7 +4,6 @@
 #SBATCH -t 24:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc08_rename_dataset.sh%J.out 
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc08_rename_dataset.sh%J.err
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc08_rename_dataset.sh
 

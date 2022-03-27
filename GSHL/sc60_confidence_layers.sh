@@ -5,7 +5,6 @@
 #SBATCH -t 4:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc60_confidence_layers.sh.%J.out
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc60_confidence_layers.sh.%J.err
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --array=2-649
 #SBATCH --mem-per-cpu=10000

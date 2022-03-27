@@ -3,7 +3,6 @@
 #SBATCH -n 1 -c 1  -N 1  
 #SBATCH --array=1-1150
 #SBATCH -t 0:10:00
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH -e  /gpfs/scratch60/fas/sbsc/ga254/stderr/sc02_layers_preparation.sh%A_%a.err
 #SBATCH -o  /gpfs/scratch60/fas/sbsc/ga254/stdout/sc02_layers_preparation.sh%A_%a.out

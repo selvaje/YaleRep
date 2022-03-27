@@ -4,7 +4,6 @@
 #SBATCH -t 6:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc08_crete_carving_layer_inmapset.sh.%J.out
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc08_crete_carving_layer_inmapset.sh.%J.err
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 
 # for RADIUS in 11 21 31 41 51 61 71 81 91 101 111 121 131 141 151 161  ; do export RADIUS ;  grep ^200   /gpfs/scratch60/fas/sbsc/ga254/dataproces/RIVER_NETWORK/grassdb/occurance_N_DIM.txt  | xargs -n 2 -P 1 bash -c $' sbatch  /gpfs/home/fas/sbsc/ga254/scripts/RIVER_NETWORK/sc08_crete_carving_layer_inmapset.sh $1 $2 GLOBE $RADIUS   ' _ ; done 

@@ -3,7 +3,6 @@
 #SBATCH -n 1 -c 1 -N 1  
 #SBATCH -t 0:05:00
 #SBATCH --array=1-1000
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=clean_dev-tmp_grace.sh
 

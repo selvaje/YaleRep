@@ -5,7 +5,6 @@
 #SBATCH -t 24:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc05_watershed_1k.sh.%J.out
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc05_watershed_1k.sh.%J.err
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 
 # sbatch  --mem-per-cpu=50000  /gpfs/home/fas/sbsc/ga254/scripts/GSHL/sc05_watershed_1k.sh 

@@ -4,7 +4,6 @@
 #SBATCH -t 10:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc31_equi_multiRougDevaggregation4figure.sh.%J.out
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc31_equi_multiRougDevaggregation4figure.sh.%J.err
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc31_equi_multiRougDevaggregation4figure.sh
 

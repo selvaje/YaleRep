@@ -3,7 +3,6 @@
 #SBATCH -N 1
 #SBATCH -c 1
 #SBATCH -t 4:00:00
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=evlyn.pless@yale.edu
 #SBATCH -o  /gpfs/scratch60/fas/powell/esp38/stdout/sc09_GPP_mean_stdev.sh.%J.out
 #SBATCH -e  /gpfs/scratch60/fas/powell/esp38/stderr/sc09_GPP_mean_stdev.sh.%J.err

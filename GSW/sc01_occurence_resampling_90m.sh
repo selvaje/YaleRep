@@ -4,7 +4,6 @@
 #SBATCH -t 24:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc01_occurence_resampling_90m.sh.out
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc01_occurence_resampling_90m.sh.err
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 
 #  with --cpus-per-task flag will always result in all your CPUs allocated on the same compute node

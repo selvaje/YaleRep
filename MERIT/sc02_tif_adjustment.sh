@@ -4,7 +4,6 @@
 #SBATCH -t 24:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc02a_dem_variables_float_noMult.sh.%J.out
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc02a_dem_variables_float_noMult.sh.%J.err 
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 
 # for file in /project/fas/sbsc/ga254/dataproces/MERIT/input_tif/n30w090_dem.tif  ; do   sbatch --export=file=$file   /gpfs/home/fas/sbsc/ga254/scripts/MERIT/sc02a_dem_variables_float_noMult.sh  ; done 

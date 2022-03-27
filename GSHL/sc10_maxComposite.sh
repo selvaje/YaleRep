@@ -5,7 +5,6 @@
 #SBATCH -t 6:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc06_maxComposite.sh.%J.out
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc06_maxComposite.sh.%J.err
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 
 # sbatch    /gpfs/home/fas/sbsc/ga254/scripts/GSHL/sc06_maxComposite.sh

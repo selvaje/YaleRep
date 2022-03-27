@@ -2,7 +2,6 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 9  -N 1  
 #SBATCH -t 4:00:00
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH -e  /gpfs/scratch60/fas/sbsc/ga254/stderr/sc03_tif_ID_geog.sh%J.err
 #SBATCH -o  /gpfs/scratch60/fas/sbsc/ga254/stdout/sc03_tif_ID_geog.sh%J.out

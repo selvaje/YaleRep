@@ -2,7 +2,6 @@
 #SBATCH -p day
 #SBATCH -n 1 -c 10  -N 1  
 #SBATCH -t 24:00:00
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc09_hysdrosheds_legthgrwl_aggregation.sh.%J.out
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc09_hysdrosheds_legthgrwl_aggregation.sh.%J.err

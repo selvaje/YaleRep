@@ -2,7 +2,6 @@
 #SBATCH -p scavenge
 #SBATCH -n 1 -c 8  -N 1  
 #SBATCH -t 24:00:00
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --mem-per-cpu=2000
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc06_dem_variables_float_noMult_resKM_continue_equi7.sh.%J.out

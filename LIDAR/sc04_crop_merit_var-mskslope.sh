@@ -4,7 +4,6 @@
 #SBATCH -t 3:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc04_crop_merit_var.sh.%J.out
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc04_crop_merit_var.sh.%J.err
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc04_crop_merit_var.sh 
 

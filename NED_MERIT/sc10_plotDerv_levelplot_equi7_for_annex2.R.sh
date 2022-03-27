@@ -4,7 +4,6 @@
 #SBATCH -t 24:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc10_plotDerv_levelplot_equi7_for_annex2.R.%J.out
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc10_plotDerv_levelplot_equi7_for_annex2.R.%J.err
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH -J sc10_plotDerv_levelplot_equi7_for_annex2.R.sh
 

@@ -4,7 +4,6 @@
 #SBATCH -t 2:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc02_dif_normalized_stats.sh.%J.out
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc02_dif_normalized_stats.sh.%J.err
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH -J sc02_derivative_stats.sh 
 

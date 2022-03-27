@@ -9,4 +9,14 @@
 *.R#
 *.r#
 *.simg
+metadata_update.py
+metadata_copy.py
+data_upload.py
+data_read.py
+data_download.py
+check_file_updates.py
+catalog_links.py
+API_Token.txt
+versions.py
+
 

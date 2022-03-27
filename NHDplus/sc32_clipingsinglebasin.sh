@@ -4,7 +4,6 @@
 #SBATCH -t 4:00:00
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc32_clipingsinglebasin.sh.%J.out
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc32_clipingsinglebasin.sh.%J.err
-#SBATCH --mail-type=ALL
 #SBATCH --mail-user=email
 #SBATCH --job-name=sc32_clipingsinglebasin.sh
 
