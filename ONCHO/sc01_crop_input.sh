@@ -18,7 +18,8 @@ ONCHO=/gpfs/loomis/project/sbsc/ga254/dataproces/ONCHO
 # for TOPO in geom aspect aspect-sine cti dev_scale dxx dy eastness pcurv roughness slope tcurv tri aspect-cosine convergence dev_magnitude dx dxy dyy elev-stdev northness rough-magnitude rough-scale spi tpi vrm ; do 
 #     gdalbuildvrt -overwrite $MERIT/${TOPO}/all_${TOPO}_90M.vrt $MERIT/${TOPO}/${TOPO}_90M_???????.tif 
 #     gdal_translate -projwin 2 15 15 4 -co COMPRESS=DEFLATE -co ZLEVEL=9   $MERIT/${TOPO}/all_${TOPO}_90M.vrt $ONCHO/input/geomorpho90m/${TOPO}.tif 
-# done 
+# done
+ 
 # mv $ONCHO/input/geomorpho90m/elev-stdev.tif   $ONCHO/input/geomorpho90m/elev_stdev.tif 
 # mv $ONCHO/input/geomorpho90m/aspect-sine.tif   $ONCHO/input/geomorpho90m/aspect_sine.tif 
 # mv $ONCHO/input/geomorpho90m/aspect-cosine.tif   $ONCHO/input/geomorpho90m/aspect_cosine.tif 
@@ -26,18 +27,29 @@ ONCHO=/gpfs/loomis/project/sbsc/ga254/dataproces/ONCHO
 # mv $ONCHO/input/geomorpho90m/rough-scale.tif   $ONCHO/input/geomorpho90m/rough_scale.tif 
 # rm -f $ONCHO/input/geomorpho90m/aspect.tif $ONCHO/input/geomorpho90m/geom.tif $ONCHO/input/geomorpho90m/cti.tif $ONCHO/input/geomorpho90m/spi.tif
 
+# reviw the pkreclass
+# pkreclass -c -9999 -r 0 -co COMPRESS=DEFLATE -co ZLEVEL=9  -i   $ONCHO/input/geomorpho90m/aspect_cosine.tif  -o  $ONCHO/input/geomorpho90m/aspect_cosine_tmp.tif 
+# mv $ONCHO/input/geomorpho90m/aspect_cosine_tmp.tif   $ONCHO/input/geomorpho90m/aspect_cosine.tif 
+
+# pkreclass -c -9999 -r 0 -co COMPRESS=DEFLATE -co ZLEVEL=9  -i   $ONCHO/input/geomorpho90m/aspect_sine.tif  -o  $ONCHO/input/geomorpho90m/aspect_sine_tmp.tif 
+# mv $ONCHO/input/geomorpho90m/aspect_sine_tmp.tif   $ONCHO/input/geomorpho90m/aspect_sine.tif 
 # gdal_translate -projwin 2 15 15 4  -co COMPRESS=DEFLATE -co ZLEVEL=9 /gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT/input_tif/all_tif.vrt  $ONCHO/input/geomorpho90m/elevation.tif
 
-# HYDRO=/gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT_HYDRO/hydrography90m_v.1.0
+HYDRO=/gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT_HYDRO/hydrography90m_v.1.0
 
-# for HYDROD in   flow.index  r.stream.channel  r.stream.distance  r.stream.order  r.stream.slope  r.watershed  ; do 
-# for DIR in $(ls $HYDRO/$HYDROD ) ; do 
-#     gdal_translate -projwin 2 15 15 4 -co COMPRESS=DEFLATE -co ZLEVEL=9   $HYDRO/$HYDROD/$DIR/$(basename $DIR _tiles20d).vrt $ONCHO/input/hydrography90m/$(basename $DIR _tiles20d).tif 
-# done 
-# done 
+for HYDROD in   flow.index  r.stream.distance  r.stream.slope  r.watershed  ; do 
+    for DIR in $(ls $HYDRO/$HYDROD ) ; do 
+     gdal_translate -projwin 2 15 15 4 -co COMPRESS=DEFLATE -co ZLEVEL=9   $HYDRO/$HYDROD/$DIR/$(basename $DIR _tiles20d).vrt /tmp/$(basename $DIR _tiles20d).tif 
+     pksetmask -co COMPRESS=DEFLATE -co ZLEVEL=9 -m /tmp/$(basename $DIR _tiles20d).tif -msknodata -9999  -nodata 0 -i  /tmp/$(basename $DIR _tiles20d).tif   -o $ONCHO/input/hydrography90m/$(basename $DIR _tiles20d).tif 
+     rm /tmp/$(basename $DIR _tiles20d).tif 
+     gdal_edit.py -a_nodata -9999 $ONCHO/input/hydrography90m/$(basename $DIR _tiles20d).tif 
+    done 
+done 
 
 #### remove some tif
-# rm -f $ONCHO/input/hydrography90m/channel_*.tif $ONCHO/input/hydrography90m/{segment.tif,regional_unit.tif,basin.tif,depression.tif,direction.tif,sub_catchment.tif}
+rm -f $ONCHO/input/hydrography90m/channel_*.tif $ONCHO/input/hydrography90m/order_*.tif $ONCHO/input/hydrography90m/{segment.tif,regional_unit.tif,basin.tif,depression.tif,direction.tif,sub_catchment.tif,outlet.tif}
+
+exit 
 
 CHELSA=/gpfs/gibbs/pi/hydro/hydro/dataproces/CHELSA/climatologies/bio
 
@@ -78,5 +90,15 @@ rm -f $ONCHO/input/soilgrids/${filename}_tmp.tif
 gdal_translate -tr 0.00083333333333333 0.00083333333333333 -r bilinear  -co COMPRESS=DEFLATE -co ZLEVEL=9  $ONCHO/input/soilgrids/${filename}.tif $ONCHO/input/soilgrids/${filename}_r.tif
 done
 
-pkgetmask -ot Byte   -co COMPRESS=DEFLATE -co ZLEVEL=9  -min  65534  -max 65536  -data 0  -nodata 1 -i $ONCHO/input/soilgrids/AWCtS_WeigAver.tif  -o $ONCHO/input/soilgrids/soilgrids_msk.tif
+pkgetmask -ot Byte -co COMPRESS=DEFLATE -co ZLEVEL=9 -min 65534 -max 65536 -data 0 -nodata 1 -i $ONCHO/input/soilgrids/AWCtS_WeigAver.tif -o $ONCHO/input/soilgrids/soilgrids_msk.tif
 gdal_edit.py -a_nodata 0 $ONCHO/input/soilgrids/soilgrids_msk.tif
+
+
+##### population density 
+
+# alternative https://ghsl.jrc.ec.europa.eu/download.php?ds=pop 
+
+# https://data.grid3.org/maps/GRID3::grid3-nigeria-gridded-population-estimates-version-2-0/about 
+cd /gpfs/loomis/project/sbsc/ga254/dataproces/ONCHO/input/population 
+wget https://wopr.worldpop.org/download/495
+unzip 495
