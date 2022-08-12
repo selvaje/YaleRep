@@ -27,7 +27,7 @@ ONCHO=/gpfs/loomis/project/sbsc/ga254/dataproces/ONCHO
 # mv $ONCHO/input/geomorpho90m/rough-scale.tif   $ONCHO/input/geomorpho90m/rough_scale.tif 
 # rm -f $ONCHO/input/geomorpho90m/aspect.tif $ONCHO/input/geomorpho90m/geom.tif $ONCHO/input/geomorpho90m/cti.tif $ONCHO/input/geomorpho90m/spi.tif
 
-# reviw the pkreclass
+
 # pkreclass -c -9999 -r 0 -co COMPRESS=DEFLATE -co ZLEVEL=9  -i   $ONCHO/input/geomorpho90m/aspect_cosine.tif  -o  $ONCHO/input/geomorpho90m/aspect_cosine_tmp.tif 
 # mv $ONCHO/input/geomorpho90m/aspect_cosine_tmp.tif   $ONCHO/input/geomorpho90m/aspect_cosine.tif 
 
@@ -46,8 +46,22 @@ for HYDROD in   flow.index  r.stream.distance  r.stream.slope  r.watershed  ; do
     done 
 done 
 
-#### remove some tif
 rm -f $ONCHO/input/hydrography90m/channel_*.tif $ONCHO/input/hydrography90m/order_*.tif $ONCHO/input/hydrography90m/{segment.tif,regional_unit.tif,basin.tif,depression.tif,direction.tif,sub_catchment.tif,outlet.tif}
+
+pkreclass -c -9999999  -r -2147483648  -co COMPRESS=DEFLATE -co ZLEVEL=9  -i   $ONCHO/input/hydrography90m/accumulation.tif  -o  $ONCHO/input/hydrography90m/accumulation_tmp.tif 
+mv $ONCHO/input/hydrography90m/accumulation_tmp.tif    $ONCHO/input/hydrography90m/accumulation.tif 
+
+pkreclass -c -9999999  -r -2147483648 -co COMPRESS=DEFLATE -co ZLEVEL=9 -i $ONCHO/input/hydrography90m/slope_curv_max_dw_cel.tif -o $ONCHO/input/hydrography90m/slope_curv_max_dw_cel_tmp.tif
+mv $ONCHO/input/hydrography90m/slope_curv_max_dw_cel_tmp.tif  $ONCHO/input/hydrography90m/slope_curv_max_dw_cel.tif
+
+pkreclass -c -9999999  -r -2147483648 -co COMPRESS=DEFLATE -co ZLEVEL=9 -i $ONCHO/input/hydrography90m/slope_curv_min_dw_cel.tif -o $ONCHO/input/hydrography90m/slope_curv_min_dw_cel_tmp.tif
+mv $ONCHO/input/hydrography90m/slope_curv_min_dw_cel_tmp.tif  $ONCHO/input/hydrography90m/slope_curv_min_dw_cel.tif
+
+pkreclass -c -9999999  -r -2147483648 -co COMPRESS=DEFLATE -co ZLEVEL=9 -i $ONCHO/input/hydrography90m/slope_grad_dw_cel.tif -o $ONCHO/input/hydrography90m/slope_grad_dw_cel_tmp.tif
+mv $ONCHO/input/hydrography90m/slope_grad_dw_cel_tmp.tif  $ONCHO/input/hydrography90m/slope_grad_dw_cel.tif 
+
+#### remove some tif
+
 
 exit 
 
@@ -80,6 +94,7 @@ SOILGRIDS=/gpfs/gibbs/pi/hydro/hydro/dataproces/SOILGRIDS
 # for SOIL in $SOILGRIDS/*_acc/*_WeigAver.vrt ; do
 #     filename=$(basename  $SOIL  .vrt)
 #     gdal_translate -projwin 2 15 15 4 -co COMPRESS=DEFLATE -co ZLEVEL=9   $SOIL  $ONCHO/input/soilgrids/${filename}_acc.tif
+#     gdal_edit.py -a_nodata -9999  $ONCHO/input/soilgrids/soilgrids_msk.tif  # to fake the no-data
 # done
 
 for SOIL in $(ls $SOILGRIDS/*/*_WeigAver.tif |  grep -v  -e _acc -e out_  )  ; do

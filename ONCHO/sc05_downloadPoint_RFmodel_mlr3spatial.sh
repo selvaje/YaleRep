@@ -5,15 +5,16 @@
 #SBATCH -o /gpfs/scratch60/fas/sbsc/ga254/stdout/sc05_downloadPoint_RFmodel_mlr3spatial.sh.%A_%a.out 
 #SBATCH -e /gpfs/scratch60/fas/sbsc/ga254/stderr/sc05_downloadPoint_RFmodel_mlr3spatial.sh.%A_%a.err
 #SBATCH --job-name=sc05_downloadPoint_RFmodel_mlr3spatial.sh
-#SBATCH --mem=50G
-#SBATCH --array=42
-## array=1-42
+#SBATCH --mem=40G
+#SBATCH --array=1-41
+## array=1-41
 
 ##### sbatch /vast/palmer/home.grace/ga254/scripts/ONCHO/sc05_downloadPoint_RFmodel_mlr3spatial.sh
 
 #  x 2 15 
-#  y 4 15 
-# for x in $(seq 2 2 14 )  ; do for y in $(seq 4 2 14 ) ; do echo $x $(expr $x + 2 ) $y $(expr $y + 2 ) ; done ; done >   $ONCHO/vector/tile_list.txt  
+#  y 4 15                                                                                                              remove the first row that includes only see area
+# for x in $(seq 2 2 14 )  ; do for y in $(seq 4 2 14 ) ; do echo $x $(expr $x + 2 ) $y $(expr $y + 2 ) ; done ; done  | awk '{ if (NR>1) print  }'  >   $ONCHO/vector/tile_list.txt  
+# 
 
 ONCHO=/gpfs/loomis/project/sbsc/ga254/dataproces/ONCHO
 cd $ONCHO/vector
@@ -36,10 +37,12 @@ rm -f /gpfs/loomis/project/sbsc/ga254/dataproces/ONCHO/vector/data.RData
 rm -f /gpfs/loomis/project/sbsc/ga254/dataproces/ONCHO/vector/allVar.mod.rf.txt
 rm -f /gpfs/loomis/project/sbsc/ga254/dataproces/ONCHO/vector/importance_allVar.txt
 rm -f /gpfs/loomis/project/sbsc/ga254/dataproces/ONCHO/prediction/prediction_*_*.tif
+rm -f /gpfs/loomis/project/sbsc/ga254/dataproces/ONCHO/prediction/*.tif.aux.xml
 
 module purge
 module load miniconda/4.10.3
 conda activate gdx_env
+source  /gpfs/loomis/project/sbsc/ga254/conda_envs/gdx_env/lib/python3.1/venv/scripts/common/activate
 
 python /vast/palmer/home.grace/ga254/scripts/ONCHO/gdx_download.py NigeriaHabitatSites.gpkg ab6e7398-23cc-4aea-8a2c-a03e185de9e7 /gpfs/loomis/project/sbsc/ga254/dataproces/ONCHO/vector/NigeriaHabitatSites.gpkg
 
@@ -55,11 +58,11 @@ EOF
 
 grep -v "-" $ONCHO/vector/22_5.4_nga_lit_extr_lat_lon.txt > $ONCHO/vector/22_5.4_nga_lit_extr_lat_lon_clean.txt  # to remove "square area"
 
-/gpfs/loomis/apps/avx/software/miniconda/4.10.3/bin/conda  deactivate
+conda  deactivate
 module purge
 source ~/bin/gdal3
 
-rm $ONCHO/vector/NigeriaHabitatSites.csv
+rm -f $ONCHO/vector/NigeriaHabitatSites.csv
 ogr2ogr -overwrite  $ONCHO/vector/NigeriaHabitatSites.csv $ONCHO/vector/NigeriaHabitatSites.gpkg
 
 echo "x y pa" > $ONCHO/vector/NigeriaHabitatSites_x_y_pa.txt
@@ -69,6 +72,8 @@ awk        '{ if (NR>1) print $3 , $2 , 1 }'         $ONCHO/vector/22_5.4_nga_li
 
 awk -F "," '{ if (NR>1) print $2 , $1 }'           $ONCHO/vector/NigeriaHabitatSites.csv                 >  $ONCHO/vector/NigeriaHabitatSites_x_y.txt
 awk        '{ if (NR>1) print $3 , $2 }'           $ONCHO/vector/22_5.4_nga_lit_extr_lat_lon_clean.txt  >>  $ONCHO/vector/NigeriaHabitatSites_x_y.txt
+
+rm -f $ONCHO/vector/pred_*.txt 
 
 for var in geomorpho90m hydrography90m ; do 
 
@@ -120,12 +125,20 @@ module load R/4.1.0-foss-2020b
 
 Rscript --vanilla  -e '
 library(ranger)
+library(psych)
 
 table = read.table("x_y_pa_predictors4R.txt", header = TRUE, sep = " ")
 table$geom = as.factor(table$geom)
 
-mod.rf = ranger( pa ~ . , table ,  importance="impurity")
+des.table = describe(table)
+
+write.table(des.table, "stat_allVar.txt", quote = FALSE  )
+
+mod.rf = ranger( pa ~ . , table ,   probability = TRUE  ,  classification=TRUE ,   importance="permutation")
 print(mod.rf)
+
+print(mod.rf$oob_error)
+
 imp=as.data.frame(importance(mod.rf))
 imp.s = imp[order(imp$"importance(mod.rf)",decreasing=TRUE), , drop = FALSE]
 
@@ -170,23 +183,25 @@ library("terra")
 library("future")
 
 table = read.table("x_y_pa_predictors4R_select.txt", header = TRUE, sep = " ")
+table$pa = as.factor(table$pa)
 
-backend = as_data_backend(table)
-task = as_task_regr(backend, target = "pa")
+backend = as_data_backend(table)    # this is just table for the lerner
+task = as_task_classif(backend, target = "pa")
 print(task)
 
-learner = lrn("regr.ranger")    ### https://mlr3extralearners.mlr-org.com/articles/learners/list_learners.html 
+learner = lrn("classif.ranger" , predict_type = "prob" )    ### https://mlr3extralearners.mlr-org.com/articles/learners/list_learners.html 
 learner$parallel_predict = TRUE  
 
 print(learner)
 
-save.image("data.RData")
+save.image("data1.RData")
 '
 else 
-sleep 1000
+ sleep 1000
 fi ### close the first array loop 
 
 module purge
+module load netCDF/4.7.4-gompi-2020b
 source ~/bin/gdal3
 module load R/4.1.0-foss-2020b
 
@@ -213,10 +228,11 @@ xmax
 ymin
 ymax
 
-load("data.RData")
+load("data1.RData")
 
+print ("define response variable")
 #### training ml 
-learner$train(task)    #### define respose variable 
+learner$train(task)    #### define response variable 
 print(learner)
 
 print ("start the prediction")
@@ -247,8 +263,13 @@ print ( c(xmin, xmax  , ymin , ymax) )
 extent  <- terra::ext( xmin , xmax , ymin , ymax )
 extent
 env=crop(terra::rast(stack),extent)
-env 
-rm (stack)
+
+print ("env  info")
+env
+print ("env  str")
+str(env)
+ 
+# rm (stack)
 gc() ;  gc() ;  
 print ("create the table")
 
@@ -256,25 +277,32 @@ env_table = as.data.table(env)
 colnames(env_table) = task$feature_names
 
 str(env_table)
-
-env_table_pred = predict(learner, env_table)
+save.image(paste0("data2_",xmin,"_",ymin,".RData"))
+env_table_pred = predict(learner, env_table , predict_type = "prob" )
 env$pred = env_table_pred
-terra::writeRaster (env$pred , paste0("/gpfs/loomis/project/sbsc/ga254/dataproces/ONCHO/prediction/prediction_",xmin,"_",ymin,".tif"), gdal=c("COMPRESS=DEFLATE","ZLEVEL=9"), overwrite=TRUE , datatype="Float32")
-save.image("data.Rdata")
+terra::writeRaster (env$pred, paste0("/gpfs/loomis/project/sbsc/ga254/dataproces/ONCHO/prediction/prediction_",xmin,"_",ymin,".tif"), gdal=c("COMPRESS=DEFLATE","ZLEVEL=9"), overwrite=TRUE , datatype="Float32")
+save.image(paste0("data3_",xmin,"_",ymin,".RData"))
 
 '
 
 
-if [ $SLURM_ARRAY_TASK_ID -eq 42  ] ; then
-sleep 600
+if [ $SLURM_ARRAY_TASK_ID -eq 41  ] ; then
+sleep 2000
 module purge
 source ~/bin/gdal3
 source ~/bin/pktools
 
 rm -f $ONCHO/prediction/prediction_all.* $ONCHO/prediction/prediction_all_1km.*
-gdalbuildvrt  /gpfs/loomis/project/sbsc/ga254/dataproces/ONCHO/prediction/prediction_all.vrt   /gpfs/loomis/project/sbsc/ga254/dataproces/ONCHO/prediction/prediction_*_*.tif
-gdal_translate  -co COMPRESS=DEFLATE -co ZLEVEL=9  $ONCHO/prediction/prediction_all.vrt  $ONCHO/prediction/prediction_all.tif 
+gdalbuildvrt  $ONCHO/prediction/prediction_all.vrt $ONCHO/prediction/prediction_[0-9]*_[0-9]*.tif
+gdal_translate  -co COMPRESS=DEFLATE -co ZLEVEL=9   $ONCHO/prediction/prediction_all.vrt  $ONCHO/prediction/prediction_all.tif 
+
+pksetmask -m $ONCHO/input/hydrography90m/accumulation.tif -co COMPRESS=DEFLATE -co ZLEVEL=9 -msknodata -2147483648 -nodata -9999 -i $ONCHO/prediction/prediction_all.tif -o $ONCHO/prediction/prediction_all_msk.tif 
+
+cd $ONCHO/prediction/
+rm -f gdaltindex $ONCHO/prediction/all_tif_shp.*
+gdaltindex $ONCHO/prediction/all_tif_shp.shp  prediction_[0-9]*_[0-9]*.tif
+
 gdal_translate -tr 0.00833333333333 0.00833333333333 -r average -co COMPRESS=DEFLATE -co ZLEVEL=9 $ONCHO/prediction/prediction_all.tif $ONCHO/prediction/prediction_all_1km.tif
-pksetmask -m  ../input/geomorpho90m/slope.tif  -co COMPRESS=DEFLATE -co ZLEVEL=9   -msknodata -9999  -9999 -i $ONCHO/prediction/prediction_all_1km.tif -o   $ONCHO/prediction/prediction_all_1km_msk.tif
+pksetmask -m  ../input/geomorpho90m/slope.tif  -co COMPRESS=DEFLATE -co ZLEVEL=9   -msknodata -9999 -nodata  -9999 -i $ONCHO/prediction/prediction_all_1km.tif -o   $ONCHO/prediction/prediction_all_1km_msk.tif
 gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -scale 0.344 0.966 0.01 1 $ONCHO/prediction/prediction_all_1km_msk.tif $ONCHO/prediction/prediction_all_1km_msk_s.tif
 fi
