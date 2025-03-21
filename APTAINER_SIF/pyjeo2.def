@@ -1,0 +1,74 @@
+Bootstrap: localimage
+From: pyjeo1.sif
+
+%runscript
+    BASE=/gpfs/gibbs/pi/hydro/hydro/scripts/APTAINER_SIF/pyjeo-stuff
+    mkdir -p $BASE || true
+
+    export INSTALL_HOME=$BASE/pyjeo-install
+    rm -rf $INSTALL_HOME \
+    && mkdir $INSTALL_HOME
+
+    cd $INSTALL_HOME \
+    && tar xvf $BASE/pyjeo/mialib.tar.gz \
+    && tar xvf $BASE/pyjeo/jiplib.tar.gz \
+    && tar xvf $BASE/pyjeo/pyjeo.tar.gz
+
+    cd $INSTALL_HOME/jeolib-miallib* \
+    && rm -rf build \
+    && mkdir build \
+    && cd build \
+    && cmake -DCMAKE_INSTALL_PREFIX=$INSTALL_HOME .. \
+    && cmake --build . \
+    && cmake --install .
+
+    mkdir $BASE/pip-cache
+    pip3 config --user set global.cache-dir $BASE/pip-cache
+
+    # it is strictly required using a venv
+    if [ ! -f $BASE/pyjeovenv/bin/activate ]
+    then
+        echo 'Build pyjeovenv'
+        python3 -m venv $BASE/pyjeovenv
+    fi
+    . $BASE/pyjeovenv/bin/activate
+
+    # NOTE: to avoid mess with recent updates in numpy and xarray
+    # that introduced incompatibilities with past releases,
+    # use strict versioning
+    pip3 install 'numpy==1.26.4'
+    pip3 install 'xarray==2024.03.0'
+    pip3 install 'scikit-learn==1.5.1'
+    pip3 install Cmake
+    pip3 install wheel
+
+    # add by selvaje
+    pip3 install scipy setuptools \
+             certifi six threadpoolctl python-dateutil pytz \
+             contourpy cycler kiwisolver \
+             pandas scikit-learn xarray \
+             fonttools joblib pillow pyparsing sip tomli tornado \
+             tzdata PyQt5 ply munkres pandas
+    pip3 install dill
+    pip3 install matplotlib 
+    pip3 install joblib
+    
+    cd $INSTALL_HOME/jeolib-jiplib* \
+    && rm -rf build \
+    && mkdir build \
+    && cd build \
+    && cmake -DCMAKE_INSTALL_PREFIX=$INSTALL_HOME .. \
+    && cmake --build . \
+    && cp jiplib-*.whl $INSTALL_HOME \
+    && ls $INSTALL_HOME
+
+    cd $INSTALL_HOME/jeolib-pyjeo* \
+    && pip3 wheel . \
+    && cp pyjeo-*.whl $INSTALL_HOME
+
+    pip3 install ${INSTALL_HOME}/jiplib-*.whl  --no-cache-dir
+    pip3 install ${INSTALL_HOME}/pyjeo-*.whl --no-cache-dir
+
+    pip3 install jupyterlab
+    pip3 install ipykernel
+

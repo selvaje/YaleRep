@@ -1,0 +1,119 @@
+# .bashrc
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+	. /etc/bashrc
+fi
+
+PATH=$PATH:$HOME/bin
+
+# User specific aliases and functions
+alias rl='readlink -f'
+alias openev='$HOME/bin/openev/bin/openev'
+alias em='emacs -nw'
+
+alias uhtop='htop --user=$USER'
+alias rtq='watch squeue -u $USER   -o "%.9F %.8K%.4P%.50j %3D%2C%.8m %.1T %.5M  %.5l %.S %R"'
+alias myq='squeue -u $USER   -o "%.9F %.8K%.4P%.50j %3D%2C%.8m %.1T %.5M  %.5l %.S %R"'
+alias myqSD='squeue -u sd566   -o "%.9F %.8K%.4P%.50j %3D%2C%.8m %.1T %.5M  %.5l %.S %R"'
+alias myqJG='squeue -u jg2657  -o "%.9F %.8K%.4P%.50j %3D%2C%.8m %.1T %.5M  %.5l %.S %R"'
+alias myqLS='squeue -u ls732   -o "%.9F %.8K%.4P%.50j %3D%2C%.8m %.1T %.5M  %.5l %.S %R"'
+alias myqZT='squeue -u zt226    -o "%.9F %.8K%.4P%.50j %3D%2C%.8m %.1T %.5M  %.5l %.S %R"'
+
+alias ls='ls --color=auto'
+alias grep='grep --color=auto'
+alias ll='ls -lh'
+alias llt='ls -lhrt'
+alias la='ls -A'
+alias l='ls -CF'
+
+alias err='ll -rt    /vast/palmer/scratch/sbsc/$USER/stderr/*'
+alias errl='ll -rt    /vast/palmer/scratch/sbsc/$USER/stderr/* | tail '
+alias errlmore=' more  $(ls  -rt    /vast/palmer/scratch/sbsc/$USER/stderr/* | tail -1 ) '
+alias outlmore=' more  $(ls  -rt    /vast/palmer/scratch/sbsc/$USER/stdout/* | tail -1 ) '
+alias errlless=' less  $(ls  -rt    /vast/palmer/scratch/sbsc/$USER/stderr/* | tail -1 ) '
+alias outlless=' less  $(ls  -rt    /vast/palmer/scratch/sbsc/$USER/stdout/* | tail -1 ) '
+alias out='ll -rt    /vast/palmer/scratch/sbsc/$USER/stdout/*'
+alias outl='ll -rt    /vast/palmer/scratch/sbsc/$USER/stdout/* | tail '
+
+alias err1='ll -rt    /gpfs/loomis/project/sbsc/hydro/stderr1/*'
+alias err1l='ll -rt    /gpfs/loomis/project/sbsc/hydro/stderr1/* | tail '
+alias err1lmore=' more  $(ls  -rt    /gpfs/loomis/project/sbsc/hydro/stderr1/* | tail -1 ) '
+alias out1lmore=' more  $(ls  -rt    /gpfs/loomis/project/sbsc/hydro/stdout1/* | tail -1 ) '
+alias err1lless=' less  $(ls  -rt    /gpfs/loomis/project/sbsc/hydro/stderr1/* | tail -1 ) '
+alias out1lless=' less  $(ls  -rt    /gpfs/loomis/project/sbsc/hydro/stdout1/* | tail -1 ) '
+alias out1='ll -rt    /gpfs/loomis/project/sbsc/hydro/stdout1/*'
+alias out1l='ll -rt    /gpfs/loomis/project/sbsc/hydro/stdout1/* | tail '
+
+alias errh='ll -rt    /gpfs/loomis/project/sbsc/hydro/stderr/*'
+alias errhl='ll -rt    /gpfs/loomis/project/sbsc/hydro/stderr/* | tail '
+alias errhlmore=' more  $(ls  -rt    /gpfs/loomis/project/sbsc/hydro/stderr/* | tail -1 ) '
+alias outhlmore=' more  $(ls  -rt    /gpfs/loomis/project/sbsc/hydro/stdout/* | tail -1 ) '
+alias errhlless=' less  $(ls  -rt    /gpfs/loomis/project/sbsc/hydro/stderr/* | tail -1 ) '
+alias outhlless=' less  $(ls  -rt    /gpfs/loomis/project/sbsc/hydro/stdout/* | tail -1 ) '
+alias outh='ll -rt    /gpfs/loomis/project/sbsc/hydro/stdout/*'
+alias outhl='ll -rt    /gpfs/loomis/project/sbsc/hydro/stdout/* | tail '
+
+alias interactivex='srun --pty --x11 -t 2:00:00   -p devel bash'
+alias cdpr='cd /gpfs/gibbs/pi/hydro/hydro'
+alias cdh='cd /project/fas/sbsc/hydro'
+alias cdprh='cd /project/fas/sbsc/hydro'
+alias cdsc='cd /vast/palmer/scratch/sbsc/$USER/dataproces'
+alias cdsch='cd /vast/palmer/scratch/sbsc/hydro'
+alias ulimit='ulimit -c 0'
+alias gdal2='source $HOME/bin/gdal2'
+alias gdal3='source $HOME/bin/gdal3'
+alias pktools='source $HOME/bin/pktools'
+alias grass78m='source $HOME/bin/grass78m'
+alias grass76m='source $HOME/bin/grass76m'
+alias GDALMAX='export GDAL_CACHEMAX=2000'
+alias scontrolmem='scontrol -o show nodes  | cut -d " " -f 1,25,26,27 '
+
+export SC=/vast/palmer/scratch/sbsc/$USER/dataproces
+export PR=/project/fas/sbsc/$USER/dataproces
+export HY=/project/fas/sbsc/hydro
+
+# old module 
+# module load Langs/Python/3.3.5
+# module load Langs/Python
+# module load Libs/OSGEO/1.11.2 
+# module load Libs/GSL/2.2
+# module load Libs/Boost/1.59.0
+# module load Tools/PKTOOLS/2.6.7.2
+# module load Libs/ARMADILLO/7.700.0   
+
+# new module 
+# module purge
+# module load GEOS/3.6.2-foss-2018a-Python-2.7.14 
+# module load GDAL/2.2.3-foss-2018a-Python-2.7.14 
+# module load GRASS/7.6.0-foss-2018a-Python-2.7.14
+# module load GSL/2.3-GCCcore-6.4.0
+# module load Boost/1.66.0-foss-2018a
+# module load PKTOOLS/2.6.7.6-foss-2018a 
+# module load Armadillo/8.400.0-foss-2018a
+
+
+# added by Anaconda3 4.3.1 installer
+# export PATH="/home/fas/sbsc/$USER/anaconda3/bin:$PATH"
+
+
+# to avoid 
+# https://unix.stackexchange.com/questions/230238/starting-x-applications-from-the-terminal-and-the-warnings-that-follow
+# in emacs 
+export NO_AT_BRIDGE=1 
+
+# remove the core file 
+# https://www-01.ibm.com/support/docview.wss?uid=swg21643872 
+ulimit -c 0
+
+# mount the gdrive 
+# rclone   mount  --daemon   -vvv   remote:      /gpfs/loomis/home.grace/fas/sbsc/ga254/gdrive2 
+
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/gpfs/loomis/home.grace/ga254/google-cloud-sdk/path.bash.inc' ]; then . '/gpfs/loomis/home.grace/ga254/google-cloud-sdk/path.bash.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/gpfs/loomis/home.grace/ga254/google-cloud-sdk/completion.bash.inc' ]; then . '/gpfs/loomis/home.grace/ga254/google-cloud-sdk/completion.bash.inc'; fi
+
+

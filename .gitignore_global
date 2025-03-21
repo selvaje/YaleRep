@@ -1,0 +1,11 @@
+*.sh~
+.#*.sh
+*.txt
+*~
+#*#
+*.sif
+APTAINER_SIF/pip-cache/
+APTAINER_SIF/pyjeovenv/
+APTAINER_SIF/pyjeo-install/
+APTAINER_SIF/pyjeo/
+APTAINER_SIF/pyjeo-stuff/

@@ -1,0 +1,72 @@
+Bootstrap: localimage
+From: pyjeo1.sif
+
+%post
+    export INSTALL_HOME=$HOME/pyjeo-install
+    rm -rf $INSTALL_HOME && mkdir -p $INSTALL_HOME
+
+    # Extract necessary libraries from /tmp
+    cd $INSTALL_HOME
+    tar xvf /tmp/mialib.tar.gz
+    tar xvf /tmp/jiplib.tar.gz
+    tar xvf /tmp/pyjeo.tar.gz
+
+    # Continue with the rest of your installation steps as usual
+    cd $INSTALL_HOME/jeolib-miallib*
+    rm -rf build && mkdir build && cd build
+    cmake -DCMAKE_INSTALL_PREFIX=$INSTALL_HOME ..
+    cmake --build . && cmake --install .
+
+    # Set up the virtual environment if it doesn't exist
+    BASE=$HOME
+    if [ ! -f $BASE/pyjeovenv/bin/activate ]; then
+        echo 'Building pyjeovenv'
+        python3 -m venv $BASE/pyjeovenv
+    fi
+    . $BASE/pyjeovenv/bin/activate  # Activates the virtual environment
+
+    # Install all required Python packages in one pip command to ensure environment consistency
+    pip3 install 'numpy==1.26.4'
+    pip3 install 'xarray==2024.03.0'
+    pip3 install 'scikit-learn==1.5.1'
+    pip3 install Cmake
+    pip3 install wheel
+    pip3 install cmake wheel \
+             scipy setuptools \
+             certifi six threadpoolctl python-dateutil pytz \
+             contourpy cycler kiwisolver \
+             pandas scikit-learn xarray \
+             fonttools joblib pillow pyparsing sip tomli tornado \
+             tzdata PyQt5 ply munkres
+    pip3 install dill
+    pip3 install matplotlib 
+
+    # Build and install jiplib
+    cd $INSTALL_HOME/jeolib-jiplib*
+    rm -rf build && mkdir build && cd build
+    cmake -DCMAKE_INSTALL_PREFIX=$INSTALL_HOME ..
+    cmake --build .
+    cp jiplib-*.whl $INSTALL_HOME
+
+    # Build and install pyjeo
+    cd $INSTALL_HOME/jeolib-pyjeo*
+    pip3 wheel .
+    cp pyjeo-*.whl $INSTALL_HOME
+
+    # Install custom wheels
+    pip3 install ${INSTALL_HOME}/jiplib-*.whl --no-cache-dir
+    pip3 install ${INSTALL_HOME}/pyjeo-*.whl --no-cache-dir
+
+    # Additional tools
+    pip3 install jupyterlab ipykernel
+
+%environment
+    # Automatically activate the virtual environment and set paths for Python
+    export BASE=$HOME
+    export PYTHONPATH=$BASE/pyjeovenv/lib/python3.11/site-packages
+    export PATH=$BASE/pyjeovenv/bin:$PATH
+    . $BASE/pyjeovenv/bin/activate
+
+%runscript
+    # Run script to activate the environment and execute commands
+    exec python "$@"

@@ -1,0 +1,44 @@
+Bootstrap: docker
+From: debian:bookworm
+
+%labels
+    Author Francesco Lovergine
+    ContactEmail frankie@debian.org
+    Name PyJeo container 1
+
+%post
+    apt update -y
+    apt install -y \
+    build-essential \
+        apt-utils \
+        curl \
+        git \
+        gzip \
+        tar \
+        unzip \
+        build-essential \
+        make \
+        cmake \
+        libtool \
+        swig \
+        sqlite3 \
+        zlib1g-dev \
+        libgdal-dev \
+        libproj-dev \
+        libgeotiff-dev \
+        libgsl-dev \
+        libgsl0-dev \
+        libfann-dev \
+        libfann2 \
+        libfftw3-dev \
+        libssl-dev \
+        libshp-dev \
+        uthash-dev \
+        libopenblas-dev \
+        libjsoncpp-dev \
+        libpython3-dev \
+        libboost-serialization-dev \
+        libboost-filesystem-dev \
+        python3-pip \
+        python3-venv \
+        python3-numpy

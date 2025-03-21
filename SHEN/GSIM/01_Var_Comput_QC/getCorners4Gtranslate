@@ -1,0 +1,13 @@
+#!/bin/bash
+# get corners for gdal_translate -projwin option 
+# gdal_translate -projwin $(getCorners4Gtranslate reference.tif ) input.tif output.tif
+
+
+file=$1
+
+ulx=$(gdalinfo $file | grep "Upper Left" | awk '{ gsub ("[(),]","") ; print  $3  }')
+uly=$(gdalinfo $file | grep "Upper Left" | awk '{ gsub ("[(),]","") ; print  $4  }')
+lrx=$(gdalinfo $file | grep "Lower Right" | awk '{ gsub ("[(),]","") ; print $3  }')
+lry=$(gdalinfo $file | grep "Lower Right" | awk '{ gsub ("[(),]","") ; print $4  }')
+
+echo $ulx $uly $lrx $lry
