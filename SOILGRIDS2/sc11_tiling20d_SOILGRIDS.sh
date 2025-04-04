@@ -5,13 +5,13 @@
 #SBATCH -o /vast/palmer/scratch/sbsc/ga254/stdout/sc11_tiling20d_SOILGRIDS.sh.%A_%a.out  
 #SBATCH -e /vast/palmer/scratch/sbsc/ga254/stderr/sc11_tiling20d_SOILGRIDS.sh.%A_%a.err
 #SBATCH --array=1-116
-#SBATCH --mem=20G
+#SBATCH --mem=30G
 
 ### --array=1-116
 
 ####  1-116   # row number /gpfs/gibbs/pi/hydro/hydro/dataproces/GEO_AREA/tile_files/tile_lat_long_20d_MERIT_HYDRO_noheader.txt   final number of tiles 116
 #### sbatch --export=dir=clay,tifname=clay_60-100cm --job-name=sc11_tiling20d_SOILGRIDS_clay_60-100cm.sh  /gpfs/gibbs/pi/hydro/hydro/scripts/SOILGRIDS2/sc11_tiling20d_SOILGRIDS.sh
-#### for vrt  in /gpfs/gibbs/pi/hydro/hydro/dataproces/SOILGRIDS2/*/wgs84_250m_grow/clay_30-60cm.vrt ; do  dir=$(basename "$vrt" | cut -d'_' -f1) ;  tifname=$(basename "$vrt" .vrt) ; sbatch --export=dir=$dir,tifname=$tifname --job-name=sc11_tiling20d_SOILGRIDS_$tifname.sh  /gpfs/gibbs/pi/hydro/hydro/scripts/SOILGRIDS2/sc11_tiling20d_SOILGRIDS.sh  ; done 
+#### for vrt  in /gpfs/gibbs/pi/hydro/hydro/dataproces/SOILGRIDS2/*/wgs84_250m_grow/*.vrt ; do  dir=$(basename "$vrt" | cut -d'_' -f1) ;  tifname=$(basename "$vrt" .vrt) ; sbatch --exclude=r805u25n04,r806u14n01    --export=dir=$dir,tifname=$tifname --job-name=sc11_tiling20d_SOILGRIDS_$tifname.sh  /gpfs/gibbs/pi/hydro/hydro/scripts/SOILGRIDS2/sc11_tiling20d_SOILGRIDS.sh  ; done 
 
 
 ulimit -c 0
@@ -36,14 +36,15 @@ export tile=$(awk -v AR=$SLURM_ARRAY_TASK_ID '{ if(NR==AR)  print $1      }' /gp
 mkdir -p $SOILGRIDSH/${dir}/${dir}_acc/tiles20d
 mkdir -p $SOILGRIDSSC/${dir}/${dir}_acc/intb
 
-if [ $tile =  h16v10 ] ; then exit 1 ; fi ### tile h16v10 complitly empity 
+if [ $tile =  h16v10 ] ; then exit 1 ; fi ### tile h16v10 complitly empity also in SOILGRIDS2 
 
 ulx=$(awk -v AR=$SLURM_ARRAY_TASK_ID '{ if(NR==AR)  print int($2) }' /gpfs/gibbs/pi/hydro/hydro/dataproces/GEO_AREA/tile_files/tile_lat_long_20d_MERIT_HYDRO_noheader.txt )
 uly=$(awk -v AR=$SLURM_ARRAY_TASK_ID '{ if(NR==AR)  print int($3) }' /gpfs/gibbs/pi/hydro/hydro/dataproces/GEO_AREA/tile_files/tile_lat_long_20d_MERIT_HYDRO_noheader.txt )
 lrx=$(awk -v AR=$SLURM_ARRAY_TASK_ID '{ if(NR==AR)  print int($4) }' /gpfs/gibbs/pi/hydro/hydro/dataproces/GEO_AREA/tile_files/tile_lat_long_20d_MERIT_HYDRO_noheader.txt )
 lry=$(awk -v AR=$SLURM_ARRAY_TASK_ID '{ if(NR==AR)  print int($5) }' /gpfs/gibbs/pi/hydro/hydro/dataproces/GEO_AREA/tile_files/tile_lat_long_20d_MERIT_HYDRO_noheader.txt )
 
-echo processing  $tifname 
+echo processing  $tifname tile $tile
+echoerr  "processing  ${tifname} tile ${tile}"
 
 GDAL_CACHEMAX=10000
 GDAL_NUM_THREADS=2
@@ -69,7 +70,7 @@ gdal_translate -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -co TILED=Y
 
 cp $HYDROSC/flow_tiles/flow_${tile}_pos.tif $RAM/flow_pos_${tifname}_${tile}.tif
 
-### invert negative values of the flow accumulation
+### divedie the accumulated variable by the flow accumulation. 
 
 module load GRASS/8.2.0-foss-2022b &> /dev/null
 
@@ -92,7 +93,7 @@ echo ${tifname}_${tile}_acc.tif  $( pkstat -hist   -src_min -9999999.1 -src_max 
 #### in case of no data put 0 ; the tiles is cover by full data value
 awk '{ if($2=="") { print $1 , 0 } else {print $1 , $2 } }' /dev/shm/${tifname}_${tile}_acc.nd   > $SOILGRIDSH/${dir}/${dir}_acc/tiles20d/${tifname}_${tile}_acc.nd
 
-rm -f $RAM/${tifname}_${tile}_acc.vrt $RAM/${tifname}_${tile}_acc_tmp.tif  $RAM/flow_${tifname}_${tile}_pos.tif  $RAM/flow_${tifname}_${tile}.tif /dev/shm/${tifname}_${tile}_acc.nd
+rm -f  $RAM/${tifname}_${tile}_acc_tmp.tif  $RAM/flow_pos_${tifname}_${tile}.tif $RAM/${tifname}_${tile}_acc.tif    /dev/shm/${tifname}_${tile}_acc.nd
 
 if [ $SLURM_ARRAY_TASK_ID -eq 116  ] ; then
 sleep 2000

@@ -10,9 +10,11 @@
 #  1-59  IDtif    ### 22 small island on the north of russia   ###    25 & 26 east asia for testing 
 #                                                       
 ### 48 last ID in the tileComp_size_memory.txt usefull to start sc11   *_*cm.vrt 
-#### for tif in /gpfs/gibbs/pi/hydro/hydro/dataproces/SOILGRIDS2/*/wgs84_250m_grow/{sand_0-5cm.vrt,sand_15-30cm.vrt,sand_30-60cm.vrt,sand_60-100cm.vrt,sand_100-200cm.vrt}  ; do for ID in $(awk '{ print $1 }' /gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT_HYDRO/tiles_comp/tileComp_size_memory.txt ) ; do MEM=$(grep ^"$ID " /gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT_HYDRO/tiles_comp/tileComp_size_memory.txt | awk  '{ print $4}' ) ;  sbatch  --export=tif=$tif,ID=$ID --mem=${MEM}M --job-name=sc10_var_acc_intb1_SOILGRIDS_$(basename $tif .tif).sh  /gpfs/gibbs/pi/hydro/hydro/scripts/SOILGRIDS2/sc10_variable_accumulation_intb1_SOILGRIDS.sh ; done ; sleep 1200 ; done 
+#### for tif in /gpfs/gibbs/pi/hydro/hydro/dataproces/SOILGRIDS2/*/wgs84_250m_grow/{sand_0-5cm.vrt,sand_15-30cm.vrt,sand_30-60cm.vrt,sand_60-100cm.vrt,sand_100-200cm.vrt}  ; do for ID in $(awk '{ print $1 }' /gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT_HYDRO/tiles_comp/tileComp_size_memory.txt ) ; do MEM=$(grep ^"$ID " /gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT_HYDRO/tiles_comp/tileComp_size_memory.txt | awk  '{ print $4}' ) ;  sbatch --exclude=r805u25n04,r806u14n01   --export=tif=$tif,ID=$ID --mem=${MEM}M --job-name=sc10_var_acc_intb1_SOILGRIDS_$(basename $tif .tif).sh  /gpfs/gibbs/pi/hydro/hydro/scripts/SOILGRIDS2/sc10_variable_accumulation_intb1_SOILGRIDS.sh ; done ; sleep 1200 ; done 
 
-
+## for checking
+## cd /gpfs/gibbs/pi/hydro/hydro/dataproces/SOILGRIDS2
+## for var in silt clay sand ; do for depth in 0-5cm 5-15cm 15-30cm 30-60cm 60-100cm 100-200cm 0-200cm  ; do ll   /vast/palmer/scratch/sbsc/hydro/dataproces/SOILGRIDS2/$var/${var}_acc/intb/${var}_${depth}_*_acc.tif  | wc -l   ; done ; done
 
 source ~/bin/gdal3 &> /dev/null
 

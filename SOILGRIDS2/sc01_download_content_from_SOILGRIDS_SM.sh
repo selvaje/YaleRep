@@ -17,12 +17,20 @@
 ##### =======================================================================================================================================
 
 ##### ===================================================== [ DATASET INFO ] ================================================================
-##### DOWNLOADED
-##### [var]: sand silt clay bdod                                     [depth]: 0-5cm 5-15cm 15-30cm 30-60cm 60-100cm 100-200cm 
-##### NOT DOWNLOADED:
-##### [var]: cec cfvo nitrogen ocd phh2o soc                         [depth]: 0-5cm 5-15cm 15-30cm 30-60cm 60-100cm 100-200cm
-##### [var]: ocs                                                     [depth]: 0-30cm 
-##### [var]: wrb                                                     [depth]: sub-variables needs to be treated separately
+############################################################## DOWNLOADED ###################################################################
+##### [var]: sand      [depth]: 0-5cm 5-15cm 15-30cm 30-60cm 60-100cm 100-200cm  [Units mapped]: g/kg        [Description]: Proportion of sandy particles (particles with diameter > 0.05 mm) present in the fine soil fraction.
+##### [var]: silt      [depth]: 0-5cm 5-15cm 15-30cm 30-60cm 60-100cm 100-200cm  [Units mapped]: g/kg        [Description]: Proportion of silty particles (generally between 0.002 and 0.05 mm) in the fine fraction of soil.
+##### [var]: clay      [depth]: 0-5cm 5-15cm 15-30cm 30-60cm 60-100cm 100-200cm  [Units mapped]: g/kg        [Description]: Proportion of clay particles (diameter < 0.002 mm) in the fine fraction of soil.
+##### [var]: bdod      [depth]: 0-5cm 5-15cm 15-30cm 30-60cm 60-100cm 100-200cm  [Units mapped]: cg/cm³      [Description]: Bulk density (bulk density) of the fine soil fraction, expressed in terms of dry mass per volume.
+##### [var]: cec       [depth]: 0-5cm 5-15cm 15-30cm 30-60cm 60-100cm 100-200cm  [Units mapped]: mmol(c)/kg  [Description]: Soil cation exchange capacity, which is the ability of soil to retain cationic nutrients useful to plants.
+##### [var]: cfvo      [depth]: 0-5cm 5-15cm 15-30cm 30-60cm 60-100cm 100-200cm  [Units mapped]: cm³/dm³     [Description]: Volumetric fractions of coarse fragments (particles with size > 2 mm) in soil.
+##### [var]: nitrogen  [depth]: 0-5cm 5-15cm 15-30cm 30-60cm 60-100cm 100-200cm  [Units mapped]: cg/kg       [Description]: Total nitrogen (N) content in soil, an essential element for plant nutrition.
+##### [var]: ocd       [depth]: 0-5cm 5-15cm 15-30cm 30-60cm 60-100cm 100-200cm  [Units mapped]: hg/m³       [Description]: Density of organic carbon in soil, indicative of the amount of organic carbon present per unit volume.
+##### [var]: phh2o     [depth]: 0-5cm 5-15cm 15-30cm 30-60cm 60-100cm 100-200cm  [Units mapped]: pH × 10     [Description]: Soil pH measured in water, a key parameter affecting nutrient availability and microbial activity.
+##### [var]: soc       [depth]: 0-5cm 5-15cm 15-30cm 30-60cm 60-100cm 100-200cm  [Units mapped]: dg/kg       [Description]: Organic carbon content in the fine fraction of soil, indicative of the amount of organic matter present.
+##### [var]: ocs       [depth]: 0-30cm                                           [Units mapped]: kg/m²       [Description]: Total amount of organic carbon stock stored in the surface profile
+############################################################ NOT DOWNLOADED #################################################################
+##### [var]: wrb       [depth]: sub-variables needs to be treated separately     [Units mapped]: % of belonging to a specific WRB soil class. [Description]: Soil classes based on the World Reference Base for Soil Resources
 ##### =======================================================================================================================================
 
 ulimit -c 0

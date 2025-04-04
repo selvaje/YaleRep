@@ -7,10 +7,10 @@
 #SBATCH --job-name=sc05_weightedAVE.sh
 #SBATCH --mem-per-cpu=10G
 #SBATCH --array=1-116
-####    --array=1-116
 
+###### complete job array:#    --array=1-116
 ###### ==============================================[SBATCH LINE]========================================================
-###### for var in clay sand silt ; do sbatch --export=var=$var  /gpfs/gibbs/pi/hydro/hydro/scripts/SOILGRIDS2/sc05_weightedAVE.sh; done 
+###### for var in clay sand silt ; do sbatch --exclude=r805u25n04,r806u14n01  --export=var=$var  /gpfs/gibbs/pi/hydro/hydro/scripts/SOILGRIDS2/sc05_weightedAVE.sh; done 
 ###### ===================================================================================================================
 
 module load StdEnv
@@ -30,9 +30,13 @@ export filename=$(basename $file .tif  )
 export tile=$( echo $filename | awk '{ gsub("stream_","") ; print }'   )
 
 ###### Variable trace in sterr and stdout
-echoerr "var ${var}  tile ${tile} IDarray ${SLURM_ARRAY_TASK_ID}"
+~/bin/echoerr "var ${var}  tile ${tile} IDarray ${SLURM_ARRAY_TASK_ID}"
 echo    "var ${var}  tile ${tile} IDarray ${SLURM_ARRAY_TASK_ID}"
 
+###### --------------------------------------------------------------------------------------------------------------
+###### This script computes a weighted average of soil data across depths (0-200 cm) using six GeoTIFF input rasters.
+###### Each layer is weighted by its depth range, summed, and divided by 200 cm.
+###### The output is a compressed GeoTIFF file with depth-averaged values. 
 
 export GDAL_CACHEMAX=6000
 gdal_calc.py -A $DIR/$var/wgs84_250m_grow/${var}_0-5cm_${tile}.tif \

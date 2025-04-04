@@ -1,17 +1,19 @@
 #!/bin/bash
-#SBATCH -p scavenge
+#SBATCH -p day
 #SBATCH -n 1 -c 2 -N 1
 #SBATCH --cpus-per-task=1
 #SBATCH -t 10:00:00
-#SBATCH -o /vast/palmer/scratch/sbsc/sm3665/stdout/sc03_SOILGRIDS_transpose.sh.%J.out
-#SBATCH -e /vast/palmer/scratch/sbsc/sm3665/stderr/sc03_SOILGRIDS_transpose.sh.%J.err
+#SBATCH -o /vast/palmer/scratch/sbsc/sm3665/stdout/sc03_SOILGRIDS_transpose_vrt_SM.sh.%J.out
+#SBATCH -e /vast/palmer/scratch/sbsc/sm3665/stderr/sc03_SOILGRIDS_transpose_vrt_SM.sh.%J.err
 #SBATCH --mem-per-cpu=30G
 
 ###### ==============================================[SBATCH LINE]========================================================
-###### for var in clay sand silt ; do for depth in 0-5cm 5-15cm 15-30cm 30-60cm 60-100cm 100-200cm ; do sbatch
-###### --job-name=sc03_SOILGRIDS_transpose_${var}_${depth}.sh --export=var=$var,depth=$depth
-###### /vast/palmer/home.grace/sm3665/scripts/download/sc03b_SOILGRIDS_transpose_vrt.sh  ;  done ;  done
+###### for var in clay sand silt ; do for depth in 0-5cm 5-15cm 15-30cm 30-60cm 60-100cm 100-200cm ; do sbatch --job-name=sc03_SOILGRIDS_transpose_vrt_${var}_${depth}.sh --export=var=$var,depth=$depth  /gpfs/gibbs/pi/hydro/hydro/scripts/SOILGRIDS2/sc03_SOILGRIDS_transpose_vrt_SM.sh  ;  done ;  done
 ###### ===================================================================================================================       
+
+
+###### ----------------------- 0 -----------------------
+###### variable settings
 
 source ~/bin/gdal3
 source ~/bin/pktools
@@ -20,10 +22,10 @@ export var=$var
 export depth=$depth
 ###### setting roots
 export pi_root=/gpfs/gibbs/pi/hydro/hydro/dataproces
-export pj_root=/gpfs/gibbs/project/sbsc/sm3665/dataproces
-export sc_root=/vast/palmer/scratch/sbsc/sm3665/dataproces 
+export pj_root=/gpfs/gibbs/project/sbsc/sm3665/dataproces #for testing only
+export sc_root=/vast/palmer/scratch/sbsc/sm3665/dataproces #for testing only
 ###### setting variables
-export DIR=${sc_root}/SOILGRIDS2/${var}/wgs84_250m
+export DIR=${pi_root}/SOILGRIDS2/${var}/wgs84_250m
 export DIR10=${pi_root}/SOILGRIDS2/${var}/wgs84_10km
 export OUT=${pi_root}/SOILGRIDS2/${var}/transposing
 export VAR=${var}_${depth}_mean_wgs84.tif
@@ -34,6 +36,10 @@ GDAL_CACHEMAX=20000
 
 ###### ----------------------- 1 -----------------------
 ###### Prepare the tile with the transposed peninsula
+
+mkdir -p $OUT
+
+echo "VAR: $var DEPTH: $depth  Content - SOILGRIDS2 transposing operation"
 
 ###### CUT
 echo cutting
@@ -87,6 +93,7 @@ gdalbuildvrt -srcnodata ${NAsource}\
 	     $RAM/${NAM}.vrt ${RAM}/${NAM}_ta_msk.tif $RAM/${NAM}_t{b,c}.vrt  
 
 
+##### ----------------------- 5 -----------------------
 ##### gdal_translate to create a downsampled copy of the GTiff
 ##### input 250m tif -> output 10km tif
 

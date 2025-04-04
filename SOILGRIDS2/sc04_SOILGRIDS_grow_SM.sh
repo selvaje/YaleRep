@@ -11,9 +11,7 @@
 ###### For a complete run set:  --array=1-116, 116 is the final for vrt creation 
 
 ###### ==============================================[SBATCH LINE]========================================================
-###### for var in clay sand silt ; do for depth in 0-5cm 5-15cm 15-30cm 30-60cm 60-100cm 100-200cm ; do sbatch
-###### --job-name=sc04_SOILGRIDS_grow_${var}_${depth}_SM.sh --export=var=$var,depth=$depth --exclude=r805u25n04
-###### /gpfs/gibbs/pi/hydro/hydro/scripts/SOILGRIDS2/sc04_SOILGRIDS_grow_SM.sh  ; done ; done
+###### for var in clay sand silt ; do for depth in 0-5cm 5-15cm 15-30cm 30-60cm 60-100cm 100-200cm ; do sbatch --job-name=sc04_SOILGRIDS_grow_${var}_${depth}_SM.sh --export=var=$var,depth=$depth --exclude=r805u25n04  /gpfs/gibbs/pi/hydro/hydro/scripts/SOILGRIDS2/sc04_SOILGRIDS_grow_SM.sh  ; done ; done
 ###### ===================================================================================================================
 
 ###### ================================================[DEBUG LINE]=======================================================

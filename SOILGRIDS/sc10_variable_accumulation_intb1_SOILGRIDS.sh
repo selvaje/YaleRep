@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH -p scavenge
+#SBATCH -p day
 #SBATCH -n 1 -c 2 -N 1
 #SBATCH -t 7:00:00       # 6 hours 
 #SBATCH -o /vast/palmer/scratch/sbsc/ga254/stdout/sc10_variable_accumulation_intb1_SOILGRIDS.sh.%J.out
@@ -13,10 +13,10 @@ ulimit -c 0
 #  1-59  IDtif    ### 22 small island on the north of russia   ###    25 & 26 east asia for testing 
 #                                                        constrain up to 2016 as in GSIM. TERRA goes until 2018
 ### 48 last ID in the tileComp_size_memory.txt usefull to start sc11
-#### for tif in /gpfs/gibbs/pi/hydro/hydro/dataproces/SOILGRIDS/out_TranspGrow/*.tif ; do for ID in $(awk '{ print $1 }' /gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT_HYDRO/tiles_comp/tileComp_size_memory.txt ) ; do MEM=$(grep ^"$ID " /gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT_HYDRO/tiles_comp/tileComp_size_memory.txt | awk  '{ print $4}' ) ;  sbatch  --export=tif=$tif,ID=$ID --mem=${MEM}M --job-name=sc10_var_acc_intb1_SOILGRIDS_$(basename $tif .tif).sh  /gpfs/gibbs/pi/hydro/hydro/scripts/SOILGRIDS/sc10_variable_accumulation_intb1_SOILGRIDS.sh ; done ; sleep 1200 ; done 
+#### for vrt in /gpfs/gibbs/pi/hydro/hydro/dataproces/SOILGRIDS/*/*_WeAv_transGrow.vrt ; do for ID in $(awk '{ print $1 }' /gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT_HYDRO/tiles_comp/tileComp_size_memory.txt ) ; do MEM=$(grep ^"$ID " /gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT_HYDRO/tiles_comp/tileComp_size_memory.txt | awk  '{ print $4}' ) ;  sbatch  --export=vrt=$vrt,ID=$ID --mem=${MEM}M --job-name=sc10_var_acc_intb1_SOILGRIDS_$(basename $vrt .vrt).sh  /gpfs/gibbs/pi/hydro/hydro/scripts/SOILGRIDS/sc10_variable_accumulation_intb1_SOILGRIDS.sh ; done ; sleep 1200 ; done 
 
 
-source ~/bin/gdal3
+source ~/bin/gdal3  &> /dev/null
 
 find  /tmp/       -user $USER  -mtime +3  2>/dev/null  | xargs -n 1 -P 2 rm -ifr  
 find  /dev/shm/   -user $USER  -mtime +3  2>/dev/null  | xargs -n 1 -P 2 rm -ifr  
@@ -36,9 +36,9 @@ export  MERIT=/gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT_HYDRO_DEM/
 export  RAM=/dev/shm
 MEMG=$( awk -v MEM=$MEM 'BEGIN {  print int (int(MEM) / 3 )  }' ) 
 SC=/gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT_HYDRO
-SOILGRIDSSC=/vast/palmer/scratch/sbsc/ga254/dataproces/SOILGRIDS
+SOILGRIDSSC=/vast/palmer/scratch/sbsc/hydro/dataproces/SOILGRIDS
 
-export  tifname=$(basename  $tif .tif )
+export  tifname=$(basename  $vrt .vrt )
 dir=$(echo $tifname | cut -d "_"  -f 1 )
 file=/gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT_HYDRO/tiles_comp/tile_??_ID${ID}.tif
 filename=$(basename $file .tif )
@@ -56,22 +56,24 @@ echo coordinates $ulx $uly $lrx $lry
 ### cp to the ram
 echo are elv msk dep | xargs -n 1 -P 2 bash -c $'
 var=$1
-cp $MERIT/${var}/${zone}${tile}_${var}.tif    $RAM/${tifname}_${zone}${tile}_${var}.tif
+cp $MERIT/${var}/${zone}${tile}_${var}.tif $RAM/${tifname}_${zone}${tile}_${var}.tif
 ' _ 
 
 GDAL_CACHEMAX=$MEMG
-gdal_translate -a_nodata 65535  -a_srs EPSG:4326 -r bilinear -ot Float32 -tr 0.000833333333333333333 0.000833333333333333333 -co BIGTIFF=YES -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -projwin $ulx $uly $lrx $lry $tif $RAM/${tifname}_${zone}${tile}_var.tif
+gdal_translate -a_nodata 65535  -a_srs EPSG:4326 -r bilinear -ot Float32 -tr 0.000833333333333333333 0.000833333333333333333 -co BIGTIFF=YES -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -projwin $ulx $uly $lrx $lry $vrt $RAM/${tifname}_${zone}${tile}_var.tif
 
+module load GRASS/8.2.0-foss-2022b &> /dev/null
 #### variable per area pixel 
-gdalbuildvrt -separate $RAM/${tifname}_${zone}${tile}_varare.vrt    $RAM/${tifname}_${zone}${tile}_var.tif $RAM/${tifname}_${zone}${tile}_are.tif
 ### adding a small number to avoid to accumulate 0 values that finaly resoult in no-data accumulation.
-oft-calc -ot Float32  $RAM/${tifname}_${zone}${tile}_varare.vrt   $RAM/${tifname}_${zone}${tile}_varTMP.tif <<EOF
-1
-#1 #2 * 0.0001 +
+grass  -f --text --tmp-location  $RAM/${tifname}_${zone}${tile}_var.tif   <<'EOF' 
+r.external  input=$RAM/${tifname}_${zone}${tile}_var.tif   output=var        --overwrite 
+r.external  input=$RAM/${tifname}_${zone}${tile}_are.tif   output=are        --overwrite 
+r.mapcalc 'var_are = float(var * are + 0.0001)'
+r.out.gdal --o -c -m createopt="COMPRESS=DEFLATE,ZLEVEL=9,BIGTIFF=YES" type=Float32 format=GTiff nodata=-9999 input=var_are output=$RAM/${tifname}_${zone}${tile}_varTMP.tif
 EOF
 
 ############   sea mask and var msk 
-source ~/bin/pktools
+source ~/bin/pktools  &> /dev/null 
 
 pksetmask -ot Float32  -m $RAM/${tifname}_${zone}${tile}_msk.tif -msknodata 0 -nodata -9999  -m $RAM/${tifname}_${zone}${tile}_var.tif -msknodata 65535   -nodata -9999 -co COMPRESS=DEFLATE -co ZLEVEL=9 -co PREDICTOR=3 -co INTERLEAVE=BAND -co TILED=YES -co NUM_THREADS=2 -co BIGTIFF=YES -i $RAM/${tifname}_${zone}${tile}_varTMP.tif -o $RAM/${tifname}_${zone}${tile}_varare.tif
 
@@ -79,7 +81,7 @@ pksetmask -ot Float32  -m $RAM/${tifname}_${zone}${tile}_msk.tif -msknodata 0 -n
 
 rm -f $RAM/${tifname}_${zone}${tile}_varTMP.tif $RAM/${tifname}_${zone}${tile}_are.tif
 
-source ~/bin/grass82m
+module load GRASS/8.2.0-foss-2022b  &> /dev/null
 echo START GRASS
 
 grass  -f --text --tmp-location  $RAM/${tifname}_${zone}${tile}_elv.tif    <<'EOF'
@@ -88,7 +90,7 @@ r.external  input=$RAM/${tifname}_${zone}${tile}_msk.tif     output=msk      --o
 
 echo elv dep varare | xargs -n 1 -P 2 bash -c $'
 r.external  input=$RAM/${tifname}_${zone}${tile}_$1.tif      output=$1        --overwrite 
-' _ 
+' _
 
 r.mask raster=msk --o # usefull to mask the flow accumulation 
 
@@ -129,9 +131,10 @@ EOF
 rm -f $RAM/${tifname}_${zone}${tile}_{elv,msk,dep}.tif
 
 
-source ~/bin/pktools
+source ~/bin/pktools &> /dev/null
 
 GDAL_CACHEMAX=$MEMG
+mkdir -p $SOILGRIDSSC/${dir}_acc/intb
 ### masking base on the flow accumulation and also base on the var resampled
 pksetmask -ot Float32 -m $SC/flow_tiles_intb1/flow_${zone}${tile}_msk.tif -msknodata 0 -nodata -9999999  -m $RAM/${tifname}_${zone}${tile}_var.tif -msknodata 65535  -nodata -9999999  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -co TILED=YES -co NUM_THREADS=2 -co BIGTIFF=YES -i $RAM/${tifname}_${zone}${tile}_acc.tif -o $SOILGRIDSSC/${dir}_acc/intb/${tifname}_${zone}${tile}_acc.tif
 
@@ -144,6 +147,8 @@ rm -f $RAM/${tifname}_${zone}${tile}_var.tif $RAM/${tifname}_${zone}${tile}_acc.
 gdal_translate -a_nodata -9999999   -r average  -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -co TILED=YES -co NUM_THREADS=2 -of GTiff -tr 0.004166666666 0.004166666666 $SOILGRIDSSC/${dir}_acc/intb/${tifname}_${zone}${tile}_acc.tif $SOILGRIDSSC/${dir}_acc/intb/${tifname}_${zone}${tile}_acc_5p.tif
 
 ## 48 last one in the list.
+
+exit 
 
 if [ $ID -eq  48  ] ; then     ### change back to 48 
 sbatch  --export=dir=$dir,tifname=$tifname  --job-name=sc11_tiling20d_SOILGRIDS_${tifname}.sh --dependency=afterany:$( squeue -u $USER -o "%.9F %.80j" | grep sc10_var_acc_intb1_SOILGRIDS_${tifname}.sh | awk '{ printf ("%i:", $1)} END {gsub(":","") ; print $1 }' ) /gpfs/gibbs/pi/hydro/hydro/scripts/SOILGRIDS/sc11_tiling20d_SOILGRIDS.sh

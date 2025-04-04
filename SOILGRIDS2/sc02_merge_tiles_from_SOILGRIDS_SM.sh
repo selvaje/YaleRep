@@ -15,11 +15,7 @@
 ###### ===================================================================================================================
 
 ###### ==============================================[SBATCH LINE]========================================================
-###### for var in clay sand silt ; do ; for depth in 0-5cm 5-15cm 15-30cm 30-60cm 60-100cm 100-200cm ; do ;
-###### tifnumber=$(ll /gpfs/gibbs/pi/hydro/hydro/dataproces/SOILGRIDS2/${var}/homolosine_250m/${var}_${depth}_??.tif | wc -l ) ;
-###### if [ $tifnumber -eq 4  ]  ; then ;  sbatch --job-name=sc02_${var}_${depth}_merge_tiles_from_SOILGRIDS_SM.sh
-###### --export=var=$var,depth=$depth  /gpfs/gibbs/pi/hydro/hydro/scripts/SOILGRIDS2/sc02_merge_tiles_from_SOILGRIDS_SM.sh  ;
-###### fi; done ; done
+###### for var in sand silt clay ; do for depth in 0-5cm 5-15cm 15-30cm 30-60cm 60-100cm 100-200cm  ; do  tifnumber=$(ls /gpfs/gibbs/pi/hydro/hydro/dataproces/SOILGRIDS2/${var}/homolosine_250m/${var}_${depth}_??.tif | wc -l);  if [ "$tifnumber" -eq 4 ]; then sbatch --job-name=sc02_${var}_${depth}_merge_tiles_from_SOILGRIDS_SM.sh --export=var=$var,depth=$depth /gpfs/gibbs/pi/hydro/hydro/scripts/SOILGRIDS2/sc02_merge_tiles_from_SOILGRIDS_SM.sh;  fi;  done; done
 ###### ==================================================================================================================== 
 
 ulimit -c 0

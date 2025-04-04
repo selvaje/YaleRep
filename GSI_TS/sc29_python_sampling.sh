@@ -49,3 +49,16 @@ for i, fold in enumerate(folds):
 EOF
 
 "
+
+
+EXTRACT=/gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/extract4py_sample
+
+for samp in 0 1 2 3 4 ; do
+echo samp $samp 
+head -1 $EXTRACT/stationID_x_y_valueALL_predictors_sampM$samp.txt | cut -d " " -f1-19     > $EXTRACT/stationID_x_y_valueALL_predictors_sampM${samp}_Ys.txt
+awk '{ if (NR>1) print}' $EXTRACT/stationID_x_y_valueALL_predictors_sampM$samp.txt | cut -d " " -f1-19 | sort -n -k 4,4  >>  $EXTRACT/stationID_x_y_valueALL_predictors_sampM${samp}_Ys.txt 
+
+head -1 $EXTRACT/stationID_x_y_valueALL_predictors_sampM$samp.txt | cut -d " " -f1-8,20-  >   $EXTRACT/stationID_x_y_valueALL_predictors_sampM${samp}_Xs.txt
+awk '{ if (NR>1) print}' $EXTRACT/stationID_x_y_valueALL_predictors_sampM$samp.txt | cut -d " " -f1-8,20- | sort -n -k 4,4 >>   $EXTRACT/stationID_x_y_valueALL_predictors_sampM${samp}_Xs.txt 
+done 
+

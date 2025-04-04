@@ -28,6 +28,7 @@ EXTRACT=/gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/extract
 RAM=/dev/shm
 TERRA=/gpfs/gibbs/pi/hydro/hydro/dataproces/TERRA
 SOILGRIDS=/gpfs/gibbs/pi/hydro/hydro/dataproces/SOILGRIDS
+SOILGRIDS2=/gpfs/gibbs/pi/hydro/hydro/dataproces/SOILGRIDS2
 ESALC=/gpfs/gibbs/pi/hydro/hydro/dataproces/ESALC
 GRWL=/gpfs/gibbs/pi/hydro/hydro/dataproces/GRWL
 GSW=/gpfs/gibbs/pi/hydro/hydro/dataproces/GSW
@@ -141,40 +142,43 @@ time paste -d " " \
 <( gdallocationinfo -valonly -geoloc $TERRA/soil_acc/$YYYY3/soil_${YYYY3}_$MM3.vrt < $RAM/x_y_${DA_TE}.txt )   >> $RAM/predictors_values_f_${DA_TE}.txt
 
 sleep 10 
-echo gdallocationinfo g   SOILGRIDS 5 col 
+echo gdallocationinfo g   SOILGRIDS 2 col 
 
-echo "AWCtS CLYPPT SLTPPT SNDPPT WWP"  >  $RAM/predictors_values_g_${DA_TE}.txt
+echo "AWCtS WWP"       >  $RAM/predictors_values_g_${DA_TE}.txt
 
 time paste -d " " \
 <( gdallocationinfo -valonly -geoloc $SOILGRIDS/AWCtS_acc/AWCtS_WeigAver.vrt              < $RAM/x_y_${DA_TE}.txt )   \
-<( gdallocationinfo -valonly -geoloc $SOILGRIDS/CLYPPT_acc/CLYPPT_WeigAver.vrt            < $RAM/x_y_${DA_TE}.txt )   \
-<( gdallocationinfo -valonly -geoloc $SOILGRIDS/SLTPPT_acc/SLTPPT_WeigAver.vrt            < $RAM/x_y_${DA_TE}.txt )   \
-<( gdallocationinfo -valonly -geoloc $SOILGRIDS/SNDPPT_acc/SNDPPT_WeigAver.vrt            < $RAM/x_y_${DA_TE}.txt )   \
 <( gdallocationinfo -valonly -geoloc $SOILGRIDS/WWP_acc/WWP_WeigAver.vrt                  < $RAM/x_y_${DA_TE}.txt )    >> $RAM/predictors_values_g_${DA_TE}.txt
 
+echo "sand silt clay"  >  $RAM/predictors_values_h_${DA_TE}.txt
+
+time paste -d " " \
+<( gdallocationinfo -valonly -geoloc $SOILGRIDS2/sand/sand_acc/sand_0-200cm.vrt   < $RAM/x_y_${DA_TE}.txt )   \
+<( gdallocationinfo -valonly -geoloc $SOILGRIDS2/silt/silt_acc/silt_0-200cm.vrt   < $RAM/x_y_${DA_TE}.txt )   \
+<( gdallocationinfo -valonly -geoloc $SOILGRIDS2/clay/clay_acc/clay_0-200cm.vrt   < $RAM/x_y_${DA_TE}.txt )   >> $RAM/predictors_values_h_${DA_TE}.txt
 
 sleep 10
-echo gdallocationinfo h GRWL 5 col
+echo gdallocationinfo i GRWL 5 col
 
-echo "GRWLw GRWLr GRWLl GRWLd GRWLc" > $RAM/predictors_values_h_${DA_TE}.txt
+echo "GRWLw GRWLr GRWLl GRWLd GRWLc" > $RAM/predictors_values_i_${DA_TE}.txt
 
 time paste -d " " \
 <( gdallocationinfo -valonly -geoloc $GRWL/GRWL_water_acc/GRWL_water.vrt              < $RAM/x_y_${DA_TE}.txt )   \
 <( gdallocationinfo -valonly -geoloc $GRWL/GRWL_river_acc/GRWL_river.vrt              < $RAM/x_y_${DA_TE}.txt )   \
 <( gdallocationinfo -valonly -geoloc $GRWL/GRWL_lake_acc/GRWL_lake.vrt                < $RAM/x_y_${DA_TE}.txt )   \
 <( gdallocationinfo -valonly -geoloc $GRWL/GRWL_delta_acc/GRWL_delta.vrt              < $RAM/x_y_${DA_TE}.txt )   \
-<( gdallocationinfo -valonly -geoloc $GRWL/GRWL_canal_acc/GRWL_canal.vrt              < $RAM/x_y_${DA_TE}.txt )      >> $RAM/predictors_values_h_${DA_TE}.txt
+<( gdallocationinfo -valonly -geoloc $GRWL/GRWL_canal_acc/GRWL_canal.vrt              < $RAM/x_y_${DA_TE}.txt )      >> $RAM/predictors_values_i_${DA_TE}.txt
 
 sleep 10
-echo gdallocationinfo i GSW 5 col
+echo gdallocationinfo l GSW 5 col
 
-echo "GSWs GSWr GSWo GSWe"   > $RAM/predictors_values_i_${DA_TE}.txt
+echo "GSWs GSWr GSWo GSWe"   > $RAM/predictors_values_l_${DA_TE}.txt
 
 time paste -d " " \
 <( gdallocationinfo -valonly -geoloc $GSW/seasonality_acc/seasonality.vrt              < $RAM/x_y_${DA_TE}.txt )   \
 <( gdallocationinfo -valonly -geoloc $GSW/recurrence_acc/recurrence.vrt                < $RAM/x_y_${DA_TE}.txt )   \
 <( gdallocationinfo -valonly -geoloc $GSW/occurrence_acc/occurrence.vrt                < $RAM/x_y_${DA_TE}.txt )   \
-<( gdallocationinfo -valonly -geoloc $GSW/extent_acc/extent.vrt                        < $RAM/x_y_${DA_TE}.txt )    >> $RAM/predictors_values_i_${DA_TE}.txt
+<( gdallocationinfo -valonly -geoloc $GSW/extent_acc/extent.vrt                        < $RAM/x_y_${DA_TE}.txt )    >> $RAM/predictors_values_l_${DA_TE}.txt
 
 ##### hydrography
 
@@ -205,8 +209,6 @@ echo gdallocationinfo m elevation  1  col
 
 echo "elev"   >   $RAM/predictors_values_m_${DA_TE}.txt
 gdallocationinfo -valonly -geoloc $MERIT_HYDRO/elv/all_tif_dis.vrt  < $RAM/x_y_${DA_TE}.txt >> $RAM/predictors_values_m_${DA_TE}.txt
-
-
 
 #### geomorpho
 echo gdallocationinfo x  geomorpho90m 22  col
@@ -248,6 +250,8 @@ head -1 $EXTRACT/stationID_x_y_value_predictors_1958_04.txt   > $EXTRACT/station
 grep -h -v -e ID  -e "\-9999999" -e "72300000.000" -e "61202000.000" $EXTRACT/stationID_x_y_value_predictors_????_??.txt | awk '{ if (NF==93) print }' | sed  's/  / /g'  | sed 's/ *$//'   >>  $EXTRACT/stationID_x_y_valueALL_predictors.txt
 fi
 
+
+exit
 
 
 
