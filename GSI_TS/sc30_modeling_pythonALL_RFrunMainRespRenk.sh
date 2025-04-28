@@ -5,7 +5,7 @@
 #SBATCH -o /vast/palmer/scratch/sbsc/ga254/stdout/sc30_modeling-pythonALL_RFrunMainRespRenk.sh.%A_%a.out
 #SBATCH -e /vast/palmer/scratch/sbsc/ga254/stderr/sc30_modeling_pythonALL_RFrunMainRespRenk.sh.%A_%a.err
 #SBATCH --job-name=sc30_modeling_pythonALL_RFrunMainRespRenk.sh
-#SBATCH --array=300
+#SBATCH --array=300,400
 #SBATCH --mem=400G
 
 ##### #SBATCH --array=200,400,500,600
@@ -27,7 +27,6 @@ export N_EST=$SLURM_ARRAY_TASK_ID
 echo   "n_estimators"  $N_EST   "obs" $obs
 ~/bin/echoerr   n_estimators${N_EST}obs${obs}
 
-
 # awk '{ if (NR> 1) print }' $EXTRACT/stationID_x_y_valueALL_predictors.txt  | shuf -n $SAMPLE  > $EXTRACTpy/stationID_x_y_valueALL_predictors_rand${SAMPLE}_tmp.txt
 # head -1  $EXTRACT/stationID_x_y_valueALL_predictors.txt               > $EXTRACTpy/stationID_x_y_valueALL_predictors_rand${SAMPLE}.txt
 # cat $EXTRACTpy/stationID_x_y_valueALL_predictors_rand${SAMPLE}_tmp.txt >> $EXTRACTpy/stationID_x_y_valueALL_predictors_rand${SAMPLE}.txt
@@ -37,18 +36,15 @@ echo   "n_estimators"  $N_EST   "obs" $obs
 # cut -d " " -f17-    $EXTRACTpy/stationID_x_y_valueALL_predictors_rand${SAMPLE}.txt  >   $EXTRACTpy/stationID_x_y_valueALL_predictors_randX.txt 
 
 ### full dataset 
-##  cut -d " " -f1-16       $EXTRACT/stationID_x_y_valueALL_predictors.txt  >   $EXTRACTpy/stationID_x_y_valueALL_predictors_Y.txt
-##  cut -d " " -f1-5,17-    $EXTRACT/stationID_x_y_valueALL_predictors.txt  >   $EXTRACTpy/stationID_x_y_valueALL_predictors_X.txt 
-
-#### check importing of $EXTRACTpy/stationID_x_y_valueALL_predictors_randY.txt  .. 
+##  cut -d " " -f1-19       $EXTRACT/stationID_x_y_valueALL_predictors.txt  >   $EXTRACTpy/stationID_x_y_valueALL_predictors_Y.txt
+##  cut -d " " -f1-8,20-    $EXTRACT/stationID_x_y_valueALL_predictors.txt  >   $EXTRACTpy/stationID_x_y_valueALL_predictors_X.txt 
 
 echo "start python modeling"
-
-#### see https://machinelearningmastery.com/rfe-feature-selection-in-python/ 
-
 cd $EXTRACTpy
 
-apptainer exec --env=N_EST=$N_EST,obs=$obs /gpfs/gibbs/pi/hydro/hydro/scripts/SAMUEL/pyjeo2_modified.sif  bash -c "
+
+apptainer exec --env=PATH="/gpfs/gibbs/pi/hydro/hydro/scripts/APTAINER_SIF/pyjeovenv/bin:$PATH" \
+ --env=obs=$obs,N_EST=$N_EST /gpfs/gibbs/pi/hydro/hydro/scripts/APTAINER_SIF/pyjeo2.sif  bash -c "
 
 python3 <<'EOF'
 import os, sys 
@@ -66,32 +62,32 @@ from scipy import stats
 from scipy.stats import pearsonr
 from sklearn.metrics import r2_score
 
-obs_s=(os.environ["obs"])
+obs_s=(os.environ['obs'])
 print(obs_s)
 
-obs_i=int(os.environ["obs"])
+obs_i=int(os.environ['obs'])
 
-N_EST_I=int(os.environ["N_EST"])
-N_EST_S=(os.environ["N_EST"])
+N_EST_I=int(os.environ['N_EST'])
+N_EST_S=(os.environ['N_EST'])
 print(N_EST_S)
 
-X_train  = pd.read_csv(rf'./stationID_x_y_valueALL_predictors_X.txt', header=0, sep=' ', usecols=lambda column: column not in ["ID","YYYY","MM","lon","lat"])
-Y_train  = pd.read_csv(rf'./stationID_x_y_valueALL_predictors_Y.txt', header=0, sep=' ', usecols=lambda column: column not in ["ID","YYYY","MM","lon","lat"])
+X_train  = pd.read_csv(rf'./stationID_x_y_valueALL_predictors_X.txt', header=0, sep=' ', usecols=lambda column: column not in ['ID','YYYY','MM','lon','lat','Xcoord','Ycoord','IDraster'])
+Y_train  = pd.read_csv(rf'./stationID_x_y_valueALL_predictors_Y.txt', header=0, sep=' ', usecols=lambda column: column not in ['ID','YYYY','MM','lon','lat','Xcoord','Ycoord','IDraster'])
 
 print(X_train.shape)
 print(Y_train.shape)
 
-print("Run RF with - no testing ")
+print('Run RF with - no testing ')
 RFreg = RandomForestRegressor(random_state=24, n_estimators=N_EST_I, n_jobs=16 , oob_score=True ,  bootstrap=True ,   min_samples_leaf=obs_i , min_samples_split=obs_i)
 RFreg.fit(X_train, Y_train)
 
 #### make prediction using th oob
-savetxt(rf'./stationID_x_y_valueALL_predictors_YOOBpredictN{N_EST_S}_{obs_s}obs.txt', RFreg.oob_prediction_, delimiter=' ', fmt='%f', header="QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX", comments="")
+savetxt(rf'./stationID_x_y_valueALL_predictors_YOOBpredictN{N_EST_S}_{obs_s}obs_RForig.txt', RFreg.oob_prediction_, delimiter=' ', fmt='%f', header='QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='')
 
-savetxt(rf'./stationID_x_y_valueALL_predictors_YpredictN{N_EST_S}_{obs_s}obs.txt', RFreg.predict(X_train), delimiter=' ', fmt='%f', header="QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX", comments="")
+savetxt(rf'./stationID_x_y_valueALL_predictors_YpredictN{N_EST_S}_{obs_s}obs_RForig.txt', RFreg.predict(X_train), delimiter=' ', fmt='%f', header='QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='')
 
-print("OOB score" ,  RFreg.oob_score_) 
-print("Score" ,  RFreg.score)
+print('OOB score' ,  RFreg.oob_score_) 
+print('Score' ,  RFreg.score)
 
 oob_r2 = np.array([RFreg.oob_score_])
 r2 = RFreg.score(X_train, Y_train)
@@ -117,7 +113,7 @@ rQMAX = stats.pearsonr(RFreg.oob_prediction_[:,10],Y_train.iloc[:, 10])[0]
 merge=np.c_[n,o,r2,oob_r2,mse,oob_mse,rQMIN,rQ10,rQ20,rQ30,rQ40,rQ50,rQ60,rQ70,rQ80,rQ90,rQMAX]
 
 print(merge)
-savetxt( rf'./stationID_x_y_valueALL_predictors_YscoreN{N_EST_S}_{obs_s}obs.txt', merge, delimiter=' ',  fmt='%f'  )
+savetxt( rf'./stationID_x_y_valueALL_predictors_YscoreN{N_EST_S}_{obs_s}obs_RForig.txt', merge, delimiter=' ',  fmt='%f'  )
 
 # Get feature importances and sort them in descending order     
 
@@ -125,8 +121,24 @@ importance = pd.Series(RFreg.feature_importances_, index=X_train.columns)
 importance.sort_values(ascending=False, inplace=True)
 print(importance)
 
-importance.to_csv(rf'./stationID_x_y_valueALL_predictors_XimportanceN{N_EST_S}_{obs_s}obs.txt' , index=True , sep=' ' , header=False)
+importance.to_csv(rf'./stationID_x_y_valueALL_predictors_XimportanceN{N_EST_S}_{obs_s}obs_RForig.txt' , index=True , sep=' ' , header=False)
 
 EOF
 
 " # closing the sif 
+
+
+exit
+
+for file in stationID_x_y_valueALL_predictors_XimportanceN*_*obs_RForig.txt ; do
+    awk '{ print NR, $1  }' $file
+done | sort   -k 2,2 > importance_all_RForig.txt
+
+/home/ga254/scripts/general/sum.sh importance_all_RForig.txt  importance_sum_RForig.txt <<EOF
+n
+2
+0
+EOF
+
+
+sort -g  importance_sum_RForig.txt > importance_sum_RForigSort.txt

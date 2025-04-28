@@ -1,0 +1,146 @@
+Bootstrap: docker
+From: debian:bookworm
+
+%post
+    # Update and install required dependencies
+    apt update -y
+    apt install -y \
+        build-essential \
+        apt-utils \
+        curl \
+        git \
+        gzip \
+        tar \
+        unzip \
+        cmake \
+        libtool \
+        swig \
+        sqlite3 \
+        zlib1g-dev \
+        libproj-dev \
+        libgeotiff-dev \
+        libgsl-dev \
+        libfann-dev \
+        libfftw3-dev \
+        libssl-dev \
+        libshp-dev \
+        uthash-dev \
+        libopenblas-dev \
+        libjsoncpp-dev \
+        libboost-serialization-dev \
+        libboost-filesystem-dev \
+        python3-pip \
+        python3-venv \
+        python3-numpy \
+        flex \
+        bison \
+        libncurses5-dev \
+        libreadline-dev \
+        libbz2-dev \
+        libx11-dev \
+        libxmu-dev \
+        libxi-dev \
+        libjpeg-dev \
+        libpng-dev \
+        libtiff-dev \
+        libsqlite3-dev \
+        libcurl4-openssl-dev \
+        libspatialite-dev \
+        libkml-dev \
+        mesa-common-dev \
+        libglu1-mesa-dev \
+        libcairo2-dev \
+        gettext \
+        intltool
+
+    # Set working directory
+    mkdir -p /usr/local/src
+    cd /usr/local/src
+
+    ##############################
+    # Install GDAL 3.5.3 (compatible with PDAL)
+    ##############################
+    curl -L -o gdal-3.5.3.tar.gz https://github.com/OSGeo/gdal/archive/refs/tags/v3.5.3.tar.gz
+    tar -xzvf gdal-3.5.3.tar.gz
+    cd gdal-3.5.3
+    mkdir build
+    cd build
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
+    make -j$(nproc)
+    make install
+    ldconfig
+
+    ##############################
+    # Install PDAL
+    ##############################
+    cd /usr/local/src
+    git clone https://github.com/PDAL/PDAL.git
+    cd PDAL
+    git checkout 2.5.4  # Use a version compatible with GDAL 3.5.x
+    mkdir build
+    cd build
+    cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_PLUGIN_CPD=OFF
+    make -j$(nproc)
+    make install
+    ldconfig
+
+    ##############################
+    # Install GRASS GIS 8.4.0
+    ##############################
+    cd /usr/local/src
+    curl -L -o grass-8.4.0.tar.gz https://github.com/OSGeo/grass/archive/refs/tags/8.4.0.tar.gz
+    tar -xzvf grass-8.4.0.tar.gz
+    cd grass-8.4.0
+    ./configure \
+        --with-cxx \
+        --with-gdal=/usr/local/bin/gdal-config \
+        --with-proj=/usr/bin/proj \
+        --with-geos \
+        --with-python=/usr/bin/python3 \
+        --with-sqlite \
+        --with-fftw \
+        --with-readline \
+        --with-nls \
+        --with-blas \
+        --with-lapack \
+        --with-pdal \
+        --prefix=/usr/local/grass-8.4.0
+    make -j$(nproc)
+    make install
+
+    # Add GRASS GIS 8.4.0 to PATH
+    echo 'export PATH=/usr/local/grass-8.4.0/bin:$PATH' >> /etc/profile
+    echo 'export GISBASE=/usr/local/grass-8.4.0' >> /etc/profile
+    echo 'export GRASS_PROJSHARE=/usr/local/share/proj' >> /etc/profile
+
+    ##############################
+    # Install GRASS GIS 8.4.1
+    ##############################
+    cd /usr/local/src
+    curl -L -o grass-8.4.1.tar.gz https://github.com/OSGeo/grass/archive/refs/tags/8.4.1.tar.gz
+    tar -xzvf grass-8.4.1.tar.gz
+    cd grass-8.4.1
+    ./configure \
+        --with-cxx \
+        --with-gdal=/usr/local/bin/gdal-config \
+        --with-proj=/usr/bin/proj \
+        --with-geos \
+        --with-python=/usr/bin/python3 \
+        --with-sqlite \
+        --with-fftw \
+        --with-readline \
+        --with-nls \
+        --with-blas \
+        --with-lapack \
+        --with-pdal \
+        --prefix=/usr/local/grass-8.4.1
+    make -j$(nproc)
+    make install
+
+    # Add GRASS GIS 8.4.1 to PATH
+    echo 'export PATH=/usr/local/grass-8.4.1/bin:$PATH' >> /etc/profile
+    echo 'export GISBASE=/usr/local/grass-8.4.1' >> /etc/profile
+    echo 'export GRASS_PROJSHARE=/usr/local/share/proj' >> /etc/profile
+
+    # Load the updated PATH using the POSIX-compliant "." command
+    . /etc/profile

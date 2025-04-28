@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -p day
 #SBATCH -n 1 -c 2 -N 1
-#SBATCH -t 7:00:00       # 6 hours 
+#SBATCH -t 9:00:00       # 6 hours 
 #SBATCH -o /vast/palmer/scratch/sbsc/ga254/stdout/sc10_variable_accumulation_intb1_SOILGRIDS.sh.%J.out
 #SBATCH -e /vast/palmer/scratch/sbsc/ga254/stderr/sc10_variable_accumulation_intb1_SOILGRIDS.sh.%J.err
 
@@ -14,6 +14,10 @@ ulimit -c 0
 #                                                        constrain up to 2016 as in GSIM. TERRA goes until 2018
 ### 48 last ID in the tileComp_size_memory.txt usefull to start sc11
 #### for vrt in /gpfs/gibbs/pi/hydro/hydro/dataproces/SOILGRIDS/*/*_WeAv_transGrow.vrt ; do for ID in $(awk '{ print $1 }' /gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT_HYDRO/tiles_comp/tileComp_size_memory.txt ) ; do MEM=$(grep ^"$ID " /gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT_HYDRO/tiles_comp/tileComp_size_memory.txt | awk  '{ print $4}' ) ;  sbatch  --export=vrt=$vrt,ID=$ID --mem=${MEM}M --job-name=sc10_var_acc_intb1_SOILGRIDS_$(basename $vrt .vrt).sh  /gpfs/gibbs/pi/hydro/hydro/scripts/SOILGRIDS/sc10_variable_accumulation_intb1_SOILGRIDS.sh ; done ; sleep 1200 ; done 
+
+
+## for checking
+## for var in AWCtS CLYPPT SLTPPT SNDPPT WWP ; do ll /vast/palmer/scratch/sbsc/hydro/dataproces/SOILGRIDS/${var}_acc/intb/${var}_WeAv_transGrow_*_acc.tif  | wc -l ; done 
 
 
 source ~/bin/gdal3  &> /dev/null

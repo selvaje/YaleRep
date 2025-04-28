@@ -33,7 +33,8 @@ ESALC=/gpfs/gibbs/pi/hydro/hydro/dataproces/ESALC
 GRWL=/gpfs/gibbs/pi/hydro/hydro/dataproces/GRWL
 GSW=/gpfs/gibbs/pi/hydro/hydro/dataproces/GSW
 HYDRO=/gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT_HYDRO
-MERIT_HYDRO=/gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT_HYDRO_DEM
+MERIT_DEM=/gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT_HYDRO_DEM
+MERIT=/gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT
 
 #  41233 x_y_ID.txt    41233 x_y.txt
 
@@ -47,7 +48,7 @@ awk '{if(NR>1) print}' $GSI_TS/headerFlow_txt/IDstation_lon_lat_IDraster_Xcoord_
 echo 999999 -99.999371 39.999434 999999 -11131879.06 4452716.62    >> $GSI_TS/snapFlow_txt/IDstation_lon_lat_IDraster_Xcoord_Ycoord_2.txt
 sort -k 1,1 $GSI_TS/snapFlow_txt/IDstation_lon_lat_IDraster_Xcoord_Ycoord_2.txt > $GSI_TS/snapFlow_txt/IDstation_lon_lat_IDraster_Xcoord_Ycoord_2s.txt
 else 
-sleep 30
+sleep 60
 fi
 
 export DA_TE=$(awk -v ID=$SLURM_ARRAY_TASK_ID '{ if(NR==ID) print $1"_"$2 }' $GSI_TS/metadata/date.txt)
@@ -144,12 +145,16 @@ time paste -d " " \
 sleep 10 
 echo gdallocationinfo g   SOILGRIDS 2 col 
 
-echo "AWCtS WWP"       >  $RAM/predictors_values_g_${DA_TE}.txt
+echo "SNDPPT SLTPPT CLYPPT AWCtS WWP"       >  $RAM/predictors_values_g_${DA_TE}.txt
 
 time paste -d " " \
-<( gdallocationinfo -valonly -geoloc $SOILGRIDS/AWCtS_acc/AWCtS_WeigAver.vrt              < $RAM/x_y_${DA_TE}.txt )   \
-<( gdallocationinfo -valonly -geoloc $SOILGRIDS/WWP_acc/WWP_WeigAver.vrt                  < $RAM/x_y_${DA_TE}.txt )    >> $RAM/predictors_values_g_${DA_TE}.txt
+<( gdallocationinfo -valonly -geoloc $SOILGRIDS/SNDPPT_acc/SNDPPT.vrt      < $RAM/x_y_${DA_TE}.txt )   \
+<( gdallocationinfo -valonly -geoloc $SOILGRIDS/SLTPPT_acc/SLTPPT.vrt      < $RAM/x_y_${DA_TE}.txt )   \
+<( gdallocationinfo -valonly -geoloc $SOILGRIDS/CLYPPT_acc/CLYPPT.vrt      < $RAM/x_y_${DA_TE}.txt )   \
+<( gdallocationinfo -valonly -geoloc $SOILGRIDS/AWCtS_acc/AWCtS.vrt        < $RAM/x_y_${DA_TE}.txt )   \
+<( gdallocationinfo -valonly -geoloc $SOILGRIDS/WWP_acc/WWP.vrt            < $RAM/x_y_${DA_TE}.txt )   >> $RAM/predictors_values_g_${DA_TE}.txt
 
+sleep 10 
 echo "sand silt clay"  >  $RAM/predictors_values_h_${DA_TE}.txt
 
 time paste -d " " \
@@ -185,13 +190,14 @@ time paste -d " " \
 echo gdallocationinfo x  hydrography 17  col
 
 touch $RAM/predictors_values_x_${DA_TE}.txt 
-time for vrt in $( ls $HYDRO/hydrography90m_v.1.0/*/*/*.vrt | grep -v -e basin.vrt -e depression.vrt -e direction.vrt -e outlet.vrt -e regional_unit.vrt -e segment.vrt -e sub_catchment.vrt -e order_vect.vrt  -e order_vect.vrt  -e channel -e order  -e accumulation.vrt    )  ; do 
+time for vrt in $( ls $HYDRO/hydrography90m_v.1.0/*/*/*.vrt | grep -v -e basin.vrt -e depression.vrt -e direction.vrt -e outlet.vrt -e regional_unit.vrt -e segment.vrt -e sub_catchment.vrt -e order_vect.vrt  -e order_vect.vrt  -e channel -e order  -e accumulation.vrt  -e cti.vrt -e spi.vrt -e sti.vrt -e stream_diff_dw_near -e stream_dist_proximity -e stream_dist_dw_near   )  ; do 
 gdallocationinfo -valonly -geoloc $vrt   < $RAM/x_y_${DA_TE}.txt > $RAM/predictors_values_xx_${DA_TE}.txt  
 paste -d " "  $RAM/predictors_values_x_${DA_TE}.txt  $RAM/predictors_values_xx_${DA_TE}.txt > $RAM/predictors_values_xxx_${DA_TE}.txt   
 mv $RAM/predictors_values_xxx_${DA_TE}.txt  $RAM/predictors_values_x_${DA_TE}.txt   
 done 
 
-for file in $( ls $HYDRO/hydrography90m_v.1.0/*/*/*.vrt | grep -v -e basin.vrt -e depression.vrt -e direction.vrt -e outlet.vrt -e regional_unit.vrt -e segment.vrt -e sub_catchment.vrt -e order_vect.vrt -e channel -e order -e accumulation.vrt     )  ; do  
+for file in $( ls $HYDRO/hydrography90m_v.1.0/*/*/*.vrt | grep -v -e basin.vrt -e depression.vrt -e direction.vrt -e outlet.vrt -e regional_unit.vrt -e segment.vrt -e sub_catchment.vrt -e order_vect.vrt -e channel -e order -e accumulation.vrt  -e cti.vrt -e spi.vrt -e sti.vrt -e stream_di\
+ff_dw_near -e stream_dist_proximity -e stream_dist_dw_near  )  ; do  
 echo -n $(basename $file .vrt)" "  
 done > $RAM/predictors_values_l_${DA_TE}.txt 
 echo "" >> $RAM/predictors_values_l_${DA_TE}.txt 
@@ -203,12 +209,18 @@ rm   $RAM/predictors_values_xx_${DA_TE}.txt      $RAM/predictors_values_x_${DA_T
 echo "accumulation"   >   $RAM/predictors_values_t_${DA_TE}.txt
 gdallocationinfo -valonly -geoloc $HYDRO/flow_tiles/all_tif_pos_dis.vrt  < $RAM/x_y_${DA_TE}.txt >> $RAM/predictors_values_t_${DA_TE}.txt
 
+echo "cti spi sti" >   $RAM/predictors_values_u_${DA_TE}.txt
+time paste -d " " \
+<( gdallocationinfo -valonly -geoloc $HYDRO/CompUnit_stream_indices_tiles20d/all_tif_cti2_dis.vrt      < $RAM/x_y_${DA_TE}.txt )   \
+<( gdallocationinfo -valonly -geoloc $HYDRO/CompUnit_stream_indices_tiles20d/all_tif_spi2_dis.vrt      < $RAM/x_y_${DA_TE}.txt )   \
+<( gdallocationinfo -valonly -geoloc $HYDRO/CompUnit_stream_indices_tiles20d/all_tif_sti2_dis.vrt      < $RAM/x_y_${DA_TE}.txt )    >> $RAM/predictors_values_u_${DA_TE}.txt
+
 ###### elevation 
 
 echo gdallocationinfo m elevation  1  col
 
 echo "elev"   >   $RAM/predictors_values_m_${DA_TE}.txt
-gdallocationinfo -valonly -geoloc $MERIT_HYDRO/elv/all_tif_dis.vrt  < $RAM/x_y_${DA_TE}.txt >> $RAM/predictors_values_m_${DA_TE}.txt
+gdallocationinfo -valonly -geoloc $MERIT_DEM/elv/all_tif_dis.vrt  < $RAM/x_y_${DA_TE}.txt >> $RAM/predictors_values_m_${DA_TE}.txt
 
 #### geomorpho
 echo gdallocationinfo x  geomorpho90m 22  col
@@ -245,13 +257,16 @@ sleep 3000
 head -1 $EXTRACT/stationID_x_y_value_predictors_1958_04.txt   > $EXTRACT/stationID_x_y_valueALL_predictors.txt
 
 ### 72300000.000 & 61202000.000  is for QMAX value   in total 2 lines             | awk '{ if (NF==93) print }'
-### -9999999  soil  layers 
+### -9999999  soil  layers
+### -2147483648       ###  65535 there value for this but prob is 
 ### remove space in the midle ## remove space in the end  
-grep -h -v -e ID  -e "\-9999999" -e "72300000.000" -e "61202000.000" $EXTRACT/stationID_x_y_value_predictors_????_??.txt | awk '{ if (NF==93) print }' | sed  's/  / /g'  | sed 's/ *$//'   >>  $EXTRACT/stationID_x_y_valueALL_predictors.txt
-fi
+grep -h -v -e ID -e "\-2147483648 " -e "\-9999999 " -e "72300000.000" -e "61202000.000" $EXTRACT/stationID_x_y_value_predictors_????_??.txt | awk '{ if (NF==92) print }' | sed  's/  / /g'  | sed 's/ *$//'   >>  $EXTRACT/stationID_x_y_valueALL_predictors.txt
+fi 
 
 
 exit
+
+
 
 
 

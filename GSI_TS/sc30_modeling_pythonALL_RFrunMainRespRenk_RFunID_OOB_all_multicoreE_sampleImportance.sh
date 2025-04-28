@@ -9,7 +9,7 @@
 #SBATCH --mem=500G
 
 ##### #SBATCH --array=200,400,500,600
-#### for obs in 4 5 8 10 15; do for samp in 0 1 2 3 4 ;   do sbatch --export=obs=$obs,samp=$samp /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/sc30_modeling_pythonALL_RFrunMainRespRenk_RFunID_OOB_all_multicoreE.sh; done ; done 
+#### for obs in 4 5 8 10 15; do for samp in 0 1 2 3 4 ;   do sbatch --export=obs=$obs,samp=$samp /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/sc30_modeling_pythonALL_RFrunMainRespRenk_RFunID_OOB_all_multicoreE_sampleImportance.sh ; done ; done 
 #### 2 4 5 8 10 15 
 
 ### RAM error a 400G n_estimators300obs15 n_estimators400obs5  n_estimators300obs10 
@@ -57,11 +57,11 @@ samp_i=int(os.environ['samp'])
 samp_s=(os.environ['samp']) 
 print(samp_s)  
 
-dtypes_X = {col: 'float32' for col in range(7, 67)}
+dtypes_X = {col: 'float32' for col in range(7, 80)}
 dtypes_Y = {col: 'float32' for col in range(7, 18)}
 
-X_train  = pd.read_csv(rf'stationID_x_y_valueALL_predictors_sampM{samp_s}_X.txt', header=0, sep=' ', usecols=lambda column: column not in ['ID','YYYY','MM','lon','lat','Xcoord','Ycoord'], dtype=dtypes_X)
-Y_train  = pd.read_csv(rf'./stationID_x_y_valueALL_predictors_sampM{samp_s}_Y.txt', header=0, sep=' ', usecols=lambda column: column not in ['ID','YYYY','MM','lon','lat','Xcoord','Ycoord'], dtype=dtypes_Y)
+X_train  = pd.read_csv(rf'stationID_x_y_valueALL_predictors_sampM{samp_s}_Xs.txt', header=0, sep=' ', usecols=lambda column: column not in ['ID','YYYY','MM','lon','lat','Xcoord','Ycoord'], dtype=dtypes_X)
+Y_train  = pd.read_csv(rf'./stationID_x_y_valueALL_predictors_sampM{samp_s}_Ys.txt', header=0, sep=' ', usecols=lambda column: column not in ['ID','YYYY','MM','lon','lat','Xcoord','Ycoord'], dtype=dtypes_Y)
 print('Training and Testing data')
 print('################################')
 print(X_train.head(4))
@@ -191,36 +191,11 @@ EOF
 
 " # closing the sif 
 
-
-
 exit
-# explanation
-How BoundedGroupAwareRandomForest Works
-1 Standard Random Forest (RandomForestRegressor)
-   A Random Forest is an ensemble of multiple Decision Trees.
-   Each tree is trained on a bootstrap sample (random subset of training data).
-   The final prediction is the average of all tree outputs.
 
-2 Custom Decision Tree (GroupAwareDecisionTree)
-   Each individual Decision Tree is modified to respect group constraints.
-   Instead of randomly splitting the data, it ensures that entire IDraster groups stay together.
-   This prevents the same station (IDraster) from being split into different branches, improving model consistency.
 
-3 Custom Random Forest (BoundedGroupAwareRandomForest)
-   Instead of using standard DecisionTreeRegressor, this RF builds multiple GroupAwareDecisionTree models.
-   It still trains on random bootstrap samples, but ensures group-level constraints.
-   It averages predictions from multiple constrained decision trees.
-   It forces predictions ≥ 0, preventing negative discharge values.
-
-   
-
-X_train['original_index'] = X_train.index
-X_train = X_train.sort_values(by='IDraster').reset_index(drop=True)
-
-Y_train['original_index'] = Y_train.index
-Y_train = Y_train.sort_values(by='IDraster').reset_index(drop=True)
-
-# Restore original order if needed
-X_train = X_train.sort_values(by='original_index').drop(columns=['original_index']).reset_index(drop=True)
-Y_train = Y_train.sort_values(by='original_index').drop(columns=['original_index']).reset_index(drop=True)
-   
+for file in   stationID_x_y_valueALL_predictors_XimportanceN*_*obs_?samp.txt  ; do
+    awk '{ print NR, $1  }' $file
+done | sort   -k 2,2 > importance_all.txt 
+/home/ga254/scripts/general/sum.sh importance_all.txt importance_sum.txt
+sort -g  importance_sum.txt > importance_sampleAll.txt
