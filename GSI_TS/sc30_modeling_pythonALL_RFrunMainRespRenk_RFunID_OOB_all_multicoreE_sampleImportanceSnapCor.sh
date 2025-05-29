@@ -5,35 +5,31 @@
 #SBATCH -o /vast/palmer/scratch/sbsc/ga254/stdout/sc30_modeling-pythonALL_RFrunMainRespRenk_RFunID_OOB_all.sh.%A_%a.out
 #SBATCH -e /vast/palmer/scratch/sbsc/ga254/stderr/sc30_modeling_pythonALL_RFrunMainRespRenk_RFunID_OOB_all.sh.%A_%a.err
 #SBATCH --job-name=sc30_modeling_pythonALL_RFrunMainRespRenk_RFunID_OOB_all.sh
-#SBATCH --array=500
-#SBATCH --mem=500G
+#SBATCH --array=400
+#SBATCH --mem=800G
 
 ##### #SBATCH --array=200,400,500,600
-#### for obs in 10 15 20 25 ; do for samp in 0 1 2 3 4 ;   do sbatch --export=obs=$obs,samp=$samp /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/sc30_modeling_pythonALL_RFrunMainRespRenk_RFunID_OOB_all_multicoreE_sampleImportance.sh ; done ; done 
+#### for obs in 10 15 20 25 ; do sbatch --export=obs=$obs /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/sc30_modeling_pythonALL_RFrunMainRespRenk_RFunID_OOB_all_multicoreE_sampleImportanceSnapCor.sh ; done 
 #### 2 4 5 8 10 15 
-
-### full dataset 
-##  cut -d " " -f1-19       $EXTRACT/stationID_x_y_valueALL_predictors.txt  >   $EXTRACTpy/stationID_x_y_valueALL_predictors_Y.txt
-##  cut -d " " -f1-8,20-    $EXTRACT/stationID_x_y_valueALL_predictors.txt  >   $EXTRACTpy/stationID_x_y_valueALL_predictors_X.txt 
 
 ## head -1 $EXTRACT/stationID_x_y_valueALL_predictors.txt > $EXTRACT/stationID_x_y_valueALL_predictorsSnapCor.txt     
 ## join -1 1 -2 1 <( awk '{if( NR>1) print }' $EXTRACT/stationID_x_y_valueALL_predictors.txt | sort )  <(sort /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/snapFlow_area/ID_correct_snapping.txt ) >> $EXTRACT/stationID_x_y_valueALL_predictorsSnapCor.txt    
 
-##  cut -d " " -f1-19       $EXTRACT/stationID_x_y_valueALL_predictorsSnapCor.txt  >   $EXTRACTpy/stationID_x_y_valueALL_predictors_YsnapCor.txt
-##  cut -d " " -f1-8,20-    $EXTRACT/stationID_x_y_valueALL_predictorsSnapCor.txt  >   $EXTRACTpy/stationID_x_y_valueALL_predictors_XsnapCor.txt
+##  cut -d " " -f1-19    /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/extract/stationID_x_y_valueALL_predictorsSnapCor.txt  >  /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/extract4py/stationID_x_y_valueALL_predictors_YsnapCor.txt
+##  cut -d " " -f1-8,20-  /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/extract/stationID_x_y_valueALL_predictorsSnapCor.txt  > /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/extract4py/stationID_x_y_valueALL_predictors_XsnapCor.txt
 
 module load StdEnv
-EXTRACT=/gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/extract4py_sample
+EXTRACT=/gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/extract4py
 cd $EXTRACT
 export obs=$obs 
 export N_EST=$SLURM_ARRAY_TASK_ID
 
-echo   "n_estimators"  $N_EST   "obs" $obs  "samp" $samp
-~/bin/echoerr   n_estimators${N_EST}obs${obs}samp${samp}
+echo   "n_estimators"  $N_EST   "obs" $obs  
+~/bin/echoerr   n_estimators${N_EST}obs${obs}
 
 
 apptainer exec --env=PATH="/gpfs/gibbs/pi/hydro/hydro/scripts/APTAINER_SIF/pyjeovenv/bin:$PATH" \
- --env=obs=$obs,N_EST=$N_EST,samp=$samp /gpfs/gibbs/pi/hydro/hydro/scripts/APTAINER_SIF/pyjeo2.sif  bash -c "
+ --env=obs=$obs,N_EST=$N_EST /gpfs/gibbs/pi/hydro/hydro/scripts/APTAINER_SIF/pyjeo2.sif  bash -c "
 
 python3 <<'EOF'
 import os, sys 
@@ -61,15 +57,12 @@ N_EST_I=int(os.environ['N_EST'])
 N_EST_S=(os.environ['N_EST'])
 print(N_EST_S)
 
-samp_i=int(os.environ['samp'])  
-samp_s=(os.environ['samp']) 
-print(samp_s)  
 
 dtypes_X = {col: 'float32' for col in range(7, 80)}
 dtypes_Y = {col: 'float32' for col in range(7, 18)}
 
-X_train  = pd.read_csv(rf'stationID_x_y_valueALL_predictors2_sampM{samp_s}_Xs.txt', header=0, sep=' ', usecols=lambda column: column not in ['ID','YYYY','MM','lon','lat','Xcoord','Ycoord'], dtype=dtypes_X)
-Y_train  = pd.read_csv(rf'./stationID_x_y_valueALL_predictors2_sampM{samp_s}_Ys.txt', header=0, sep=' ', usecols=lambda column: column not in ['ID','YYYY','MM','lon','lat','Xcoord','Ycoord'], dtype=dtypes_Y)
+X_train  = pd.read_csv(rf'stationID_x_y_valueALL_predictors_XsnapCor.txt', header=0, sep=' ', usecols=lambda column: column not in ['ID','YYYY','MM','lon','lat','Xcoord','Ycoord'], dtype=dtypes_X)
+Y_train  = pd.read_csv(rf'stationID_x_y_valueALL_predictors_YsnapCor.txt', header=0, sep=' ', usecols=lambda column: column not in ['ID','YYYY','MM','lon','lat','Xcoord','Ycoord'], dtype=dtypes_Y)
 print('Training and Testing data')
 print('################################')
 print(X_train.head(4))
@@ -154,9 +147,9 @@ print('Y_train_predOOB') ; print(type(Y_train_predOOB)) ; print(Y_train_predOOB.
 
 #### make prediction using the oob
 fmt = '%i %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f'
-savetxt(rf'./stationID_x_y_valueALL_predictors_YOOBpredictN{N_EST_S}_{obs_s}obs_{samp_s}samp.txt', Y_train_predOOB , delimiter=' ',  header='IDraster QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='' , fmt=fmt)
+savetxt(rf'./stationID_x_y_valueALL_predictors_YOOBpredictN{N_EST_S}_{obs_s}obs_snapCor.txt', Y_train_predOOB , delimiter=' ',  header='IDraster QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='' , fmt=fmt)
 
-savetxt(rf'./stationID_x_y_valueALL_predictors_YpredictN{N_EST_S}_{obs_s}obs_{samp_s}samp.txt', Y_train_pred , delimiter=' ', header='IDraster QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='' , fmt=fmt)
+savetxt(rf'./stationID_x_y_valueALL_predictors_YpredictN{N_EST_S}_{obs_s}obs_snapCor.txt', Y_train_pred , delimiter=' ', header='IDraster QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='' , fmt=fmt)
 
 n=np.array(N_EST_I)
 o=np.array(obs_i)
@@ -185,7 +178,7 @@ merge = np.concatenate((np.array([[n, o, r2, oob_r2, mse, oob_mse]]), r, r_OOB),
 print(merge)
 fmt = ' '.join(['%i'] * 2 + ['%.4f'] * (merge.shape[1] - 2))
 
-savetxt( rf'./stationID_x_y_valueALL_predictors_YscoreN{N_EST_S}_{obs_s}obs_{samp_s}samp.txt', merge, delimiter=' ',  fmt=fmt  )
+savetxt( rf'./stationID_x_y_valueALL_predictors_YscoreN{N_EST_S}_{obs_s}obs_snapCor.txt', merge, delimiter=' ',  fmt=fmt  )
 
 ## Get feature importances and sort them in descending order     
 
@@ -193,7 +186,7 @@ importance = pd.Series(RFreg.feature_importances_, index=X_train.columns[1:])
 importance.sort_values(ascending=False, inplace=True)
 print(importance)
 
-importance.to_csv(rf'./stationID_x_y_valueALL_predictors_XimportanceN{N_EST_S}_{obs_s}obs_{samp_s}samp.txt', index=True, sep=' ', header=False)
+importance.to_csv(rf'./stationID_x_y_valueALL_predictors_XimportanceN{N_EST_S}_{obs_s}obs_snapCor1RF.txt', index=True, sep=' ', header=False)
 
 EOF
 

@@ -1,16 +1,16 @@
 #!/bin/bash
-#SBATCH -p bigmem
+#SBATCH -p day
 #SBATCH -n 1 -c 22  -N 1
 #SBATCH -t 24:00:00 
-#SBATCH -o /vast/palmer/scratch/sbsc/ga254/stdout/sc31_modeling-pythonALL_RFrunMainRespRenkOptim.sh.%A_%a.out
-#SBATCH -e /vast/palmer/scratch/sbsc/ga254/stderr/sc31_modeling_pythonALL_RFrunMainRespRenkOptim.sh.%A_%a.err
-#SBATCH --job-name=sc31_modeling_pythonALL_RFrunMainRespRenkOptim_split_IDraster_testSpars_RFunID_OOB_all_multicoreE.sh
-#SBATCH --array=300,400,500,600
-#SBATCH --mem=1500G
+#SBATCH -o /vast/palmer/scratch/sbsc/ga254/stdout/sc31_modeling-pythonALL_RFrunMainRespRenkOptimSnapCor.sh.%A_%a.out
+#SBATCH -e /vast/palmer/scratch/sbsc/ga254/stderr/sc31_modeling_pythonALL_RFrunMainRespRenkOptimSnapCor.sh.%A_%a.err
+#SBATCH --job-name=sc31SnapCor_modeling_pythonALL_RFrunMainRespRenkOptim_split_IDraster_testSpars_RFunID_OOB_all_multicoreE.sh
+#SBATCH --array=400,500,600
+#SBATCH --mem=400G
 
 ##### #SBATCH --array=300,400,500,600     200,400 250G  500,600 380G
 ################ sample is not need with oob_score=False
-#### for obs_leaf in 10 15 20 25 30  ; do for obs_split in 10 15 20 25 30  ; do for sample in 0.9  ; do sbatch --export=obs_leaf=$obs_leaf,obs_split=$obs_split,sample=$sample /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/sc31_modeling_pythonALL_RFrunMainRespRenkOptim_split_IDraster_testSpars_RFunID_OOB_all_multicoreE3_noOOB_E.sh ; done; done ; done 
+#### for obs_leaf in 10 15 20 25 30  ; do for obs_split in 10 15 20 25 30  ; do for sample in 0.9  ; do sbatch --export=obs_leaf=$obs_leaf,obs_split=$obs_split,sample=$sample /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/sc31_modeling_pythonALL_RFrunMainRespRenkOptim_split_IDraster_testSpars_RFunID_OOB_all_multicoreE3_noOOB_E_SnapCor.sh ; done; done ; done 
 
 #### for obs_leaf in 2 4 5 8 10 12   ; do for obs_split in 2 4 5 8 10 12 ; do for sample in  0.3 0.4 0.5 0.6 0.7 ; do sbatch --export=obs_leaf=$obs_leaf,obs_split=$obs_split,sample=$sample --dependency=afterany:$(squeue -u $USER -o "%.9F %.80j" | grep sc30_modeling_pythonALL_RFrunMainRespRenk.sh | awk '{ printf ("%i:" , $1)} END {gsub(":","") ; print $1 }' ) /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/sc31_modeling_pythonALL_RFrunMainRespRenkOptim_split_IDraster_testSpars_RFunID_OOB_all_multicoreE.sh  ; done  ; done ; done 
 EXTRACT=/gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/extract4py
@@ -135,19 +135,19 @@ dtypes_Y = {
 }
 
 
-importance = pd.read_csv('../extract4py_sample/importance_sampleAll.txt', header=None, sep=' ', engine='c', low_memory=False)
+importance = pd.read_csv('./stationID_x_y_valueALL_predictors_XimportanceN400_25obs_snapCor1RF.txt', header=None, sep=' ', engine='c',low_memory=False, usecols=[0])
 # Extract the second column (index 1) for the first 30 rows
 
-include_variables = importance.iloc[:30, 1].tolist()
+include_variables = importance.iloc[:40, 0].tolist()
 # Additional columns to add
 additional_columns = ['ID', 'IDraster', 'YYYY', 'MM', 'lon', 'lat', 'Xcoord', 'Ycoord']
 
 # Combine the lists
 include_variables.extend(additional_columns)
 
-# Read CSV with correct data types
-Y = pd.read_csv(rf'stationID_x_y_valueALL_predictors_Y.txt', header=0, sep=' ', dtype=dtypes_Y, engine='c', low_memory=False)
-X = pd.read_csv(rf'stationID_x_y_valueALL_predictors_X.txt', header=0, sep=' ', usecols=lambda col: col in include_variables, dtype=dtypes_X, engine='c', low_memory=False )
+# Read CSV with correct data types 
+Y = pd.read_csv(rf'stationID_x_y_valueALL_predictors_YsnapCor.txt', header=0, sep=' ', dtype=dtypes_Y, engine='c', low_memory=False)
+X = pd.read_csv(rf'stationID_x_y_valueALL_predictors_XsnapCor.txt', header=0, sep=' ', usecols=lambda col: col in include_variables, dtype=dtypes_X, engine='c', low_memory=False )
 
 stations = pd.read_csv('/gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/snapFlow_txt/IDstation_lon_lat_IDraster_Xcoord_Ycoord.txt', sep=' ', usecols=['IDraster', 'Xcoord', 'Ycoord']).drop_duplicates()
 
@@ -176,16 +176,11 @@ print(Y_train.shape)
 print(X_test.shape)
 print(Y_test.shape)
 
-fmt='%i %f %f %i %f %f %i %i %f %f %f %f %f %f %f %f %f %f %f'
-
-np.savetxt(rf'./stationID_x_y_valueALL_predictors_YTrainN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', Y_train,  delimiter=' ', fmt=fmt, header='ID YYYY MM lon lat QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='')
-np.savetxt(rf'./stationID_x_y_valueALL_predictors_YTestN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt' , Y_test ,  delimiter=' ', fmt=fmt, header='ID YYYY MM lon lat QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='')
-
 fmt='%i %f %f %i %f %f %i %i %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f'      
 X_column_names = np.array(X.columns)
 X_column_names_str = ' '.join(X_column_names)
-# np.savetxt(rf'./stationID_x_y_valueALL_predictors_XTrainN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', X_train, delimiter=' ', fmt=fmt, header=X_column_names_str, comments='')
-# np.savetxt(rf'./stationID_x_y_valueALL_predictors_XTestN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RFE.txt' , X_test , delimiter=' ', fmt=fmt, header=X_column_names_str, comments='')
+# np.savetxt(rf'./stationID_x_y_valueALL_predictors_XTrainN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RFsnapCor.txt', X_train, delimiter=' ', fmt=fmt, header=X_column_names_str, comments='')
+# np.savetxt(rf'./stationID_x_y_valueALL_predictors_XTestN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RFEsnapCor.txt' , X_test , delimiter=' ', fmt=fmt, header=X_column_names_str, comments='')
 
 #### the X_train and so on are sorted as the input
 X_train_index = X_train.index.to_numpy()
@@ -199,6 +194,10 @@ X_test = X_test.sort_values(by='IDraster').reset_index(drop=True)
 
 Y_test_index = Y_test.index.to_numpy()
 Y_test = Y_test.sort_values(by='IDraster').reset_index(drop=True)
+
+fmt='%i %f %f %i %f %f %i %i %f %f %f %f %f %f %f %f %f %f %f'
+np.savetxt(rf'./stationID_x_y_valueALL_predictors_YTrainN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RFsnapCor.txt', Y_train,  delimiter=' ', fmt=fmt, header='ID YYYY MM lon lat QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='')
+np.savetxt(rf'./stationID_x_y_valueALL_predictors_YTestN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RFsnapCor.txt' , Y_test ,  delimiter=' ', fmt=fmt, header='ID YYYY MM lon lat QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='')
 
 ### contain only IDraster + variables and _np are not sorted 
 X_train_np = X_train.drop(columns=['ID', 'lon', 'lat', 'Xcoord', 'Ycoord', 'YYYY', 'MM']).to_numpy()  
@@ -274,6 +273,10 @@ RFreg.fit(X_train_np, Y_train_np)
 Y_train_pred_nosort = RFreg.predict(X_train_np)
 Y_test_pred_nosort = RFreg.predict(X_test_np)
 
+### save Y testing and training 
+
+
+
 #  Calculate error matrix 
 
 # Compute Kling-Gupta Efficiency (KGE).
@@ -347,7 +350,7 @@ N_EST_a = np.array(N_EST_I).reshape(1, -1)
 initial_array = np.array([[N_EST_a[0, 0], sample_a[0, 0], obs_split_a[0, 0], obs_leaf_a[0, 0]]])
 
 # Concatenate train and test metrics for r, rho, mae, and kge
-merge_r = np.concatenate((initial_array, train_r_all, test_r_all, train_r_coll, test_r_coll), axis=1)
+merge_r   = np.concatenate((initial_array, train_r_all  , test_r_all  , train_r_coll  , test_r_coll  ), axis=1)
 merge_rho = np.concatenate((initial_array, train_rho_all, test_rho_all, train_rho_coll, test_rho_coll), axis=1)
 merge_mae = np.concatenate((initial_array, train_mae_all, test_mae_all, train_mae_coll, test_mae_coll), axis=1)
 merge_kge = np.concatenate((initial_array, train_kge_all, test_kge_all, train_kge_coll, test_kge_coll), axis=1)
@@ -356,10 +359,10 @@ merge_kge = np.concatenate((initial_array, train_kge_all, test_kge_all, train_kg
 fmt = ' '.join(['%i'] + ['%.2f'] + ['%i'] + ['%i'] + ['%.2f'] * (merge_r.shape[1] - 4))
 
 # Save the results to separate files
-np.savetxt(rf'./stationID_x_y_valueALL_predictors_YscorerN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RFco.txt', merge_r, delimiter=' ', fmt=fmt)
-np.savetxt(rf'./stationID_x_y_valueALL_predictors_YscorerhoN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RFco.txt', merge_rho, delimiter=' ', fmt=fmt)
-np.savetxt(rf'./stationID_x_y_valueALL_predictors_YscoremaeN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RFco.txt', merge_mae, delimiter=' ', fmt=fmt)
-np.savetxt(rf'./stationID_x_y_valueALL_predictors_YscorekgeN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RFco.txt', merge_kge, delimiter=' ', fmt=fmt)
+np.savetxt(rf'./stationID_x_y_valueALL_predictors_YscorerN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RFsnapCor.txt', merge_r, delimiter=' ', fmt=fmt)
+np.savetxt(rf'./stationID_x_y_valueALL_predictors_YscorerhoN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RFsnapCor.txt', merge_rho, delimiter=' ', fmt=fmt)
+np.savetxt(rf'./stationID_x_y_valueALL_predictors_YscoremaeN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RFsnapCor.txt', merge_mae, delimiter=' ', fmt=fmt)
+np.savetxt(rf'./stationID_x_y_valueALL_predictors_YscorekgeN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RFsnapCor.txt', merge_kge, delimiter=' ', fmt=fmt)
 
 ## Get feature importances and sort them in descending order     
 
@@ -367,7 +370,7 @@ importance = pd.Series(RFreg.feature_importances_, index=X_column_names[8:])
 importance.sort_values(ascending=False, inplace=True)
 print(importance)
 
-importance.to_csv(rf'./stationID_x_y_valueALL_predictors_XimportanceN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RFE.txt', index=True, sep=' ', header=False)
+importance.to_csv(rf'./stationID_x_y_valueALL_predictors_XimportanceN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RFsnapCor.txt', index=True, sep=' ', header=False)
 
 # Create Pandas DataFrames with the appropriate indices
 Y_train_pred_indexed = pd.DataFrame(Y_train_pred_nosort, index=X_train_index[:Y_train_pred_nosort.shape[0]])
@@ -386,8 +389,8 @@ gc.collect()
 
 #### save prediction
 fmt = '%.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f'
-np.savetxt(rf'./stationID_x_y_valueALL_predictors_YpredictTrainN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RFE.txt', Y_train_pred_sort, delimiter=' ', fmt=fmt, header='QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='')
-np.savetxt(rf'./stationID_x_y_valueALL_predictors_YpredictTestN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RFE.txt', Y_test_pred_sort , delimiter=' ', fmt=fmt, header='QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='')
+np.savetxt(rf'./stationID_x_y_valueALL_predictors_YpredictTrainN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RFsnapCor.txt', Y_train_pred_sort, delimiter=' ', fmt=fmt, header='QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='')
+np.savetxt(rf'./stationID_x_y_valueALL_predictors_YpredictTestN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RFsnapCor.txt', Y_test_pred_sort , delimiter=' ', fmt=fmt, header='QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='')
 
 EOF
 " ## close the sif

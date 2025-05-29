@@ -27,7 +27,7 @@ import numpy as np
 input_file = 'stationID_x_y_valueALL_predictors.txt'
 
 # Output file prefix
-output_prefix = 'stationID_x_y_valueALL_predictors_samp'
+output_prefix = 'stationID_x_y_valueALL_predictors2_samp'
 
 # Number of folds
 num_folds = 5
@@ -44,7 +44,7 @@ for i, (name, group) in enumerate(groups):
 
 # Write each fold to a separate file
 for i, fold in enumerate(folds):
-    fold.to_csv(f'{output_prefix}{i}.txt', sep='\s+', index=False , header=True)
+    fold.to_csv(f'/gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/extract4py_sample/{output_prefix}{i}.txt', sep='\s+', index=False , header=True)
 
 EOF
 
@@ -55,10 +55,10 @@ EXTRACT=/gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/extract4py_sample
 
 for samp in 0 1 2 3 4 ; do
 echo samp $samp 
-head -1 $EXTRACT/stationID_x_y_valueALL_predictors_sampM$samp.txt | cut -d " " -f1-19     > $EXTRACT/stationID_x_y_valueALL_predictors_sampM${samp}_Ys.txt
-awk '{ if (NR>1) print}' $EXTRACT/stationID_x_y_valueALL_predictors_sampM$samp.txt | cut -d " " -f1-19 | sort -n -k 4,4  >>  $EXTRACT/stationID_x_y_valueALL_predictors_sampM${samp}_Ys.txt 
+head -1 $EXTRACT/stationID_x_y_valueALL_predictors2_sampM$samp.txt | cut -d " " -f1-19     > $EXTRACT/stationID_x_y_valueALL_predictors2_sampM${samp}_Ys.txt
+awk '{ if (NR>1) print}' $EXTRACT/stationID_x_y_valueALL_predictors2_sampM$samp.txt | cut -d " " -f1-19 | sort -n -k 4,4 >> $EXTRACT/stationID_x_y_valueALL_predictors2_sampM${samp}_Ys.txt 
 
-head -1 $EXTRACT/stationID_x_y_valueALL_predictors_sampM$samp.txt | cut -d " " -f1-8,20-  >   $EXTRACT/stationID_x_y_valueALL_predictors_sampM${samp}_Xs.txt
-awk '{ if (NR>1) print}' $EXTRACT/stationID_x_y_valueALL_predictors_sampM$samp.txt | cut -d " " -f1-8,20- | sort -n -k 4,4 >>   $EXTRACT/stationID_x_y_valueALL_predictors_sampM${samp}_Xs.txt 
+head -1 $EXTRACT/stationID_x_y_valueALL_predictors2_sampM$samp.txt | cut -d " " -f1-8,20- > $EXTRACT/stationID_x_y_valueALL_predictors2_sampM${samp}_Xs.txt
+awk '{ if (NR>1) print}' $EXTRACT/stationID_x_y_valueALL_predictors2_sampM$samp.txt | cut -d " " -f1-8,20- | sort -n -k 4,4 >> $EXTRACT/stationID_x_y_valueALL_predictors2_sampM${samp}_Xs.txt 
 done 
 

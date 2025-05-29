@@ -48,6 +48,22 @@ done
 rm -f $IN/snapFlow_shp/x_y_snapFlowFinal_stream_IDru_flow_all.gpkg
 pkascii2ogr -f "GPKG" -x 0 -y 1 -n "IDstation"  -ot "Integer"  -n "IDstream" -ot "Integer" -n "IDraster" -ot "Integer" -n "Flow" -ot "Real" -i $IN/snapFlow_txt/x_y_snapFlowFinal_stream_IDru_flow_all.txt -o $IN/snapFlow_shp/x_y_snapFlowFinal_stream_IDru_flow_all.gpkg
 
+
+
+### join with the original data to be able to get area data. 
+join -1 1 -2 1 <( sort -k 1,1 quantiles/ID_x_y.txt ) <( awk '{print $3 , $1 , $2}' snapFlow_txt/x_y_snapFlowFinal_stream_IDru_flow_all.txt |  sort -k 1,1 )  | sort -k 1,1 -g    > snapFlow_txt/ID_lonOrig_latOrig_lonSnap_latSnap.txt
+
+
+import pandas as pd
+df = pd.read_csv('station_catalogue.csv', low_memory=False)
+df['area'] = df['area'].fillna(-9999)
+df['altitude'] = df['altitude'].fillna(-9999)
+selected_columns = df[['longitude', 'latitude', 'area', 'altitude']]
+selected_columns.to_csv('station_catalogue_lon_lat_area_alt.txt', index=False, header=True, sep=' ')
+
+join  -1 1 -2 1   <(awk '{if($3>0)  printf "%.3f_%.3f %i\n", $1, $2 ,$3}' station_catalogue_lon_lat_area_alt.txt | sort -k 1,1  )   <(awk '{  printf "%.3f_%.3f %i %s %s\n",  $2 , $3, $1 , $4 ,$5    }' ID_lonOrig_latOrig_lonSnap_latSnap.txt | sort -k 1,1   )  | awk '{gsub("_"," ") ; print $4 ,  $1 , $2,$5,$6,$3}' > ID_lonOrig_latOrig_lonSnap_latSnap_area.txt
+
+
 # Equidistant Cylindrical Projection (Equirectangular Projection)
 # Description: In this projection, distances are preserved along meridians and parallels. The projection is created by mapping latitudes and longitudes onto a regular grid, and it's useful for mapping regions close to the equator. However, distortion increases as you move away from the equator.
 # Common Uses: World maps, thematic maps.

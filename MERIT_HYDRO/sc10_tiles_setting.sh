@@ -51,3 +51,12 @@ gdaltindex  $SCMH/tiles_comp/tiles_comp_shp.shp $SCMH/tiles_comp/tile_??_ID*.tif
 
 
 
+###### continental mask 
+gdalbuildvrt SA_msk.ovr  SA??_msk.tif   SA?_msk.tif 
+gdal_translate  -co COMPRESS=DEFLATE -co ZLEVEL=9 SA_msk.ovr SA_msk.tif 
+
+gdalbuildvrt NA_msk.ovr  NA??_msk.tif   NA?_msk.tif 
+gdal_translate  -co COMPRESS=DEFLATE -co ZLEVEL=9 NA_msk.ovr NA_msk.tif 
+
+gdalbuildvrt AF_msk.ovr  AF??_msk.tif   AF?_msk.tif 
+gdal_translate  -co COMPREFF=DEFLATE -co ZLEVEL=9 AF_msk.ovr AF_msk.tif 

@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -p day
 #SBATCH -n 1 -c 1 -N 1
-#SBATCH -t 14:00:00    
+#SBATCH -t 24:00:00    
 #SBATCH -o /vast/palmer/scratch/sbsc/ga254/stdout/sc20_extract_grace.sh.%A_%a.out
 #SBATCH -e /vast/palmer/scratch/sbsc/ga254/stderr/sc20_extract_grace.sh.%A_%a.err
 #SBATCH --job-name=sc20_extract_grace.sh
@@ -9,7 +9,7 @@
 #SBATCH --array=4-744
 
 ####  200 array for the  1974 08
-#### sbatch  /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/sc20_extract_grace.sh
+#### sbatch  /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/sc20_extract_grace_morevar.sh
 #### --array=4-744       ### 744 line last date  2019 12 
 #### 1825:1958-01-31    
 #### 2532:2016-12-31
@@ -190,13 +190,13 @@ time paste -d " " \
 echo gdallocationinfo x  hydrography 17  col
 
 touch $RAM/predictors_values_x_${DA_TE}.txt 
-time for vrt in $( ls $HYDRO/hydrography90m_v.1.0/*/*/*.vrt | grep -v -e basin.vrt -e depression.vrt -e direction.vrt -e outlet.vrt -e regional_unit.vrt -e segment.vrt -e sub_catchment.vrt -e order_vect.vrt   -e channel -e order  -e accumulation.vrt  -e cti.vrt -e spi.vrt -e sti.vrt -e stream_diff_dw_near -e stream_dist_proximity -e stream_dist_dw_near   )  ; do 
+time for vrt in $( ls $HYDRO/hydrography90m_v.1.0/*/*/*.vrt | grep -v -e basin.vrt -e depression.vrt -e direction.vrt -e outlet.vrt -e regional_unit.vrt -e segment.vrt -e sub_catchment.vrt -e order_vect.vrt     -e accumulation.vrt  -e cti.vrt -e spi.vrt -e sti.vrt -e stream_diff_dw_near -e stream_dist_proximity -e stream_dist_dw_near   )  ; do 
 gdallocationinfo -valonly -geoloc $vrt   < $RAM/x_y_${DA_TE}.txt > $RAM/predictors_values_xx_${DA_TE}.txt  
 paste -d " "  $RAM/predictors_values_x_${DA_TE}.txt  $RAM/predictors_values_xx_${DA_TE}.txt > $RAM/predictors_values_xxx_${DA_TE}.txt   
 mv $RAM/predictors_values_xxx_${DA_TE}.txt  $RAM/predictors_values_x_${DA_TE}.txt   
 done 
 
-for file in $( ls $HYDRO/hydrography90m_v.1.0/*/*/*.vrt | grep -v -e basin.vrt -e depression.vrt -e direction.vrt -e outlet.vrt -e regional_unit.vrt -e segment.vrt -e sub_catchment.vrt -e order_vect.vrt -e channel -e order -e accumulation.vrt  -e cti.vrt -e spi.vrt -e sti.vrt -e stream_diff_dw_near -e stream_dist_proximity -e stream_dist_dw_near  )  ; do  
+for file in $( ls $HYDRO/hydrography90m_v.1.0/*/*/*.vrt | grep -v -e basin.vrt -e depression.vrt -e direction.vrt -e outlet.vrt -e regional_unit.vrt -e segment.vrt -e sub_catchment.vrt -e order_vect.vrt  -e accumulation.vrt  -e cti.vrt -e spi.vrt -e sti.vrt -e stream_diff_dw_near -e stream_dist_proximity -e stream_dist_dw_near  )  ; do  
 echo -n $(basename $file .vrt)" "  
 done > $RAM/predictors_values_l_${DA_TE}.txt 
 echo "" >> $RAM/predictors_values_l_${DA_TE}.txt 
@@ -259,7 +259,7 @@ head -1 $EXTRACT/stationID_x_y_value_predictors_1958_04.txt   > $EXTRACT/station
 ### -9999999  soil  layers
 ### -2147483648       ###  65535 there value for this but prob is 
 ### remove space in the midle ## remove space in the end  
-grep -h -v -e ID -e "\-2147483648 " -e "\-9999999 " -e "72300000.000" -e "61202000.000" $EXTRACT/stationID_x_y_value_predictors_????_??.txt | awk '{ if (NF==92) print }' | sed  's/  / /g'  | sed 's/ *$//'   >>  $EXTRACT/stationID_x_y_valueALL_predictors.txt
+grep -h -v -e ID -e "\-2147483648 " -e "\-9999999 " -e "72300000.000" -e "61202000.000" $EXTRACT/stationID_x_y_value_predictors_????_??.txt | awk '{ if (NF==105) print }' | sed  's/  / /g'  | sed 's/ *$//'   >>  $EXTRACT/stationID_x_y_valueALL_predictors.txt
 fi 
 
 
