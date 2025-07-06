@@ -43,10 +43,12 @@ MERIT=/gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT
 
 if [ $SLURM_ARRAY_TASK_ID = 4  ] ; then
 
-awk '{if(NR>1) print}' $GSI_TS/snapFlow_txt/IDstation_lon_lat_IDraster_Xcoord_Ycoord.txt > $GSI_TS/snapFlow_txt/IDstation_lon_lat_IDraster_Xcoord_Ycoord_2.txt
-awk '{if(NR>1) print}' $GSI_TS/headerFlow_txt/IDstation_lon_lat_IDraster_Xcoord_Ycoord.txt >> $GSI_TS/snapFlow_txt/IDstation_lon_lat_IDraster_Xcoord_Ycoord_2.txt
+awk '{if(NR>1) print}' $GSI_TS/snapFlow_txt/IDs_xsnap_ysnap_IDr_xcoord_ycoord.txt > $GSI_TS/snapFlow_txt/IDstation_lon_lat_IDraster_Xcoord_Ycoord_2.txt
+awk '{if(NR>1 && NR<100 ) print}' $GSI_TS/headerFlow_txt/IDstation_lon_lat_IDraster_Xcoord_Ycoord.txt >> $GSI_TS/snapFlow_txt/IDstation_lon_lat_IDraster_Xcoord_Ycoord_2.txt
 echo 999999 -99.999371 39.999434 999999 -11131879.06 4452716.62    >> $GSI_TS/snapFlow_txt/IDstation_lon_lat_IDraster_Xcoord_Ycoord_2.txt
 sort -k 1,1 $GSI_TS/snapFlow_txt/IDstation_lon_lat_IDraster_Xcoord_Ycoord_2.txt > $GSI_TS/snapFlow_txt/IDstation_lon_lat_IDraster_Xcoord_Ycoord_2s.txt
+echo "IDs Xsnap Ysnap IDr Xcoord Ycoord" > $GSI_TS/snapFlow_txt/IDstation_lon_lat_IDraster_Xcoord_Ycoord_2sH.txt
+sort -k 4,4 -g $GSI_TS/snapFlow_txt/IDstation_lon_lat_IDraster_Xcoord_Ycoord_2s.txt >> $GSI_TS/snapFlow_txt/IDstation_lon_lat_IDraster_Xcoord_Ycoord_2sH.txt 
 else 
 sleep 60
 fi
@@ -81,7 +83,7 @@ grep " ${YYYY} ${MM} " $EXTRACT/../quantiles_swap/ID_lonlat_date_Qquantiles.txt 
 
 cp $EXTRACT/stationID_value_${DA_TE}.txt $RAM/
 
-echo "ID lon lat IDraster Xcoord Ycoord YYYY MM QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX" > $RAM/stationID_x_y_value_${DA_TE}.txt
+echo "IDs Xsnap Ysnap IDr Xcoord Ycoord YYYY MM QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX" > $RAM/stationID_x_y_value_${DA_TE}.txt
 join -1 1 -2 1 <(sort -k 1,1 $GSI_TS/snapFlow_txt/IDstation_lon_lat_IDraster_Xcoord_Ycoord_2s.txt) <(sort -k 1,1 $RAM/stationID_value_${DA_TE}.txt) | awk -v MM=$MM -v YYYY=$YYYY '{print $1,$2,$3,$4,$5,$6,YYYY,MM,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17}'  >> $RAM/stationID_x_y_value_${DA_TE}.txt
 
 awk -v MM=$MM -v YYYY=$YYYY '{if($1>900000) print $1,$2,$3,$4,$5,$6,YYYY,MM,0,0,0,0,0,0,0,0,0,0,0}' $GSI_TS/snapFlow_txt/IDstation_lon_lat_IDraster_Xcoord_Ycoord_2s.txt   >> $RAM/stationID_x_y_value_${DA_TE}.txt  
@@ -206,13 +208,13 @@ rm   $RAM/predictors_values_xx_${DA_TE}.txt      $RAM/predictors_values_x_${DA_T
 
 ###### positive accumulation. 
 echo "accumulation"   >   $RAM/predictors_values_t_${DA_TE}.txt
-gdallocationinfo -valonly -geoloc $HYDRO/flow_tiles/all_tif_pos_dis.vrt  < $RAM/x_y_${DA_TE}.txt >> $RAM/predictors_values_t_${DA_TE}.txt
+gdallocationinfo -valonly -geoloc $HYDRO/hydrography90m_v.1.0/r.watershed/accumulation_tiles20d/accumulation_sfd.tif  < $RAM/x_y_${DA_TE}.txt >> $RAM/predictors_values_t_${DA_TE}.txt
 
 echo "cti spi sti" >   $RAM/predictors_values_u_${DA_TE}.txt
 time paste -d " " \
-<( gdallocationinfo -valonly -geoloc $HYDRO/CompUnit_stream_indices_tiles20d/all_tif_cti2_dis.vrt      < $RAM/x_y_${DA_TE}.txt )   \
-<( gdallocationinfo -valonly -geoloc $HYDRO/CompUnit_stream_indices_tiles20d/all_tif_spi2_dis.vrt      < $RAM/x_y_${DA_TE}.txt )   \
-<( gdallocationinfo -valonly -geoloc $HYDRO/CompUnit_stream_indices_tiles20d/all_tif_sti2_dis.vrt      < $RAM/x_y_${DA_TE}.txt )    >> $RAM/predictors_values_u_${DA_TE}.txt
+<( gdallocationinfo -valonly -geoloc $HYDRO/CompUnit_stream_indices_tiles20d/all_tif_cti_sfd_dis.vrt      < $RAM/x_y_${DA_TE}.txt )   \
+<( gdallocationinfo -valonly -geoloc $HYDRO/CompUnit_stream_indices_tiles20d/all_tif_spi_sfd_dis.vrt      < $RAM/x_y_${DA_TE}.txt )   \
+<( gdallocationinfo -valonly -geoloc $HYDRO/CompUnit_stream_indices_tiles20d/all_tif_sti_sfd_dis.vrt      < $RAM/x_y_${DA_TE}.txt )    >> $RAM/predictors_values_u_${DA_TE}.txt
 
 ###### elevation 
 
@@ -247,7 +249,7 @@ paste -d " " $RAM/stationID_x_y_value_${DA_TE}.txt $RAM/predictors_values_?_${DA
 
 rm -f $RAM/*_${DA_TE}.txt
 
-exit 
+
 
 if [ $SLURM_ARRAY_TASK_ID -eq $SLURM_ARRAY_TASK_MAX  ] ; then 
 cd $EXTRACT/ 

@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -p day
 #SBATCH -n 1 -c 1 -N 1
-#SBATCH -t 24:00:00  
+#SBATCH -t 4:00:00  
 #SBATCH -o /vast/palmer/scratch/sbsc/ga254/stdout/sc11_snapingByTiles.sh.%A_%a.out
 #SBATCH -e /vast/palmer/scratch/sbsc/ga254/stderr/sc11_snapingByTiles.sh.%A_%a.err
 #SBATCH --job-name=sc11_snapingByTiles.sh
@@ -43,7 +43,7 @@ find  /dev/shm/   -user $USER  -mtime +2  2>/dev/null  | xargs -n 1 -P 2 rm -ifr
 # Lower Right ( 180.0000000, -60.0000000) (180d 0' 0.00"E, 60d 0' 0.00"S)
 
 ## SLURM_ARRAY_TASK_ID=112  ##### array  112    ID 96  small area for testing 
-## SLURM_ARRAY_TASK_ID=20
+## SLURM_ARRAY_TASK_ID=116
 
 export file=$(ls $MH/CompUnit_stream_uniq_tiles20d/stream_h??v??.tif  | head -$SLURM_ARRAY_TASK_ID | tail -1 )      ## select the tile file 
 export filename=$(basename $file .tif  )
@@ -79,22 +79,24 @@ gdal_translate -projwin $(getCorners4Gtranslate $file | awk '{ print $1 - 0.2, $
 module load GRASS/8.2.0-foss-2022b  2> /dev/null 
 
 
-# rm -fr $RAM/location
-# grass  -f --text $RAM/location  -c  $RAM/stream_${TILE}_msk.tif  <<'EOF'
+### rm -fr $RAM/location
+### grass  -f --text $RAM/location  -c  $RAM/stream_${TILE}_msk.tif  <<'EOF'
+
+rm -f $INP/IDs_x_y_area_NOarea10_xsnap_ysnap_areasfd_CodeSnap_$TILE.txt
 
 grass  -f --text --tmp-location  $RAM/stream_${TILE}_msk.tif  <<'EOF'
 for var in flow stream ; do 
 r.external  input=$RAM/${var}_${TILE}_msk.tif     output=$var   --overwrite  # import the files  (mask) 
 done
 
-for n in $(seq 1 $(wc -l  $RAM/IDs_x_y_area_NOarea10_warea_$TILE.txt   | cut -d ' ' -f 1)) ; do 
-###for n in $(seq 1 4 ) ; do
+###for n in 18 ; do
+for n in $(seq 1 $(wc -l $RAM/IDs_x_y_area_NOarea10_warea_$TILE.txt  | cut -d ' ' -f 1)) ; do 
 
 head -n $n $RAM/IDs_x_y_area_NOarea10_warea_$TILE.txt | tail -1   > $RAM/IDs_x_y_area_NOarea10_warea_${TILE}_n$n.txt 
 read IDs x y area <<< $( cat $RAM/IDs_x_y_area_NOarea10_warea_${TILE}_n$n.txt )
 
 # echo region n=$(echo  $y + 0.1 | bc  )  s=$(echo $y - 0.1 | bc )  e=$(echo $x + 0.1 | bc )  w=$(echo $x - 0.1 | bc )
-g.region n=$(echo  $y + 0.1 | bc  )  s=$(echo $y - 0.1 | bc )  e=$(echo $x + 0.1 | bc )  w=$(echo $x - 0.1 | bc )  --overwrite --quiet  
+g.region n=$(echo  $y + 0.1 | bc)  s=$(echo $y - 0.1 | bc)  e=$(echo $x + 0.1 | bc)  w=$(echo $x - 0.1 | bc)  --overwrite --quiet  
 v.in.ascii in=$RAM/IDs_x_y_area_NOarea10_warea_${TILE}_n$n.txt out=x_y_orig$n  separator=space columns="Station integer, Lon double precision, Lat double precision, Area double precision" x=2 y=3 skip=0 --overwrite  --quiet 
 
 # Vector file containing outlets or inits after snapping. On layer 1, the original categories are preserved, on layer 2 there are four categories which mean:
@@ -106,30 +108,46 @@ v.in.ascii in=$RAM/IDs_x_y_area_NOarea10_warea_${TILE}_n$n.txt out=x_y_orig$n  s
 # 1413563215 1702127980 -145245235 there are few points that report a strange code number 
 # in case of adding the flow the snapping code 0 need to be read as 4
 
-r.stream.snap accumulation=flow threshold=$(echo "$area  - ($area * 0.1 )" | bc) input=x_y_orig$n output=x_y_snap$n stream_rast=stream radius=30 --overwrite memory=1000  --quiet     # snapping
+r.stream.snap accumulation=flow threshold=$(echo "$area - ($area * 0.1 )" | bc) input=x_y_orig$n output=x_y_snap$n stream_rast=stream radius=30 --overwrite memory=1000  --quiet     # snapping        
 
-########### 1235 point return code 2; with the if below   point return code 2
+########### 1235 point return code 2; with the if below 546  point return code 2
+
+qc=$(v.category input=x_y_snap$n layer=2 type=point option=print)
+
+counter=0
+while [ $qc -eq 2 ] && [ $counter -lt 10 ] ; do
+### add random values to the cordinates that have not be snaped code=2 , 
+echo add random number smaller then the pixel resolution counter $counter       
+awk -v min=-0.001 -v max=+0.001 '{ srand(); print $1 , $2+( min+rand()*(max-min)), $3+( min+rand()*(max-min)), $4 }'  $RAM/IDs_x_y_area_NOarea10_warea_${TILE}_n$n.txt > $RAM/IDs_x_y_area_NOarea10_warea_${TILE}_n${n}_tmp.txt
+v.in.ascii in=$RAM/IDs_x_y_area_NOarea10_warea_${TILE}_n${n}_tmp.txt out=x_y_orig$n  separator=space columns="Station integer, Lon double precision, Lat double precision, Area double precision" x=2 y=3 skip=0 --overwrite  --quiet
+rm -f $RAM/IDs_x_y_area_NOarea10_warea_${TILE}_n${n}_tmp.txt  
+r.stream.snap accumulation=flow threshold=$(echo "$area - ($area * 0.1)" | bc) input=x_y_orig$n output=x_y_snap$n stream_rast=stream radius=30 --overwrite memory=1000  --quiet     # snapping                                 
+qc=$(v.category input=x_y_snap$n layer=2 type=point option=print)
+counter=$((counter + 1))
+done
+
 qc=$(v.category input=x_y_snap$n layer=2 type=point option=print)
 if [ $qc -eq 2 ] ; then
-# increase the radius 
+echo  increase the radius to 50 
 r.stream.snap accumulation=flow threshold=$(echo "$area - ($area * 0.1)" | bc) input=x_y_orig$n output=x_y_snap$n stream_rast=stream radius=50 --overwrite memory=1000  --quiet     # snapping
-# increase the radius and also reduce the flow accumulation treshold 
+fi 
+ 
 qc=$(v.category input=x_y_snap$n layer=2 type=point option=print)
 if [ $qc -eq 2 ] ; then
+echo increase the radius to 50 and also reduce of 20% the flow accumulation treshold  
 r.stream.snap accumulation=flow threshold=$(echo "$area - ($area * 0.2)" | bc) input=x_y_orig$n output=x_y_snap$n stream_rast=stream radius=50 --overwrite memory=1000  --quiet     # snapping
 fi
-fi
 
-paste -d " " <(v.report map=x_y_orig$n option=coor layer=1 | awk -F "|" '{if(NR>1) print $2,$3,$4,$5 }')  \
-             <(v.report map=x_y_snap$n option=coor layer=1 | awk -F "|" '{if(NR>1) print $2,$3 }') \
+paste -d " " $RAM/IDs_x_y_area_NOarea10_warea_${TILE}_n${n}.txt   \
+   <(v.report map=x_y_snap$n option=coor layer=1 | awk -F "|" '{if(NR>1) print $2,$3 }') \
    <(r.what separator=" " map=flow coordinates=$(v.report map=x_y_snap$n option=coor layer=1 | awk -F "|" '{if(NR>1) print $2","$3}') | awk '{print $3}' ) \
-             <(v.category input=x_y_snap$n layer=2 type=point option=print)
+   <(v.category input=x_y_snap$n layer=2 type=point option=print)  >>  $INP/IDs_x_y_area_NOarea10_xsnap_ysnap_areasfd_CodeSnap_$TILE.txt 
 
 g.remove -f  type=vector name=x_y_snap${n},x_y_orig${n}
 rm -f $RAM/IDs_x_y_area_NOarea10_warea_${TILE}_n$n.txt
 
-done >  $INP/IDs_x_y_area_NOarea10_xsnap_ysnap_areasfd_CodeSnap_$TILE.txt 
- 
+done
+
 EOF
 
 else 
@@ -140,4 +158,24 @@ rm -rf $RAM/x_y_NOarea10_warea_$TILE.txt $RAM/IDs_x_y_area_NOarea10_warea_$TILE.
 
 exit
 
+cut -d " " -f 8  IDs_x_y_area_NOarea10_xsnap_ysnap_areasfd_CodeSnap_*.txt | sort | uniq -c
+   2878 0 correct
+    546 2 unresolved 
+  13401 3 snapped 
+  16279 0 & 3  
+
+# perfor point distance only for snapped points 
+awk '{ if ($8!=2)  print $2,$3,$5,$6  }'    $INP/IDs_x_y_area_NOarea10_xsnap_ysnap_areasfd_CodeSnap_*.txt  >  /tmp/cord.txt
+awk -f /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/haversine_distance.awk /tmp/cord.txt > /tmp/distance.txt
+paste -d " " <(awk '{ if ($8!=2)  print $1,$2,$3,$5,$6  }'    $INP/IDs_x_y_area_NOarea10_xsnap_ysnap_areasfd_CodeSnap_*.txt) /tmp/distance.txt > $INP/IDs_x_y_xsnap_ysnap_dist.txt 
+
+###### adding to the snapped also the one corretly locate 
+cut -d " " -f 1,4,5  $INP/IDs_x_y_xsnap_ysnap_dist.txt > $INP/IDs_xsnap_ysnap.txt
+cut -d " " -f 1,3,4  $IN/snapFlow_area/IDs_IDcu_x_y_area_alt_seg_acc_elev_area10.txt >> $INP/IDs_xsnap_ysnap.txt
  
+### wc -l $INP/IDs_xsnap_ysnap.txt  ; 19104  /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/snapFlow_area/IDs_xsnap_ysnap.txt
+
+join  -t ','   -1 1 -1 1 -v 2 <(sort -k 1,1 $INP/IDs_xsnap_ysnap.txt | awk '{ print $1 }' )  <(sort  -t','  -k 1,1   /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/stations_ai/station_catalogue_StaionInfo.csv  )    >  /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/stations_ai/station_catalogue_StaionInfo_4ai.csv
+
+#### echo 22160 + 19104  | bc  41264
+

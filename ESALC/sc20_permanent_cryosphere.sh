@@ -16,10 +16,9 @@ OUTPUT_DIR="/gpfs/gibbs/pi/hydro/hydro/dataproces/ESALC/LC220_snowper"
 #SCRATCH_DIR="/vast/palmer/scratch/sbsc/sm3665/dataproces/cryosphere_files"
 RAM_DIR="/dev/shm/dataproces"
 export GDAL_CACHEMAX=20000
-FILE_PATTERN="LC220_Y201?.tif"
-YEARS_N=$(ls $INPUT_DIR/$FILE_PATTERN | wc -l)
-YEAR_MIN=2000
-YEAR_MAX=2018
+FILE_PATTERN="LC220_Y????.tif"
+YEAR_MIN=$(basename -a $INPUT_DIR/$FILE_PATTERN | sed -n 's/.*Y\([0-9]\{4\}\).tif/\1/p' | sort -n | head -1)
+YEAR_MAX=$(basename -a $INPUT_DIR/$FILE_PATTERN | sed -n 's/.*Y\([0-9]\{4\}\).tif/\1/p' | sort -n | tail -1)
 
 ## Create scratch working dir if do not exists
 #[ -d "$SCRATCH_DIR" ] || mkdir -p "$SCRATCH_DIR"
@@ -28,27 +27,33 @@ YEAR_MAX=2018
 ## Stacking all yearly global raster (2000-2018)
 echo "Creating .vrt stack from $YEAR_MIN to $YEAR_MAX:"
 gdalbuildvrt -separate\
-	     $RAM_DIR/LC220_${YEAR_MIN}-${YEAR_MAX}_stack.vrt\
+	     $INPUT_DIR/LC220_${YEAR_MIN}-${YEAR_MAX}_stack.vrt\
 	     $INPUT_DIR/$FILE_PATTERN
 
 ## Pixel-wise analysis across all years (1 = snow/ice absent in each year)
 echo "Calculating global permanent cryosphere from ${YEAR_MIN} and ${YEAR_MAX}:"
-pkstatprofile -f sum\
-	      -i $RAM_DIR/LC220_${YEAR_MIN}-${YEAR_MAX}_stack.vrt\
+pkstatprofile -f min\
+	      -i $INPUT_DIR/LC220_${YEAR_MIN}-${YEAR_MAX}_stack.vrt\
 	      -o $RAM_DIR/LC220_${YEAR_MIN}-${YEAR_MAX}_permanent_cryo_tmp.tif
 
 echo "Masking out globally permanent cryosphere areas."
 pkgetmask -i $RAM_DIR/LC220_${YEAR_MIN}-${YEAR_MAX}_permanent_cryo_tmp.tif\
 	  -o $RAM_DIR/LC220_${YEAR_MIN}-${YEAR_MAX}_permanent_cryo_masked.tif\
-	  -min 0 -max $(($YEARS_N-1)) -data 1 -nodata 255\
-	  -co COMPRESS=DEFLATE -co ZLEVEL=9
+	  -max 0 -data 1 -nodata 0\
+	  -co COMPRESS=DEFLATE\
+	  -co ZLEVEL=9\
+	  -co BIGTIFF=YES
 	  
 ## Upscale from 300m to 90m (WGS84) resolution using nearest neighbor (for binary mask compatibility)
 echo "Upscaling mask from 300m to 90m resolution "
-gdal_translate -tr 0.00083333333333 0.00083333333333 -r near -ot Byte\
-	       -co COMPRESS=DEFLATE -co ZLEVEL=9\
+gdal_translate -tr 0.00083333333333 0.00083333333333\
+	       -r near\
+	       -ot Byte\
 	       $RAM_DIR/LC220_${YEAR_MIN}-${YEAR_MAX}_permanent_cryo_masked.tif\
-	       $OUTPUT_DIR/permanent_cryosphere_${YEAR_MIN}-${YEAR_MAX}_90m.tif
+	       $OUTPUT_DIR/permanent_cryosphere_${YEAR_MIN}-${YEAR_MAX}_90m.tif\
+	       -co COMPRESS=DEFLATE\
+               -co ZLEVEL=9\
+               -co BIGTIFF=YES
 
 ## Clean up all middle-files created in this job
 echo "Cleaning up tmp files:"

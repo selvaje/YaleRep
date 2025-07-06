@@ -43,15 +43,14 @@ From: pyjeo1.sif
     pip3 install wheel
 
     # add by selvaje
-    pip3 install scipy setuptools \
-             certifi six threadpoolctl python-dateutil pytz \
-             contourpy cycler kiwisolver \
-             pandas scikit-learn xarray \
-             fonttools joblib pillow pyparsing sip tomli tornado \
-             tzdata PyQt5 ply munkres pandas
-    pip3 install dill
-    pip3 install matplotlib 
-    pip3 install joblib
+#   pip3 install scipy setuptools \
+#              certifi six threadpoolctl python-dateutil pytz \
+#              contourpy cycler kiwisolver pandas  \
+#             fonttools joblib pillow pyparsing sip tomli tornado \
+#              tzdata ply munkres
+#    pip3 install dill
+#    pip3 install matplotlib 
+#    pip3 install joblib
     
     cd $INSTALL_HOME/jeolib-jiplib* \
     && rm -rf build \

@@ -5,22 +5,12 @@
 #SBATCH -o /vast/palmer/scratch/sbsc/ga254/stdout/sc30_modeling-pythonALL_RFrunMainRespRenk_RFunID_OOB_all.sh.%A_%a.out
 #SBATCH -e /vast/palmer/scratch/sbsc/ga254/stderr/sc30_modeling_pythonALL_RFrunMainRespRenk_RFunID_OOB_all.sh.%A_%a.err
 #SBATCH --job-name=sc30_modeling_pythonALL_RFrunMainRespRenk_RFunID_OOB_all.sh
-#SBATCH --array=500
-#SBATCH --mem=500G
+#SBATCH --array=400
+#SBATCH --mem=400G
 
 ##### #SBATCH --array=200,400,500,600
-#### for obs in 10 15 20 25 ; do for samp in 0 1 2 3 4 ;   do sbatch --export=obs=$obs,samp=$samp /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/sc30_modeling_pythonALL_RFrunMainRespRenk_RFunID_OOB_all_multicoreE_sampleImportance.sh ; done ; done 
+#### for obs in 15 20 25 30 ; do for samp in 0 1 2 ;   do sbatch --export=obs=$obs,samp=$samp /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/sc30_modeling_pythonALL_RFrunMainRespRenk_RFunID_OOB_all_multicoreE_sampleImportance.sh ; done ; done 
 #### 2 4 5 8 10 15 
-
-### full dataset 
-##  cut -d " " -f1-19       $EXTRACT/stationID_x_y_valueALL_predictors.txt  >   $EXTRACTpy/stationID_x_y_valueALL_predictors_Y.txt
-##  cut -d " " -f1-8,20-    $EXTRACT/stationID_x_y_valueALL_predictors.txt  >   $EXTRACTpy/stationID_x_y_valueALL_predictors_X.txt 
-
-## head -1 $EXTRACT/stationID_x_y_valueALL_predictors.txt > $EXTRACT/stationID_x_y_valueALL_predictorsSnapCor.txt     
-## join -1 1 -2 1 <( awk '{if( NR>1) print }' $EXTRACT/stationID_x_y_valueALL_predictors.txt | sort )  <(sort /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/snapFlow_area/ID_correct_snapping.txt ) >> $EXTRACT/stationID_x_y_valueALL_predictorsSnapCor.txt    
-
-##  cut -d " " -f1-19       $EXTRACT/stationID_x_y_valueALL_predictorsSnapCor.txt  >   $EXTRACTpy/stationID_x_y_valueALL_predictors_YsnapCor.txt
-##  cut -d " " -f1-8,20-    $EXTRACT/stationID_x_y_valueALL_predictorsSnapCor.txt  >   $EXTRACTpy/stationID_x_y_valueALL_predictors_XsnapCor.txt
 
 module load StdEnv
 EXTRACT=/gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/extract4py_sample
@@ -32,7 +22,7 @@ echo   "n_estimators"  $N_EST   "obs" $obs  "samp" $samp
 ~/bin/echoerr   n_estimators${N_EST}obs${obs}samp${samp}
 
 
-apptainer exec --env=PATH="/gpfs/gibbs/pi/hydro/hydro/scripts/APTAINER_SIF/pyjeovenv/bin:$PATH" \
+apptainer exec --env=PATH="/gpfs/gibbs/pi/hydro/hydro/scripts/APTAINER_SIF/pyjeo-stuff/pyjeovenv/bin:$PATH" \
  --env=obs=$obs,N_EST=$N_EST,samp=$samp /gpfs/gibbs/pi/hydro/hydro/scripts/APTAINER_SIF/pyjeo2.sif  bash -c "
 
 python3 <<'EOF'
@@ -68,8 +58,8 @@ print(samp_s)
 dtypes_X = {col: 'float32' for col in range(7, 80)}
 dtypes_Y = {col: 'float32' for col in range(7, 18)}
 
-X_train  = pd.read_csv(rf'stationID_x_y_valueALL_predictors2_sampM{samp_s}_Xs.txt', header=0, sep=' ', usecols=lambda column: column not in ['ID','YYYY','MM','lon','lat','Xcoord','Ycoord'], dtype=dtypes_X)
-Y_train  = pd.read_csv(rf'./stationID_x_y_valueALL_predictors2_sampM{samp_s}_Ys.txt', header=0, sep=' ', usecols=lambda column: column not in ['ID','YYYY','MM','lon','lat','Xcoord','Ycoord'], dtype=dtypes_Y)
+X_train  = pd.read_csv(rf'stationID_x_y_valueALL_predictors2_sampM{samp_s}_Xs.txt', header=0, sep=' ', usecols=lambda column: column not in ['IDs','YYYY','MM','Xsnap','Ysnap','Xcoord','Ycoord'], dtype=dtypes_X)
+Y_train  = pd.read_csv(rf'./stationID_x_y_valueALL_predictors2_sampM{samp_s}_Ys.txt', header=0, sep=' ', usecols=lambda column: column not in ['IDs','YYYY','MM','Xsnap','Ysnap','Xcoord','Ycoord'], dtype=dtypes_Y)
 print('Training and Testing data')
 print('################################')
 print(X_train.head(4))
@@ -81,9 +71,9 @@ print(Y_train.shape)
 
 ##  Maintain original row order
 print(type(X_train))  
-X_train = X_train.sort_values(by='IDraster').reset_index(drop=True)
+X_train = X_train.sort_values(by='IDr').reset_index(drop=True)
 print(type(Y_train))  
-Y_train = Y_train.sort_values(by='IDraster').reset_index(drop=True)
+Y_train = Y_train.sort_values(by='IDr').reset_index(drop=True)
 
 # Custom Decision Tree to enforce Group constraints
 class GroupAwareDecisionTree(DecisionTreeRegressor):
@@ -94,20 +84,20 @@ class GroupAwareDecisionTree(DecisionTreeRegressor):
 
 class BoundedGroupAwareRandomForest(RandomForestRegressor, RegressorMixin):
     def fit(self, X, Y):
-        self.oob_predictions = np.full(Y.drop(columns=['IDraster']).shape, fill_value=np.nan, dtype=np.float64)
-        unique_groups = np.unique(X['IDraster'])
+        self.oob_predictions = np.full(Y.drop(columns=['IDr']).shape, fill_value=np.nan, dtype=np.float64)
+        unique_groups = np.unique(X['IDr'])
         
         def train_tree(boot_groups):
-            train_mask = np.isin(X['IDraster'], boot_groups)
+            train_mask = np.isin(X['IDr'], boot_groups)
             oob_mask = ~train_mask
             
             tree = GroupAwareDecisionTree()
-            X_train_filtered = X.loc[train_mask].drop(columns=['IDraster']).values
-            Y_train_filtered = Y.loc[train_mask].drop(columns=['IDraster']).values
+            X_train_filtered = X.loc[train_mask].drop(columns=['IDr']).values
+            Y_train_filtered = Y.loc[train_mask].drop(columns=['IDr']).values
             tree.fit(X_train_filtered, Y_train_filtered)
             
             if np.any(oob_mask):
-                X_oob_filtered = X.loc[oob_mask].drop(columns=['IDraster']).values
+                X_oob_filtered = X.loc[oob_mask].drop(columns=['IDr']).values
                 self.oob_predictions[oob_mask, :] = tree.predict(X_oob_filtered)
             return tree
 
@@ -116,13 +106,13 @@ class BoundedGroupAwareRandomForest(RandomForestRegressor, RegressorMixin):
         ) for _ in range(self.n_estimators))
 
     def compute_oob_error(self, Y_true):
-        unique_idrasters = np.unique(Y_true['IDraster'])
+        unique_idrasters = np.unique(Y_true['IDr'])
         
         def compute_group_error(idraster):
-            mask = Y_true['IDraster'].values == idraster
+            mask = Y_true['IDr'].values == idraster
             if np.sum(mask) <= 5:
                 return [idraster] + [np.nan] * (Y_true.shape[1] - 1)
-            Y_true_filtered = Y_true.loc[mask].drop(columns=['IDraster']).values
+            Y_true_filtered = Y_true.loc[mask].drop(columns=['IDr']).values
             oob_pred_filtered = self.oob_predictions[mask, :]
             correlations = [pearsonr(Y_true_filtered[:, i].flatten(), oob_pred_filtered[:, i].flatten())[0] for i in range(Y_true_filtered.shape[1])]
             return [idraster] + correlations
@@ -133,7 +123,7 @@ class BoundedGroupAwareRandomForest(RandomForestRegressor, RegressorMixin):
         return oob_errors, overall_oob_error
 
     def predict(self, X):
-        X_filtered = X.drop(columns=['IDraster']).copy()
+        X_filtered = X.drop(columns=['IDr']).copy()
         y_pred = np.mean([tree.predict(X_filtered) for tree in self.estimators_], axis=0)
         return np.maximum(y_pred, 0)  # Ensure non-negative predictions
 
@@ -146,17 +136,17 @@ RFreg = BoundedGroupAwareRandomForest(random_state=24, n_estimators=N_EST_I, n_j
 
 RFreg.fit(X_train, Y_train)  # Train the model with ID constraints
 
-Y_train_pred =  np.column_stack([Y_train['IDraster'].values,   RFreg.predict(X_train)])   
-Y_train_predOOB = np.column_stack([Y_train['IDraster'].values, RFreg.oob_predictions])
+Y_train_pred =  np.column_stack([Y_train['IDr'].values,   RFreg.predict(X_train)])   
+Y_train_predOOB = np.column_stack([Y_train['IDr'].values, RFreg.oob_predictions])
 
 print('Y_train_pred')    ; print(type(Y_train_pred))    ; print(Y_train_pred.shape)    ; print(Y_train_pred[:4])     # <class 'numpy.ndarray'>  (60550, 12)
 print('Y_train_predOOB') ; print(type(Y_train_predOOB)) ; print(Y_train_predOOB.shape) ; print(Y_train_predOOB[:4])  # <class 'numpy.ndarray'>  (60550, 12)
 
 #### make prediction using the oob
-fmt = '%i %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f'
-savetxt(rf'./stationID_x_y_valueALL_predictors_YOOBpredictN{N_EST_S}_{obs_s}obs_{samp_s}samp.txt', Y_train_predOOB , delimiter=' ',  header='IDraster QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='' , fmt=fmt)
+# fmt = '%i %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f'
+# savetxt(rf'./stationID_x_y_valueALL_predictors_YOOBpredictN{N_EST_S}_{obs_s}obs_{samp_s}samp.txt', Y_train_predOOB , delimiter=' ',  header='IDr QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='' , fmt=fmt)
 
-savetxt(rf'./stationID_x_y_valueALL_predictors_YpredictN{N_EST_S}_{obs_s}obs_{samp_s}samp.txt', Y_train_pred , delimiter=' ', header='IDraster QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='' , fmt=fmt)
+# savetxt(rf'./stationID_x_y_valueALL_predictors_YpredictN{N_EST_S}_{obs_s}obs_{samp_s}samp.txt', Y_train_pred , delimiter=' ', header='IDr QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='' , fmt=fmt)
 
 n=np.array(N_EST_I)
 o=np.array(obs_i)
@@ -201,6 +191,8 @@ EOF
 
 exit
 
+EXTRACT=/gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/extract4py_sample
+cd $EXTRACT
 
 for file in   stationID_x_y_valueALL_predictors_XimportanceN*_*obs_?samp.txt  ; do
     awk '{ print NR, $1  }' $file

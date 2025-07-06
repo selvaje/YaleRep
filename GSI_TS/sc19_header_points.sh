@@ -31,8 +31,8 @@ pkascii2ogr -f "GPKG" -x 0 -y 1 -n "IDstation"  -ot "Integer" -i $IN/headerFlow_
 rm -f $IN/headerFlow_shp/IDstation_lon_lat_eqdist.gpkg 
 ogr2ogr -t_srs EPSG:32662 $IN/headerFlow_shp/IDstation_lon_lat_eqdist.gpkg $IN/headerFlow_shp/IDstation_lon_lat.gpkg 
 
-echo "IDstation Xcoord Ycoord" > $IN/headerFlow_txt/IDstation_Xcoord_Ycoord.txt
+echo "IDs Xcoord Ycoord" > $IN/headerFlow_txt/IDstation_Xcoord_Ycoord.txt
 paste -d " "  <(ogrinfo -al $IN/headerFlow_shp/IDstation_lon_lat_eqdist.gpkg | grep "IDstation (Integer)")  <(ogrinfo -al $IN/headerFlow_shp/IDstation_lon_lat_eqdist.gpkg | grep POINT )  | sed  's/)/ /g' | sed  's/(/ /g'  |  awk '{ print $4,$6,$7 }'  >> $IN/headerFlow_txt/IDstation_Xcoord_Ycoord.txt
 
-echo "IDstation lon lat IDraster Xcoord Ycoord" > $IN/headerFlow_txt/IDstation_lon_lat_IDraster_Xcoord_Ycoord.txt
+echo "IDs Xsnap Ysnap IDr Xcoord Ycoord" > $IN/headerFlow_txt/IDstation_lon_lat_IDraster_Xcoord_Ycoord.txt
 join -1 1 -2 1  <(sort  -k 1,1 $IN/headerFlow_txt/IDstation_lon_lat.txt  ) <( sort  -k 1,1 $IN/headerFlow_txt/IDstation_Xcoord_Ycoord.txt )  |  awk '{ print $1,$2,$3,$1,$4,$5}'   >> $IN/headerFlow_txt/IDstation_lon_lat_IDraster_Xcoord_Ycoord.txt

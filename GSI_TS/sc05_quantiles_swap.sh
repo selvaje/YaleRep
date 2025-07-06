@@ -38,9 +38,15 @@ awk  '{ print $7 , $8 , $9 , $10 , $11, $12 , $13 , $14, $15 , $16 , $17 }'  $OU
 import pandas as pd
 df = pd.read_csv('station_catalogue.csv', low_memory=False)
 df['area'] = df['area'].fillna(-9999)
+df['area'] = df['area'].replace(0.0, -9999)
+df['area'] = df['area'].replace(-999.0, -9999)
 df['altitude'] = df['altitude'].fillna(-9999)
-selected_columns = df[['no','longitude', 'latitude', 'area', 'altitude']]
-selected_columns.to_csv('station_catalogue_IDs_lon_lat_area_alt.txt', index=False, header=True, sep=' ')
+df['altitude'] = df['altitude'].replace(-999.0, -9999)
+selected_columns = df[['no','no_ori','database','longitude', 'latitude', 'area', 'altitude']]
+selected_columns.to_csv('station_catalogue_IDs_noori_db_lon_lat_area_alt.txt', index=False, header=True, sep=' ')
+
+###  scp -o ControlPath=~/.ssh/tmp/%h_%p_%r station_catalogue_IDs_noori_db_lon_lat_area_alt.txt ga254@grace1.hpc.yale.edu:/gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles 
+
 
 #####  
 

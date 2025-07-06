@@ -1,16 +1,16 @@
 #!/bin/bash
-#SBATCH -p bigmem
+#SBATCH -p scavenge
 #SBATCH -n 1 -c 22  -N 1
 #SBATCH -t 24:00:00 
-#SBATCH -o /vast/palmer/scratch/sbsc/ga254/stdout/sc31_modeling-pythonALL_RFrunMainRespRenkOptim.sh.%A_%a.out
-#SBATCH -e /vast/palmer/scratch/sbsc/ga254/stderr/sc31_modeling_pythonALL_RFrunMainRespRenkOptim.sh.%A_%a.err
-#SBATCH --job-name=sc31_modeling_pythonALL_RFrunMainRespRenkOptim_split_IDraster_testSpars_RFunID_OOB_all_multicoreE.sh
-#SBATCH --array=300,400,500,600
-#SBATCH --mem=1500G
+#SBATCH -o /vast/palmer/scratch/sbsc/ga254/stdout/sc31_modeling-pythonALL_RFrunMainRespRenkOptimSnapCor.sh.%A_%a.out
+#SBATCH -e /vast/palmer/scratch/sbsc/ga254/stderr/sc31_modeling_pythonALL_RFrunMainRespRenkOptimSnapCor.sh.%A_%a.err
+#SBATCH --job-name=sc31SnapCor_modeling_pythonALL_RFrunMainRespRenkOptim_split_IDraster_testSpars_RFunID_OOB_all_multicoreE.sh
+#SBATCH --array=400,500,600
+#SBATCH --mem=500G
 
 ##### #SBATCH --array=300,400,500,600     200,400 250G  500,600 380G
 ################ sample is not need with oob_score=False
-#### for obs_leaf in 10 15 20 25 30  ; do for obs_split in 10 15 20 25 30  ; do for sample in 0.9  ; do sbatch --export=obs_leaf=$obs_leaf,obs_split=$obs_split,sample=$sample /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/sc31_modeling_pythonALL_RFrunMainRespRenkOptim_split_IDraster_testSpars_RFunID_OOB_all_multicoreE3_noOOB_E.sh ; done; done ; done 
+#### for obs_leaf in 10 15 20 25 30  ; do for obs_split in 10 15 20 25 30  ; do for sample in 0.9  ; do sbatch --export=obs_leaf=$obs_leaf,obs_split=$obs_split,sample=$sample /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/sc31_modeling_pythonALL_RFrunMainRespRenkOptim_split_IDraster_testSpars_RFunID_OOB_all_multicoreE3_noOOB_E_SnapCor.sh ; done; done ; done 
 
 #### for obs_leaf in 2 4 5 8 10 12   ; do for obs_split in 2 4 5 8 10 12 ; do for sample in  0.3 0.4 0.5 0.6 0.7 ; do sbatch --export=obs_leaf=$obs_leaf,obs_split=$obs_split,sample=$sample --dependency=afterany:$(squeue -u $USER -o "%.9F %.80j" | grep sc30_modeling_pythonALL_RFrunMainRespRenk.sh | awk '{ printf ("%i:" , $1)} END {gsub(":","") ; print $1 }' ) /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/sc31_modeling_pythonALL_RFrunMainRespRenkOptim_split_IDraster_testSpars_RFunID_OOB_all_multicoreE.sh  ; done  ; done ; done 
 EXTRACT=/gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/extract4py
@@ -24,7 +24,7 @@ echo "obs_leaf  $obs_leaf obs_split  $obs_split sample $sample n_estimators $N_E
 ~/bin/echoerr "n_estimators ${N_EST} obs_leaf ${obs_leaf} obs_split ${obs_split} sample $sample "
 echo "start python modeling"
 
-apptainer exec --env=PATH="/gpfs/gibbs/pi/hydro/hydro/scripts/APTAINER_SIF/pyjeovenv/bin:$PATH" \
+apptainer exec --env=PATH="/gpfs/gibbs/pi/hydro/hydro/scripts/APTAINER_SIF/pyjeo-stuff/pyjeovenv/bin:$PATH" \
  --env=obs_leaf=$obs_leaf,obs_split=$obs_split,sample=$sample,N_EST=$N_EST /gpfs/gibbs/pi/hydro/hydro/scripts/APTAINER_SIF/pyjeo2.sif  bash -c "
 
 python3 <<'EOF'
@@ -43,7 +43,7 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from scipy import stats
 from scipy.stats import pearsonr, spearmanr
 from joblib import Parallel, delayed
-import dill 
+# import dill 
 pd.set_option('display.max_columns', None)  # Show all columns
 
 obs_leaf_s=(os.environ['obs_leaf'])
@@ -61,14 +61,14 @@ N_EST_S=(os.environ['N_EST'])
 # Define column data types based on analysis
 dtypes_X = {
     # Integer columns
-    'ID': 'int32',
-    'IDraster': 'int32',
+    'IDs': 'int32',
+    'IDr': 'int32',
     'YYYY': 'int32',
     'MM': 'int32',
 
     # Float columns (coordinates and spatial data)
-    'lon': 'float32',
-    'lat': 'float32',
+    'Xsnap': 'float32',
+    'Ysnap': 'float32',
     'Xcoord': 'float32',
     'Ycoord': 'float32',
 
@@ -103,28 +103,17 @@ dtypes_X = {
         'slope', 'tcurv', 'tpi', 'tri', 'vrm','accumulation']}
 }
 
-# Define columns to exclude from import
-excluded_columns = [
-    'GSWe', 'dy', 'AWCtS', 'GSWr', 'dyy', 'tpi',
-    'GSWo', 'slope_curv_max_dw_cel', 'GRWLl', 'GSWs', 'WWP', 'vrm',
-    'swe2', 'pcurv', 'stream_diff_up_near', 'slope_grad_dw_cel',
-    'outlet_diff_dw_scatch', 'swe0', 'swe1', 'GRWLc', 'GRWLd',
-    'slope_elv_dw_cel', 'stream_diff_dw_near', 'stream_dist_dw_near',
-    'stream_dist_proximity', 'SLTPPT', 'rough-scale', 'tmin3', 'tmax3',
-    'elev-stdev', 'SNDPPT', 'eastness', 'dx', 'swe3', 'sti'
-]
-
 # Define column data types
 dtypes_Y = {
     # Integer columns
-    'ID': 'int32',
-    'IDraster': 'int32',
+    'IDs': 'int32',
+    'IDr': 'int32',
     'YYYY': 'int32',
     'MM': 'int32',
 
     # Float columns (coordinates and flow values)
-    'lon': 'float32',
-    'lat': 'float32',
+    'Xsnap': 'float32',
+    'Ysnap': 'float32',
     'Xcoord': 'float32',
     'Ycoord': 'float32',
 
@@ -134,78 +123,91 @@ dtypes_Y = {
         'Q60', 'Q70', 'Q80', 'Q90', 'QMAX']}
 }
 
-
-importance = pd.read_csv('../extract4py_sample/importance_sampleAll.txt', header=None, sep=' ', engine='c', low_memory=False)
+importance = pd.read_csv('../extract4py_sample/importance_sampleAll.txt', header=None, sep=' ', engine='c',low_memory=False)
 # Extract the second column (index 1) for the first 30 rows
 
-include_variables = importance.iloc[:30, 1].tolist()
+include_variables = importance.iloc[:40, 1].tolist()
 # Additional columns to add
-additional_columns = ['ID', 'IDraster', 'YYYY', 'MM', 'lon', 'lat', 'Xcoord', 'Ycoord']
+additional_columns = ['IDs', 'IDr', 'YYYY', 'MM', 'Xsnap', 'Ysnap', 'Xcoord', 'Ycoord']
 
 # Combine the lists
 include_variables.extend(additional_columns)
 
-# Read CSV with correct data types
-Y = pd.read_csv(rf'stationID_x_y_valueALL_predictors_Y.txt', header=0, sep=' ', dtype=dtypes_Y, engine='c', low_memory=False)
-X = pd.read_csv(rf'stationID_x_y_valueALL_predictors_X.txt', header=0, sep=' ', usecols=lambda col: col in include_variables, dtype=dtypes_X, engine='c', low_memory=False )
+# Read CSV with correct data types 
+Y = pd.read_csv(rf'stationID_x_y_valueALL_predictors_Y.txt', header=0,sep='\s+', dtype=dtypes_Y, engine='c', low_memory=False)
+X = pd.read_csv(rf'stationID_x_y_valueALL_predictors_X.txt', header=0,sep='\s+', usecols=lambda col: col in include_variables, dtype=dtypes_X, engine='c', low_memory=False )
 
-stations = pd.read_csv('/gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/snapFlow_txt/IDstation_lon_lat_IDraster_Xcoord_Ycoord.txt', sep=' ', usecols=['IDraster', 'Xcoord', 'Ycoord']).drop_duplicates()
+stations = pd.read_csv('/gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/snapFlow_txt/IDstation_lon_lat_IDraster_Xcoord_Ycoord_2sH.txt', sep=' ', usecols=['IDr', 'Xcoord', 'Ycoord']).drop_duplicates()
 
 # Perform clustering on the unique station locations
-num_clusters = 50  # Adjust as needed
-kmeans = KMeans(n_clusters=num_clusters, random_state=42, n_init='auto')
-stations['cluster'] = kmeans.fit_predict(stations[['Xcoord', 'Ycoord']])
+# num_clusters = 50  # Adjust as needed
+# kmeans = KMeans(n_clusters=num_clusters, random_state=42, n_init='auto')
+# stations['cluster'] = kmeans.fit_predict(stations[['Xcoord', 'Ycoord']])
 
 # Ensure unique IDraster values are split while maintaining spatial separation
-train_rasters, test_rasters = train_test_split(stations[['IDraster', 'cluster']], test_size=0.2, random_state=24, stratify=stations['cluster'])
+# train_rasters, test_rasters = train_test_split(stations[['IDr', 'cluster']], test_size=0.2, random_state=24, stratify=stations['cluster'])
+# X_train = X[X['IDr'].isin(train_rasters['IDr'])]
+# Y_train = Y[Y['IDr'].isin(train_rasters['IDr'])]
+# X_test = X[X['IDr'].isin(test_rasters['IDr'])]
+# Y_test = Y[Y['IDr'].isin(test_rasters['IDr'])]
 
-# Apply clustering and IDraster separation to X and Y
-X_train = X[X['IDraster'].isin(train_rasters['IDraster'])]
-Y_train = Y[Y['IDraster'].isin(train_rasters['IDraster'])]
-X_test = X[X['IDraster'].isin(test_rasters['IDraster'])]
-Y_test = Y[Y['IDraster'].isin(test_rasters['IDraster'])]
+#  Apply clustering and IDr separation to X and Y
+train_rasters, test_rasters = train_test_split(stations['IDr'], test_size=0.2, random_state=24)
+
+X_train = X[X['IDr'].isin(train_rasters)]
+Y_train = Y[Y['IDr'].isin(train_rasters)]
+X_test = X[X['IDr'].isin(test_rasters)]
+Y_test = Y[Y['IDr'].isin(test_rasters)]
+
+# random split 
+# X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.25, random_state=42)
 
 print('Training and Testing data')
-print('################################')
+print('#### X TRAIN ###################')
 print(X_train.head(4))
-print('################################')
+print('#### Y TRAIN ###################')
 print(Y_train.head(4))
+print('#### X TEST ####################')
+print(X_test.head(4))
+print('#### Y TEST ####################')
+print(Y_test.head(4))
 print('################################')
 print(X_train.shape)
 print(Y_train.shape)
 print(X_test.shape)
 print(Y_test.shape)
 
-fmt='%i %f %f %i %f %f %i %i %f %f %f %f %f %f %f %f %f %f %f'
-
-np.savetxt(rf'./stationID_x_y_valueALL_predictors_YTrainN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', Y_train,  delimiter=' ', fmt=fmt, header='ID YYYY MM lon lat QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='')
-np.savetxt(rf'./stationID_x_y_valueALL_predictors_YTestN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt' , Y_test ,  delimiter=' ', fmt=fmt, header='ID YYYY MM lon lat QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='')
-
-fmt='%i %f %f %i %f %f %i %i %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f'      
+fmt='%i %f %f %i %f %f %i %i %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f'
 X_column_names = np.array(X.columns)
 X_column_names_str = ' '.join(X_column_names)
-# np.savetxt(rf'./stationID_x_y_valueALL_predictors_XTrainN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', X_train, delimiter=' ', fmt=fmt, header=X_column_names_str, comments='')
-# np.savetxt(rf'./stationID_x_y_valueALL_predictors_XTestN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RFE.txt' , X_test , delimiter=' ', fmt=fmt, header=X_column_names_str, comments='')
+np.savetxt(rf'../predict_splitting/stationID_x_y_valueALL_predictors_XTrainN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', X_train , delimiter=' ', fmt=fmt, header=X_column_names_str, comments='')
+np.savetxt(rf'../predict_splitting/stationID_x_y_valueALL_predictors_XTestN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', X_test , delimiter=' ', fmt=fmt, header=X_column_names_str, comments='')
 
 #### the X_train and so on are sorted as the input
 X_train_index = X_train.index.to_numpy()
-X_train = X_train.sort_values(by='IDraster').reset_index(drop=True)
+X_train = X_train.sort_values(by='IDr').reset_index(drop=True)
 
 Y_train_index = Y_train.index.to_numpy()
-Y_train = Y_train.sort_values(by='IDraster').reset_index(drop=True)
+Y_train = Y_train.sort_values(by='IDr').reset_index(drop=True)
 
 X_test_index = X_test.index.to_numpy()
-X_test = X_test.sort_values(by='IDraster').reset_index(drop=True)
+X_test = X_test.sort_values(by='IDr').reset_index(drop=True)
 
 Y_test_index = Y_test.index.to_numpy()
-Y_test = Y_test.sort_values(by='IDraster').reset_index(drop=True)
+Y_test = Y_test.sort_values(by='IDr').reset_index(drop=True)
 
-### contain only IDraster + variables and _np are not sorted 
-X_train_np = X_train.drop(columns=['ID', 'lon', 'lat', 'Xcoord', 'Ycoord', 'YYYY', 'MM']).to_numpy()  
-Y_train_np = Y_train.drop(columns=['ID', 'lon', 'lat', 'Xcoord', 'Ycoord', 'YYYY', 'MM']).to_numpy()
+fmt='%i %f %f %i %f %f %i %i %f %f %f %f %f %f %f %f %f %f %f'
+Y_column_names = np.array(Y.columns)     
+Y_column_names_str = ' '.join(Y_column_names) 
+np.savetxt(rf'../predict_splitting/stationID_x_y_valueALL_predictors_YTrainN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', Y_train,  delimiter=' ', fmt=fmt, header=Y_column_names_str, comments='')
+np.savetxt(rf'../predict_splitting/stationID_x_y_valueALL_predictors_YTestN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt' , Y_test ,  delimiter=' ', fmt=fmt, header=Y_column_names_str, comments='')
 
-X_test_np = X_test.drop(columns=['ID', 'lon', 'lat', 'Xcoord', 'Ycoord', 'YYYY', 'MM', 'IDraster']).to_numpy()
-Y_test_np = Y_test.drop(columns=['ID', 'lon', 'lat', 'Xcoord', 'Ycoord', 'YYYY', 'MM']).to_numpy()
+### contain only IDr + variables and _np are not sorted
+X_train_np = X_train.drop(columns=['IDs', 'Xsnap', 'Ysnap', 'Xcoord', 'Ycoord', 'YYYY', 'MM','IDr']).to_numpy()  
+Y_train_np = Y_train.drop(columns=['IDs', 'Xsnap', 'Ysnap', 'Xcoord', 'Ycoord', 'YYYY', 'MM','IDr']).to_numpy()
+
+X_test_np = X_test.drop(columns=['IDs', 'Xsnap', 'Ysnap', 'Xcoord', 'Ycoord', 'YYYY', 'MM','IDr']).to_numpy()
+Y_test_np = Y_test.drop(columns=['IDs', 'Xsnap', 'Ysnap', 'Xcoord', 'Ycoord', 'YYYY', 'MM','IDr']).to_numpy()
 
 del X, Y, X_train, Y_train, X_test, Y_test
 gc.collect()
@@ -250,9 +252,9 @@ class BoundedGroupAwareRandomForest(RandomForestRegressor, RegressorMixin):
         ) for _ in range(self.n_estimators))
 
     def predict(self, X):
-        # Check if X has the IDraster column
+        # Check if X has the IDr column
         if X.shape[1] == X_train_np.shape[1]:  # Assuming X_train_np is available
-            X = X[:, 1:]  # Remove the first column (IDraster)
+            X = X[:, 1:]  # Remove the first column (IDr)
 
         # Use joblib to parallelize the predictions
         all_preds = Parallel(n_jobs=self.n_jobs, prefer='threads')(
@@ -264,11 +266,18 @@ class BoundedGroupAwareRandomForest(RandomForestRegressor, RegressorMixin):
         y_pred = np.mean(all_preds, axis=0)
         return np.maximum(y_pred, 0)  # Ensure non-negative predictions
 
-RFreg = BoundedGroupAwareRandomForest(random_state=24, n_estimators=N_EST_I, n_jobs=-1, max_samples=sample_f, oob_score=False, bootstrap=False, min_samples_leaf=obs_leaf_i, min_samples_split=obs_split_i)
+RFreg = RandomForestRegressor(random_state=24, n_estimators=N_EST_I, n_jobs=-1, max_samples=sample_f, oob_score=True, bootstrap=True, min_samples_leaf=obs_leaf_i, min_samples_split=obs_split_i)
 
 print('Fit RF on the training') 
 RFreg.fit(X_train_np, Y_train_np)
 
+if RFreg.oob_score:
+    oob_r2 = RFreg.oob_score_  # This is R² score on OOB samples
+    oob_error = 1 - oob_r2     # A simple proxy for error (depends on context)
+    print(f'OOB R² score: {oob_r2:.4f}')
+    print(f'OOB error (1 - R²): {oob_error:.4f}')
+else:
+    print('OOB scoring is disabled. Set oob_score=True and bootstrap=True to enable it.')
 
 # Make predictions on the training data
 Y_train_pred_nosort = RFreg.predict(X_train_np)
@@ -284,29 +293,32 @@ def kge(y_true, y_pred):
     return 1 - np.sqrt((r - 1) ** 2 + (beta - 1) ** 2 + (gamma - 1) ** 2)
 
 # Calculate Pearson correlation coefficients
-train_r_coll = [pearsonr(Y_train_pred_nosort[:, i], Y_train_np[:, i + 1])[0] for i in range(0, 11)]
-test_r_coll = [pearsonr(Y_test_pred_nosort[:, i], Y_test_np[:, i + 1])[0] for i in range(0, 11)]
+train_r_coll = [pearsonr(Y_train_pred_nosort[:, i], Y_train_np[:, i ])[0] for i in range(0, 11)]
+test_r_coll  = [pearsonr(Y_test_pred_nosort[:, i], Y_test_np[:, i ])[0] for i in range(0, 11)]
+
+print(train_r_coll)
+print(test_r_coll)
 
 train_r_all = np.mean(train_r_coll)
 test_r_all = np.mean(test_r_coll)
 
 # Calculate Spearman correlation coefficients
-train_rho_coll = [spearmanr(Y_train_pred_nosort[:, i], Y_train_np[:, i + 1])[0] for i in range(0, 11)]
-test_rho_coll = [spearmanr(Y_test_pred_nosort[:, i], Y_test_np[:, i + 1])[0] for i in range(0, 11)]
+train_rho_coll = [spearmanr(Y_train_pred_nosort[:, i], Y_train_np[:, i ])[0] for i in range(0, 11)]
+test_rho_coll = [spearmanr(Y_test_pred_nosort[:, i], Y_test_np[:, i ])[0] for i in range(0, 11)]
 
 train_rho_all = np.mean(train_rho_coll)
 test_rho_all = np.mean(test_rho_coll)
 
 # Calculate Mean Absolute Error (MAE)
-train_mae_coll = [mean_absolute_error(Y_train_np[:, i + 1], Y_train_pred_nosort[:, i]) for i in range(0, 11)]
-test_mae_coll = [mean_absolute_error(Y_test_np[:, i + 1], Y_test_pred_nosort[:, i]) for i in range(0, 11)]
+train_mae_coll = [mean_absolute_error(Y_train_np[:, i ], Y_train_pred_nosort[:, i]) for i in range(0, 11)]
+test_mae_coll = [mean_absolute_error(Y_test_np[:, i ], Y_test_pred_nosort[:, i]) for i in range(0, 11)]
 
 train_mae_all = np.mean(train_mae_coll)
 test_mae_all = np.mean(test_mae_coll)
 
 # Calculate Kling-Gupta Efficiency (KGE)
-train_kge_coll = [kge(Y_train_np[:, i + 1], Y_train_pred_nosort[:, i]) for i in range(0, 11)]
-test_kge_coll = [kge(Y_test_np[:, i + 1], Y_test_pred_nosort[:, i]) for i in range(0, 11)]
+train_kge_coll = [kge(Y_train_np[:, i ], Y_train_pred_nosort[:, i]) for i in range(0, 11)]
+test_kge_coll = [kge(Y_test_np[:, i ], Y_test_pred_nosort[:, i]) for i in range(0, 11)]
 
 train_kge_all = np.mean(train_kge_coll)
 test_kge_all = np.mean(test_kge_coll)
@@ -347,7 +359,7 @@ N_EST_a = np.array(N_EST_I).reshape(1, -1)
 initial_array = np.array([[N_EST_a[0, 0], sample_a[0, 0], obs_split_a[0, 0], obs_leaf_a[0, 0]]])
 
 # Concatenate train and test metrics for r, rho, mae, and kge
-merge_r = np.concatenate((initial_array, train_r_all, test_r_all, train_r_coll, test_r_coll), axis=1)
+merge_r   = np.concatenate((initial_array, train_r_all  , test_r_all  , train_r_coll  , test_r_coll  ), axis=1)
 merge_rho = np.concatenate((initial_array, train_rho_all, test_rho_all, train_rho_coll, test_rho_coll), axis=1)
 merge_mae = np.concatenate((initial_array, train_mae_all, test_mae_all, train_mae_coll, test_mae_coll), axis=1)
 merge_kge = np.concatenate((initial_array, train_kge_all, test_kge_all, train_kge_coll, test_kge_coll), axis=1)
@@ -356,10 +368,10 @@ merge_kge = np.concatenate((initial_array, train_kge_all, test_kge_all, train_kg
 fmt = ' '.join(['%i'] + ['%.2f'] + ['%i'] + ['%i'] + ['%.2f'] * (merge_r.shape[1] - 4))
 
 # Save the results to separate files
-np.savetxt(rf'./stationID_x_y_valueALL_predictors_YscorerN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RFco.txt', merge_r, delimiter=' ', fmt=fmt)
-np.savetxt(rf'./stationID_x_y_valueALL_predictors_YscorerhoN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RFco.txt', merge_rho, delimiter=' ', fmt=fmt)
-np.savetxt(rf'./stationID_x_y_valueALL_predictors_YscoremaeN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RFco.txt', merge_mae, delimiter=' ', fmt=fmt)
-np.savetxt(rf'./stationID_x_y_valueALL_predictors_YscorekgeN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RFco.txt', merge_kge, delimiter=' ', fmt=fmt)
+np.savetxt(rf'../predict_score/stationID_x_y_valueALL_predictors_YscorerN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', merge_r, delimiter=' ', fmt=fmt)
+np.savetxt(rf'../predict_score/stationID_x_y_valueALL_predictors_YscorerhoN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', merge_rho, delimiter=' ', fmt=fmt)
+np.savetxt(rf'../predict_score/stationID_x_y_valueALL_predictors_YscoremaeN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', merge_mae, delimiter=' ', fmt=fmt)
+np.savetxt(rf'../predict_score/stationID_x_y_valueALL_predictors_YscorekgeN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', merge_kge, delimiter=' ', fmt=fmt)
 
 ## Get feature importances and sort them in descending order     
 
@@ -367,7 +379,7 @@ importance = pd.Series(RFreg.feature_importances_, index=X_column_names[8:])
 importance.sort_values(ascending=False, inplace=True)
 print(importance)
 
-importance.to_csv(rf'./stationID_x_y_valueALL_predictors_XimportanceN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RFE.txt', index=True, sep=' ', header=False)
+importance.to_csv(rf'../predict_importance/stationID_x_y_valueALL_predictors_XimportanceN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', index=True, sep=' ', header=False)
 
 # Create Pandas DataFrames with the appropriate indices
 Y_train_pred_indexed = pd.DataFrame(Y_train_pred_nosort, index=X_train_index[:Y_train_pred_nosort.shape[0]])
@@ -386,8 +398,8 @@ gc.collect()
 
 #### save prediction
 fmt = '%.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f'
-np.savetxt(rf'./stationID_x_y_valueALL_predictors_YpredictTrainN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RFE.txt', Y_train_pred_sort, delimiter=' ', fmt=fmt, header='QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='')
-np.savetxt(rf'./stationID_x_y_valueALL_predictors_YpredictTestN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RFE.txt', Y_test_pred_sort , delimiter=' ', fmt=fmt, header='QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='')
+np.savetxt(rf'../predict_prediction/stationID_x_y_valueALL_predictors_YpredictTrainN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', Y_train_pred_sort, delimiter=' ', fmt=fmt, header='QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='')
+np.savetxt(rf'../predict_prediction/stationID_x_y_valueALL_predictors_YpredictTestN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', Y_test_pred_sort , delimiter=' ', fmt=fmt, header='QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='')
 
 EOF
 " ## close the sif
