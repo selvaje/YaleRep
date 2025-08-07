@@ -6,7 +6,7 @@
 #SBATCH -e /vast/palmer/scratch/sbsc/sm3665/stderr/sc08_rnd_absence_points.sh.%A_%a.err
 #SBATCH --job-name=sc08_rnd_absence_points
 #SBATCH --mem=180G
-#SBATCH --array=1-115
+#SBATCH --array=1-116
 
 ### ==================- PARAMETERS ==================
 export DATASET_FOLDER="/gpfs/gibbs/project/sbsc/sm3665/dataproces/GLS"
@@ -204,7 +204,7 @@ if [ "$SLURM_ARRAY_TASK_ID" -eq "$N_TILES" ]; then
         cp $RANDOMPTS_DIR/absence_points_ALL.txt $RANDOMPTS_DIR/absence_points.txt
         rm -f $RANDOMPTS_DIR/absence_points_*.txt
         rm -f $RANDOMPTS_DIR/absence_points_ALL.txt
-        echo "$(date +'%Y-%m-%d %H:%M:%S') - No downsampling needed, Absence points already Non serve il downsampling, i pabsence points already <= of presences."
-	~/bin/echoerr "$(date +'%Y-%m-%d %H:%M:%S') - No downsampling needed, Absence points already Non serve il downsampling, i pabsence points already <= of presences."
+        echo "$(date +'%Y-%m-%d %H:%M:%S') - No downsampling needed, Absence points already <= of presences."
+	~/bin/echoerr "$(date +'%Y-%m-%d %H:%M:%S') - No downsampling needed, Absence points already <= of presences."
     fi
 fi

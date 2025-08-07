@@ -215,7 +215,7 @@ class BoundedGroupAwareRandomForest(RandomForestRegressor, RegressorMixin):
         if len(X) != len(Y):
             raise ValueError('X and Y have different lengths: %d vs %d' % (len(X), len(Y)))
         if 'IDr' not in X.columns:
-            raise ValueError('X must contain "IDr" column for group-aware training')
+            raise ValueError('X must contain 'IDr' column for group-aware training')
 
         X = X.astype(np.float32)
         Y = Y.astype(np.float32)
@@ -266,7 +266,7 @@ class BoundedGroupAwareRandomForest(RandomForestRegressor, RegressorMixin):
         if len(X) == 0:
             raise ValueError('Input X is empty')
         if 'IDr' not in X.columns:
-            raise ValueError('X must contain "IDr" column for consistency')
+            raise ValueError('X must contain 'IDr' column for consistency')
         if X.isna().any().any():
             raise ValueError('Input data contains missing values')
         test_features = X.drop(columns=['IDr']).columns.tolist()
@@ -367,10 +367,10 @@ merge_mae = np.concatenate((initial_array, train_mae_all, test_mae_all, train_ma
 merge_kge = np.concatenate((initial_array, train_kge_all, test_kge_all, train_kge_coll, test_kge_coll), axis=1)
 
 fmt = ' '.join(['%i'] + ['%.2f'] + ['%i'] + ['%i'] + ['%.2f'] * (merge_r.shape[1] - 4))
-np.savetxt('predict_score/stationID_x_y_valueALL_predictors_YscorerN%s_%sleaf_%ssplit_%ssample_2RF.txt' % (N_EST_S, obs_leaf_s, obs_split_s, sample_s), merge_r, delimiter=' ', fmt=fmt)
-np.savetxt('predict_score/stationID_x_y_valueALL_predictors_YscorerhoN%s_%sleaf_%ssplit_%ssample_2RF.txt' % (N_EST_S, obs_leaf_s, obs_split_s, sample_s), merge_rho, delimiter=' ', fmt=fmt)
-np.savetxt('predict_score/stationID_x_y_valueALL_predictors_YscoremaeN%s_%sleaf_%ssplit_%ssample_2RF.txt' % (N_EST_S, obs_leaf_s, obs_split_s, sample_s), merge_mae, delimiter=' ', fmt=fmt)
-np.savetxt('predict_score/stationID_x_y_valueALL_predictors_YscorekgeN%s_%sleaf_%ssplit_%ssample_2RF.txt' % (N_EST_S, obs_leaf_s, obs_split_s, sample_s), merge_kge, delimiter=' ', fmt=fmt)
+np.savetxt('predict_score/stationID_x_y_valueALL_predictors_Y1scorerN%s_%sleaf_%ssplit_%ssample_2RF.txt' % (N_EST_S, obs_leaf_s, obs_split_s, sample_s), merge_r, delimiter=' ', fmt=fmt)
+np.savetxt('predict_score/stationID_x_y_valueALL_predictors_Y1scorerhoN%s_%sleaf_%ssplit_%ssample_2RF.txt' % (N_EST_S, obs_leaf_s, obs_split_s, sample_s), merge_rho, delimiter=' ', fmt=fmt)
+np.savetxt('predict_score/stationID_x_y_valueALL_predictors_Y1scoremaeN%s_%sleaf_%ssplit_%ssample_2RF.txt' % (N_EST_S, obs_leaf_s, obs_split_s, sample_s), merge_mae, delimiter=' ', fmt=fmt)
+np.savetxt('predict_score/stationID_x_y_valueALL_predictors_Y1scorekgeN%s_%sleaf_%ssplit_%ssample_2RF.txt' % (N_EST_S, obs_leaf_s, obs_split_s, sample_s), merge_kge, delimiter=' ', fmt=fmt)
 
 importance = pd.Series(RFreg.feature_importances_, index=RFreg.feature_names)
 importance.sort_values(ascending=False, inplace=True)

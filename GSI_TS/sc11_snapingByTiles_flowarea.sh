@@ -54,11 +54,10 @@ echo          $file
 ########################         
 ###  select all the points that fall inside the tile from 
 
-### points that need snapping    38408   with areaT       16825  #### snapping useing area-10%  as treshold for each point 
+### points that need snapping    34605  #### snapping useing area-20%  as treshold for each point 
 ### $INP/IDs_IDcu_x_y_area_alt_seg_acc_elev_NOarea10_warea.txt
 
-
-paste -d " " <(cut -d " " -f 1,3,4,5  $INP/IDs_IDcu_x_y_area_alt_seg_acc_elev_NOarea10_warea.txt)  <( gdallocationinfo -geoloc -valonly $file  <  <( cut -d " " -f 3,4  $INP/IDs_IDcu_x_y_area_alt_seg_acc_elev_NOarea10_warea.txt  ) ) | awk '{if (NF==5) print $1, $2,$3,$4 }'  > $RAM/IDs_x_y_area_NOarea10_warea_$TILE.txt 
+paste -d " " <(cut -d " " -f 1,4,5,8  $INP/station_catalogueUPD_IDs_lon_lat_areaDB_araHB_area4SN_????.txt)  <( gdallocationinfo -geoloc -valonly $file  <  <( cut -d " " -f 4,5  $INP/station_catalogueUPD_IDs_lon_lat_areaDB_araHB_area4SN_????.txt  ) ) | awk '{if (NF==5) print $1, $2,$3,$4 }'  > $RAM/IDs_x_y_area_NOarea10_warea_$TILE.txt 
 
 awk '{ print $2, $3 }'  $RAM/IDs_x_y_area_NOarea10_warea_$TILE.txt   > $RAM/x_y_NOarea10_warea_$TILE.txt 
 
@@ -89,7 +88,7 @@ for var in flow stream ; do
 r.external  input=$RAM/${var}_${TILE}_msk.tif     output=$var   --overwrite  # import the files  (mask) 
 done
 
-###for n in 18 ; do
+###### for n in 18 ; do
 for n in $(seq 1 $(wc -l $RAM/IDs_x_y_area_NOarea10_warea_$TILE.txt  | cut -d ' ' -f 1)) ; do 
 
 head -n $n $RAM/IDs_x_y_area_NOarea10_warea_$TILE.txt | tail -1   > $RAM/IDs_x_y_area_NOarea10_warea_${TILE}_n$n.txt 
@@ -159,23 +158,13 @@ rm -rf $RAM/x_y_NOarea10_warea_$TILE.txt $RAM/IDs_x_y_area_NOarea10_warea_$TILE.
 exit
 
 cut -d " " -f 8  IDs_x_y_area_NOarea10_xsnap_ysnap_areasfd_CodeSnap_*.txt | sort | uniq -c
-   2878 0 correct
-    546 2 unresolved 
-  13401 3 snapped 
-  16279 0 & 3  
-
+   8358 0 correct 
+    523 2 unresolved
+  25571 3 snapped
+    
 # perfor point distance only for snapped points 
 awk '{ if ($8!=2)  print $2,$3,$5,$6  }'    $INP/IDs_x_y_area_NOarea10_xsnap_ysnap_areasfd_CodeSnap_*.txt  >  /tmp/cord.txt
 awk -f /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/haversine_distance.awk /tmp/cord.txt > /tmp/distance.txt
-paste -d " " <(awk '{ if ($8!=2)  print $1,$2,$3,$5,$6  }'    $INP/IDs_x_y_area_NOarea10_xsnap_ysnap_areasfd_CodeSnap_*.txt) /tmp/distance.txt > $INP/IDs_x_y_xsnap_ysnap_dist.txt 
+paste -d " " <(awk '{ if ($8!=2)  print $1,$2,$3,$5,$6,$7 }'    $INP/IDs_x_y_area_NOarea10_xsnap_ysnap_areasfd_CodeSnap_*.txt) /tmp/distance.txt > $INP/IDs_x_y_xsnap_ysnap_areaSFD_dist.txt 
 
-###### adding to the snapped also the one corretly locate 
-cut -d " " -f 1,4,5  $INP/IDs_x_y_xsnap_ysnap_dist.txt > $INP/IDs_xsnap_ysnap.txt
-cut -d " " -f 1,3,4  $IN/snapFlow_area/IDs_IDcu_x_y_area_alt_seg_acc_elev_area10.txt >> $INP/IDs_xsnap_ysnap.txt
- 
-### wc -l $INP/IDs_xsnap_ysnap.txt  ; 19104  /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/snapFlow_area/IDs_xsnap_ysnap.txt
-
-join  -t ','   -1 1 -1 1 -v 2 <(sort -k 1,1 $INP/IDs_xsnap_ysnap.txt | awk '{ print $1 }' )  <(sort  -t','  -k 1,1   /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/stations_ai/station_catalogue_StaionInfo.csv  )    >  /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/stations_ai/station_catalogue_StaionInfo_4ai.csv
-
-#### echo 22160 + 19104  | bc  41264
-
+join -1 1 -2 1 <(sort -k 1,1 $INP/station_catalogueUPD_IDs_lon_lat_areaDB_araHB_area4SN_????.txt) <( sort -k 1,1 $INP/IDs_x_y_xsnap_ysnap_areaSFD_dist.txt ) |  awk '{ print $1,$2,$3,$4,$5,$6,$11,$12,$13,$14 }' > $INP/IDs_x_y_areaDB_xsnap_ysnap_areaSFD_dist.txt 

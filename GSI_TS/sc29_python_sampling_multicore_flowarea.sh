@@ -31,7 +31,7 @@ input_file = 'stationID_x_y_valueALL_predictors.txt'
 output_prefix = 'stationID_x_y_valueALL_predictors2_sampM'
 
 # Number of folds
-num_folds = 3
+num_folds = 5
 
 # Read the input file into a pandas DataFrame
 df = pd.read_csv(input_file, sep='\s+' ) # 
@@ -68,7 +68,7 @@ head -1 $EXTRACT/stationID_x_y_valueALL_predictors2_sampM$samp.txt | cut -d " " 
 awk '{ if (NR>1) print}' $EXTRACT/stationID_x_y_valueALL_predictors2_sampM$samp.txt | cut -d " " -f1-8,20- | sort -n -k 4,4 >> $EXTRACT/stationID_x_y_valueALL_predictors2_sampM${samp}_Xs.txt 
 done 
 
-exit 
+
 ### full  dataset for the sc31
 EXTRACT=/gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS
 cut -d " " -f1-19       $EXTRACT/extract/stationID_x_y_valueALL_predictors.txt  >   $EXTRACT/extract4py/stationID_x_y_valueALL_predictors_Y.txt

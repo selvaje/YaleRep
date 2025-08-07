@@ -11,8 +11,8 @@
 
 ulimit -c 0
 
-source ~/bin/gdal3
-source ~/bin/pktools
+source ~/bin/gdal3          2>/dev/null
+source ~/bin/pktools        2>/dev/null
 
 export SC=/vast/palmer/scratch/sbsc/hydro/dataproces/GSI_TS
 export IN=/gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS
@@ -46,21 +46,15 @@ done
 ### IDs_xsnap_ysnap_IDseg_IDrt_IDru_all.txt
 ### 
 
-join -1 1 -2 1 <( sort -k 1,1 $IN/quantiles/IDs_x_y.txt ) <( awk '{print $1 , $2 , $3 , $6 }' $IN/snapFlow_txt/IDs_xsnap_ysnap_IDseg_IDrt_IDru_all.txt  |  sort -k 1,1 )  | sort -k 1,1 -g  > $IN/snapFlow_txt/IDs_xorig_yorig_xsnap_ysnap_IDru_all.txt   
+join -1 1 -2 1 <( sort -k 1,1 $IN/snapFlow_area/IDs_x_y_areaDB_xsnap_ysnap_areaSFD_dist_h??v??.txt  ) <( awk '{print $1 , $2 , $3 , $6 }' $IN/snapFlow_txt/IDs_xsnap_ysnap_IDseg_IDrt_IDru_all.txt  |  sort -k 1,1 )  | sort -k 1,1 -g | awk '{print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$14  }'    > $IN/snapFlow_txt/IDs_ximpr_yimpr_areaDB_xsnap_ysnap_areaSFD_dist_IDr_all.txt   
 
-###  snapped
-###   2878 0 correct
-###    546 2 unresolved 
-###  13401 3 snapped 
-###  2825  points that do not need snapping areaT basin 
-###  echo 2825 + 13401 + 2878  | bc  = 19104
-###  wc -l $IN/snapFlow_txt/IDs_xorig_yorig_xsnap_ysnap_IDseg_IDrt_IDru_all.txt  19104 
+###  wc -l $IN/snapFlow_txt/IDs_ximpr_yimpr_areaDB_xsnap_ysnap_areaSFD_dist_IDr_all.txt   33929 
+                                
+awk '{print $4,$5,$1}'       $IN/snapFlow_txt/IDs_ximpr_yimpr_areaDB_xsnap_ysnap_areaSFD_dist_IDr_all.txt  > $IN/snapFlow_txt/ximpr_yimpr_IDs_all.txt
+awk '{print $7,$8,$1,$11}'   $IN/snapFlow_txt/IDs_ximpr_yimpr_areaDB_xsnap_ysnap_areaSFD_dist_IDr_all.txt  > $IN/snapFlow_txt/xsnap_ysnap_IDs_IDr_all.txt
 
-awk '{print $2,$3,$1}'      $IN/snapFlow_txt/IDs_xorig_yorig_xsnap_ysnap_IDru_all.txt > $IN/snapFlow_txt/xorig_yorig_IDs_all.txt
-awk '{print $4,$5,$1,$6}'   $IN/snapFlow_txt/IDs_xorig_yorig_xsnap_ysnap_IDru_all.txt > $IN/snapFlow_txt/xsnap_ysnap_IDs_IDr_all.txt
-
-rm -f $IN/snapFlow_gpkg/xorig_yorig_IDs_all.gpkg
-pkascii2ogr -a_srs epsg:4326 -f "GPKG" -x 0 -y 1 -n "IDstation"  -ot "Integer"   -i $IN/snapFlow_txt/xorig_yorig_IDs_all.txt   -o $IN/snapFlow_gpkg/xorig_yorig_IDs_all.gpkg
+rm -f $IN/snapFlow_gpkg/ximpr_yimpr_IDs_all.gpkg
+pkascii2ogr -a_srs epsg:4326 -f "GPKG" -x 0 -y 1 -n "IDstation"  -ot "Integer"   -i $IN/snapFlow_txt/ximpr_yimpr_IDs_all.txt   -o $IN/snapFlow_gpkg/ximpr_yimpr_IDs_all.gpkg
 rm -f $IN/snapFlow_gpkg/xsnap_ysnap_IDs_IDr_all.gpkg 
 pkascii2ogr -a_srs epsg:4326   -f "GPKG" -x 0 -y 1 -n "IDstation" -ot "Integer" -n "IDraster" -ot "Integer" -i $IN/snapFlow_txt/xsnap_ysnap_IDs_IDr_all.txt  -o $IN/snapFlow_gpkg/xsnap_ysnap_IDs_IDr_all.gpkg
 
@@ -86,21 +80,6 @@ paste -d " "  <(ogrinfo -al $IN/snapFlow_gpkg/xsnap_ysnap_IDs_IDr_all_eqdist.gpk
 echo "IDs Xsnap Ysnap IDr Xcoord Ycoord" > $IN/snapFlow_txt/IDs_xsnap_ysnap_IDr_xcoord_ycoord.txt
 join -1 3 -2 1  <(sort -k 3,3 $IN/snapFlow_txt/xsnap_ysnap_IDs_IDr_all.txt   ) <(awk '{if (NR>1) print }' $IN/snapFlow_txt/IDs_IDr_xcoord_ycoord.txt  | sort -k 1,1)  |  awk '{ print $1,$2,$3,$4,$6,$7}'   >> $IN/snapFlow_txt/IDs_xsnap_ysnap_IDr_xcoord_ycoord.txt
 
-exit
-
 ### IDstation IDraster Xcoord Ycoord (lon lat Equidistance)
 ### $IN/snapFlow_txt/IDs_xsnap_ysnap_IDr_xcoord_ycoord.txt
-### 18742  after snapping, same station have been snap to the same raster pixel counting 40165 uniq pixel 
-
-exit 
-
-import pandas as pd
-df = pd.read_csv('station_catalogue.csv', low_memory=False)
-df['area'] = df['area'].fillna(-9999)
-df['altitude'] = df['altitude'].fillna(-9999)
-selected_columns = df[['longitude', 'latitude', 'area', 'altitude']]
-selected_columns.to_csv('station_catalogue_lon_lat_area_alt.txt', index=False, header=True, sep=' ')
-
-
-
 

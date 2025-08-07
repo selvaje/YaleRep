@@ -9,7 +9,7 @@
 #SBATCH --mem=400G
 
 ##### #SBATCH --array=200,400,500,600
-#### for obs in 15 20 25 30 ; do for samp in 0 1 2 ;   do sbatch --export=obs=$obs,samp=$samp /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/sc30_modeling_pythonALL_RFrunMainRespRenk_RFunID_OOB_all_multicoreE_sampleImportance.sh ; done ; done 
+#### for obs in 20 30 40 50 ; do for samp in 0 1 2 3 4 ;   do sbatch --export=obs=$obs,samp=$samp /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/sc30_modeling_pythonALL_RFrunMainRespRenk_RFunID_OOB_all_multicoreE_sampleImportance.sh ; done ; done 
 #### 2 4 5 8 10 15 
 
 module load StdEnv

@@ -10,7 +10,7 @@
 
 ##### #SBATCH --array=300,400,500,600     200,400 250G  500,600 380G
 ################ sample is not need with oob_score=False
-#### for obs_leaf in 100 200 500 1000   ; do for obs_split in 100 200 500 1000 ; do for sample in 0.9  ; do sbatch --export=obs_leaf=$obs_leaf,obs_split=$obs_split,sample=$sample /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/sc31_modeling_pythonALL_RFrunMainRespRenkOptim_split_IDraster_testSpars_RFunID_OOB_all_multicoreE3_noOOB_E_SnapCor.sh ; done; done ; done 
+#### for obs_leaf in 10 15 20 25 30  ; do for obs_split in 10 15 20 25 30  ; do for sample in 0.9  ; do sbatch --export=obs_leaf=$obs_leaf,obs_split=$obs_split,sample=$sample /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/sc31_modeling_pythonALL_RFrunMainRespRenkOptim_split_IDraster_testSpars_RFunID_OOB_all_multicoreE3_noOOB_E_SnapCorRFas30.sh ; done; done ; done 
 
 #### for obs_leaf in 2 4 5 8 10 12   ; do for obs_split in 2 4 5 8 10 12 ; do for sample in  0.3 0.4 0.5 0.6 0.7 ; do sbatch --export=obs_leaf=$obs_leaf,obs_split=$obs_split,sample=$sample --dependency=afterany:$(squeue -u $USER -o "%.9F %.80j" | grep sc30_modeling_pythonALL_RFrunMainRespRenk.sh | awk '{ printf ("%i:" , $1)} END {gsub(":","") ; print $1 }' ) /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/sc31_modeling_pythonALL_RFrunMainRespRenkOptim_split_IDraster_testSpars_RFunID_OOB_all_multicoreE.sh  ; done  ; done ; done 
 EXTRACT=/gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/extract4py
@@ -45,7 +45,6 @@ from scipy.stats import pearsonr, spearmanr
 from joblib import Parallel, delayed
 # import dill 
 pd.set_option('display.max_columns', None)  # Show all columns
-np.set_printoptions(suppress=True, precision=6, floatmode='fixed', formatter={'float': '{:.6f}'.format})
 
 obs_leaf_s=(os.environ['obs_leaf'])
 obs_leaf_i=int(os.environ['obs_leaf'])
@@ -110,7 +109,7 @@ dtypes_Y = {
     'IDs': 'int32',
     'IDr': 'int32',
     'YYYY': 'int32',
-    'MM':  'int32',
+    'MM': 'int32',
 
     # Float columns (coordinates and flow values)
     'Xsnap': 'float32',
@@ -125,7 +124,8 @@ dtypes_Y = {
 }
 
 importance = pd.read_csv('../extract4py_sample/importance_sampleAll.txt', header=None, sep=' ', engine='c',low_memory=False)
-# Extract the second column (index 1) for the first 40 rows
+# Extract the second column (index 1) for the first 30 rows
+
 include_variables = importance.iloc[:40, 1].tolist()
 # Additional columns to add
 additional_columns = ['IDs', 'IDr', 'YYYY', 'MM', 'Xsnap', 'Ysnap', 'Xcoord', 'Ycoord']
@@ -137,27 +137,30 @@ include_variables.extend(additional_columns)
 Y = pd.read_csv(rf'stationID_x_y_valueALL_predictors_Y.txt', header=0,sep='\s+', dtype=dtypes_Y, engine='c', low_memory=False)
 X = pd.read_csv(rf'stationID_x_y_valueALL_predictors_X.txt', header=0,sep='\s+', usecols=lambda col: col in include_variables, dtype=dtypes_X, engine='c', low_memory=False )
 
-# Add description of X and Y
-print('#### X Description ###################')
-print(X.describe())
-print('#### Y Description ###################')
-print(Y.describe())
-
 stations = pd.read_csv('/gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/snapFlow_txt/IDstation_lon_lat_IDraster_Xcoord_Ycoord_2sH.txt', sep=' ', usecols=['IDr', 'Xcoord', 'Ycoord']).drop_duplicates()
 
-# Split unique IDr values
+# Perform clustering on the unique station locations
+# num_clusters = 50  # Adjust as needed
+# kmeans = KMeans(n_clusters=num_clusters, random_state=42, n_init='auto')
+# stations['cluster'] = kmeans.fit_predict(stations[['Xcoord', 'Ycoord']])
+
+# Ensure unique IDraster values are split while maintaining spatial separation
+# train_rasters, test_rasters = train_test_split(stations[['IDr', 'cluster']], test_size=0.2, random_state=24, stratify=stations['cluster'])
+# X_train = X[X['IDr'].isin(train_rasters['IDr'])]
+# Y_train = Y[Y['IDr'].isin(train_rasters['IDr'])]
+# X_test = X[X['IDr'].isin(test_rasters['IDr'])]
+# Y_test = Y[Y['IDr'].isin(test_rasters['IDr'])]
+
+#  Apply clustering and IDr separation to X and Y
 train_rasters, test_rasters = train_test_split(stations['IDr'], test_size=0.2, random_state=24)
 
-# Apply to X and Y
 X_train = X[X['IDr'].isin(train_rasters)]
 Y_train = Y[Y['IDr'].isin(train_rasters)]
 X_test = X[X['IDr'].isin(test_rasters)]
 Y_test = Y[Y['IDr'].isin(test_rasters)]
 
-# Verify split sizes
-print(f'Train IDr count: {len(train_rasters)}, Test IDr count: {len(test_rasters)}')
-print(f'X_train: {len(X_train)}, Y_train: {len(Y_train)}')
-print(f'X_test: {len(X_test)}, Y_test: {len(Y_test)}')
+# random split 
+# X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.25, random_state=42)
 
 print('Training and Testing data')
 print('#### X TRAIN ###################')
@@ -177,7 +180,7 @@ print(Y_test.shape)
 fmt='%i %f %f %i %f %f %i %i %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f'
 X_column_names = np.array(X.columns)
 X_column_names_str = ' '.join(X_column_names)
-np.savetxt(rf'../predict_splitting/stationID_x_y_valueALL_predictors_XTrainN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', X_train, delimiter=' ', fmt=fmt, header=X_column_names_str, comments='')
+np.savetxt(rf'../predict_splitting/stationID_x_y_valueALL_predictors_XTrainN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', X_train , delimiter=' ', fmt=fmt, header=X_column_names_str, comments='')
 np.savetxt(rf'../predict_splitting/stationID_x_y_valueALL_predictors_XTestN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', X_test , delimiter=' ', fmt=fmt, header=X_column_names_str, comments='')
 
 #### the X_train and so on are sorted as the input
@@ -193,43 +196,26 @@ X_test = X_test.sort_values(by='IDr').reset_index(drop=True)
 Y_test_index = Y_test.index.to_numpy()
 Y_test = Y_test.sort_values(by='IDr').reset_index(drop=True)
 
-print('Training and Testing data after IDr sorting')
-print('#### X TRAIN ###################')
-print(X_train.head(4))
-print('#### Y TRAIN ###################')
-print(Y_train.head(4))
-print('#### X TEST ####################')
-print(X_test.head(4))
-print('#### Y TEST ####################')
-print(Y_test.head(4))
-print('################################')
-print(X_train.shape)
-print(Y_train.shape)
-print(X_test.shape)
-print(Y_test.shape)
-
 fmt='%i %f %f %i %f %f %i %i %f %f %f %f %f %f %f %f %f %f %f'
 Y_column_names = np.array(Y.columns)     
 Y_column_names_str = ' '.join(Y_column_names) 
 np.savetxt(rf'../predict_splitting/stationID_x_y_valueALL_predictors_YTrainN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', Y_train,  delimiter=' ', fmt=fmt, header=Y_column_names_str, comments='')
 np.savetxt(rf'../predict_splitting/stationID_x_y_valueALL_predictors_YTestN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt' , Y_test ,  delimiter=' ', fmt=fmt, header=Y_column_names_str, comments='')
 
-# Remove specified columns but keep as DataFrames, retain IDr in X for grouping
-X_train_df = X_train.drop(columns=['IDs', 'Xsnap', 'Ysnap', 'Xcoord', 'Ycoord', 'YYYY', 'MM'])
-Y_train_df = Y_train.drop(columns=['IDs', 'Xsnap', 'Ysnap', 'Xcoord', 'Ycoord', 'YYYY', 'MM', 'IDr'])
-X_test_df = X_test.drop(columns=['IDs', 'Xsnap', 'Ysnap', 'Xcoord', 'Ycoord', 'YYYY', 'MM'])
-Y_test_df = Y_test.drop(columns=['IDs', 'Xsnap', 'Ysnap', 'Xcoord', 'Ycoord', 'YYYY', 'MM', 'IDr'])
+### contain only IDr + variables and _np are not sorted
+X_train_np = X_train.drop(columns=['IDs', 'Xsnap', 'Ysnap', 'Xcoord', 'Ycoord', 'YYYY', 'MM']).to_numpy()        ### only this with IDr
+Y_train_np = Y_train.drop(columns=['IDs', 'Xsnap', 'Ysnap', 'Xcoord', 'Ycoord', 'YYYY', 'MM','IDr']).to_numpy()
 
-# Delete original DataFrames to free memory
+X_test_np = X_test.drop(columns=['IDs', 'Xsnap', 'Ysnap', 'Xcoord', 'Ycoord', 'YYYY', 'MM','IDr']).to_numpy()
+Y_test_np = Y_test.drop(columns=['IDs', 'Xsnap', 'Ysnap', 'Xcoord', 'Ycoord', 'YYYY', 'MM','IDr']).to_numpy()
+
 del X, Y, X_train, Y_train, X_test, Y_test
 gc.collect()
 
-print('#### Y TRAIN DF ####################')
-print(Y_train_df.shape)
-print(Y_train_df.head(4))
-print('#### X TRAIN DF ####################')
-print(X_train_df.shape)
-print(X_train_df.head(4))
+print(Y_train_np.shape)
+print(Y_train_np[:4])
+print(X_train_np.shape)
+print(X_train_np[:4])
 
 class GroupAwareDecisionTree(DecisionTreeRegressor):
     def __init__(self, *, min_samples_leaf=1, min_samples_split=2):
@@ -247,18 +233,19 @@ class BoundedGroupAwareRandomForest(RandomForestRegressor, RegressorMixin):
         self.max_samples = max_samples
 
     def fit(self, X, Y):
-        X = X.astype(np.float32)  # Reduce precision
-        Y = Y.astype(np.float32)  # Reduce precision
-        unique_groups = np.unique(X['IDr'])
+        X = X.astype(np.float32)
+        Y = Y.astype(np.float32)
+        self.n_features_ = X.shape[1] - 1  # Store number of predictors (exclude IDr)
+        unique_groups = np.unique(X[:, 0])
 
         def train_tree(boot_groups):
-            train_mask = X['IDr'].isin(boot_groups)
+            train_mask = np.isin(X[:, 0], boot_groups)
             tree = GroupAwareDecisionTree(min_samples_leaf=self.min_samples_leaf, min_samples_split=self.min_samples_split)
-            X_train_filtered = X[train_mask].drop(columns=['IDr'])
+            X_train_filtered = X[train_mask, 1:]  # Remove IDr
             Y_train_filtered = Y[train_mask]
             tree.fit(X_train_filtered, Y_train_filtered)
-            del X_train_filtered, Y_train_filtered  # Explicitly delete
-            gc.collect()  # Run garbage collection
+            del X_train_filtered, Y_train_filtered
+            gc.collect()
             return tree
 
         self.estimators_ = Parallel(n_jobs=self.n_jobs, prefer='threads')(delayed(train_tree)(
@@ -266,42 +253,37 @@ class BoundedGroupAwareRandomForest(RandomForestRegressor, RegressorMixin):
         ) for _ in range(self.n_estimators))
 
     def predict(self, X):
-        # Remove IDr column for prediction
-        X_pred = X.drop(columns=['IDr'])
-        # Use joblib to parallelize the predictions
+        # Remove IDr only if X has one more column than the number of predictors
+        if X.shape[1] == self.n_features_ + 1:
+            X = X[:, 1:]  # Remove the first column (IDr)
+        elif X.shape[1] != self.n_features_:
+            raise ValueError(f'Expected {self.n_features_} or {self.n_features_ + 1} columns, got {X.shape[1]}')
+        
         all_preds = Parallel(n_jobs=self.n_jobs, prefer='threads')(
-            delayed(tree.predict)(X_pred) for tree in self.estimators_
+            delayed(tree.predict)(X) for tree in self.estimators_
         )
-        # Convert list to numpy array
         all_preds = np.array(all_preds)
-        # Average the predictions
         y_pred = np.mean(all_preds, axis=0)
-        return np.maximum(y_pred, 0)  # Ensure non-negative predictions
+        return np.maximum(y_pred, 0)
 
-RFreg = BoundedGroupAwareRandomForest(random_state=24, n_estimators=N_EST_I, n_jobs=-1, max_samples=sample_f, oob_score=False, bootstrap=False, min_samples_leaf=obs_leaf_i, min_samples_split=obs_split_i)
+RFreg = BoundedGroupAwareRandomForest(random_state=24, n_estimators=N_EST_I, n_jobs=-1, max_samples=sample_f, oob_score=True, bootstrap=True, min_samples_leaf=obs_leaf_i, min_samples_split=obs_split_i)
 
 print('Fit RF on the training') 
-RFreg.fit(X_train_df, Y_train_df)
+RFreg.fit(X_train_np, Y_train_np)
 
-# Make predictions on the training and test data
-print('#### X TRAIN DF ####################')
-print(X_train_df.shape)
-print(X_train_df.head(4))
-print('#### X TEST DF ####################')
-print(X_test_df.shape)
-print(X_test_df.head(4))
+# if RFreg.oob_score:
+#    oob_r2 = RFreg.oob_score_  # This is R² score on OOB samples
+#    oob_error = 1 - oob_r2     # A simple proxy for error (depends on context)
+#    print(f'OOB R² score: {oob_r2:.4f}')
+#    print(f'OOB error (1 - R²): {oob_error:.4f}')
+# else:
+#    print('OOB scoring is disabled. Set oob_score=True and bootstrap=True to enable it.')
 
-Y_train_pred_nosort = RFreg.predict(X_train_df)
-Y_test_pred_nosort = RFreg.predict(X_test_df)
+# Make predictions on the training data
+Y_train_pred_nosort = RFreg.predict(X_train_np)
+Y_test_pred_nosort = RFreg.predict(X_test_np)
 
-print('#### Y TRAIN PRED no sort  ####################')
-print(Y_train_pred_nosort.shape)       
-print(Y_train_pred_nosort[:4])     
-print('#### Y TEST PRED no sort  ####################')
-print(Y_test_pred_nosort.shape)   
-print(Y_test_pred_nosort[:4])      
-
-# Calculate error matrix 
+#  Calculate error matrix 
 
 # Compute Kling-Gupta Efficiency (KGE).
 def kge(y_true, y_pred):
@@ -311,8 +293,9 @@ def kge(y_true, y_pred):
     return 1 - np.sqrt((r - 1) ** 2 + (beta - 1) ** 2 + (gamma - 1) ** 2)
 
 # Calculate Pearson correlation coefficients
-train_r_coll = [pearsonr(Y_train_pred_nosort[:, i], Y_train_df.iloc[:, i])[0] for i in range(Y_train_df.shape[1])]
-test_r_coll = [pearsonr(Y_test_pred_nosort[:, i], Y_test_df.iloc[:, i])[0] for i in range(Y_test_df.shape[1])]
+train_r_coll = [pearsonr(Y_train_pred_nosort[:, i], Y_train_np[:, i ])[0] for i in range(0, 11)]
+test_r_coll  = [pearsonr(Y_test_pred_nosort[:, i], Y_test_np[:, i ])[0] for i in range(0, 11)]
+
 print(train_r_coll)
 print(test_r_coll)
 
@@ -320,22 +303,22 @@ train_r_all = np.mean(train_r_coll)
 test_r_all = np.mean(test_r_coll)
 
 # Calculate Spearman correlation coefficients
-train_rho_coll = [spearmanr(Y_train_pred_nosort[:, i], Y_train_df.iloc[:, i])[0] for i in range(Y_train_df.shape[1])]
-test_rho_coll = [spearmanr(Y_test_pred_nosort[:, i], Y_test_df.iloc[:, i])[0] for i in range(Y_test_df.shape[1])]
+train_rho_coll = [spearmanr(Y_train_pred_nosort[:, i], Y_train_np[:, i ])[0] for i in range(0, 11)]
+test_rho_coll = [spearmanr(Y_test_pred_nosort[:, i], Y_test_np[:, i ])[0] for i in range(0, 11)]
 
 train_rho_all = np.mean(train_rho_coll)
 test_rho_all = np.mean(test_rho_coll)
 
 # Calculate Mean Absolute Error (MAE)
-train_mae_coll = [mean_absolute_error(Y_train_df.iloc[:, i], Y_train_pred_nosort[:, i]) for i in range(Y_train_df.shape[1])]
-test_mae_coll = [mean_absolute_error(Y_test_df.iloc[:, i], Y_test_pred_nosort[:, i]) for i in range(Y_test_df.shape[1])]
+train_mae_coll = [mean_absolute_error(Y_train_np[:, i ], Y_train_pred_nosort[:, i]) for i in range(0, 11)]
+test_mae_coll = [mean_absolute_error(Y_test_np[:, i ], Y_test_pred_nosort[:, i]) for i in range(0, 11)]
 
 train_mae_all = np.mean(train_mae_coll)
 test_mae_all = np.mean(test_mae_coll)
 
 # Calculate Kling-Gupta Efficiency (KGE)
-train_kge_coll = [kge(Y_train_df.iloc[:, i].to_numpy(), Y_train_pred_nosort[:, i]) for i in range(Y_train_df.shape[1])]
-test_kge_coll = [kge(Y_test_df.iloc[:, i].to_numpy(), Y_test_pred_nosort[:, i]) for i in range(Y_test_df.shape[1])]
+train_kge_coll = [kge(Y_train_np[:, i ], Y_train_pred_nosort[:, i]) for i in range(0, 11)]
+test_kge_coll = [kge(Y_test_np[:, i ], Y_test_pred_nosort[:, i]) for i in range(0, 11)]
 
 train_kge_all = np.mean(train_kge_coll)
 test_kge_all = np.mean(test_kge_coll)
@@ -390,8 +373,9 @@ np.savetxt(rf'../predict_score/stationID_x_y_valueALL_predictors_YscorerhoN{N_ES
 np.savetxt(rf'../predict_score/stationID_x_y_valueALL_predictors_YscoremaeN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', merge_mae, delimiter=' ', fmt=fmt)
 np.savetxt(rf'../predict_score/stationID_x_y_valueALL_predictors_YscorekgeN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', merge_kge, delimiter=' ', fmt=fmt)
 
-# Get feature importances and sort them in descending order     
-importance = pd.Series(RFreg.feature_importances_, index=X_train_df.drop(columns=['IDr']).columns)
+## Get feature importances and sort them in descending order     
+
+importance = pd.Series(RFreg.feature_importances_, index=X_column_names[8:])
 importance.sort_values(ascending=False, inplace=True)
 print(importance)
 
@@ -412,7 +396,12 @@ Y_test_pred_sort = Y_test_pred_sort.values
 del Y_train_pred_indexed, Y_test_pred_indexed
 gc.collect()
 
-# Save prediction
+#### save prediction
+print(Y_train_pred_sort.shape)            
+print(Y_train_pred_sort[:4])        
+print(Y_test_pred_sort.shape)  
+print(Y_test_pred_sort[:4]) 
+
 fmt = '%.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f'
 np.savetxt(rf'../predict_prediction/stationID_x_y_valueALL_predictors_YpredictTrainN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', Y_train_pred_sort, delimiter=' ', fmt=fmt, header='QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='')
 np.savetxt(rf'../predict_prediction/stationID_x_y_valueALL_predictors_YpredictTestN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', Y_test_pred_sort , delimiter=' ', fmt=fmt, header='QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='')
@@ -420,3 +409,10 @@ np.savetxt(rf'../predict_prediction/stationID_x_y_valueALL_predictors_YpredictTe
 EOF
 " ## close the sif
 exit
+
+
+
+############################################################
+rho and kge comparison 
+https://github.com/copilot/share/804c43a4-4340-8002-b902-8e006450415c
+

@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -p scavenge
-#SBATCH -n 1 -c 1 -N 1
-#SBATCH -t 4:00:00       # 1 hours 
+#SBATCH -n 1 -c 20 -N 1
+#SBATCH -t 6:00:00       # 1 hours 
 #SBATCH -o /vast/palmer/scratch/sbsc/ga254/stdout/sc10_point4snapingByTiles_flowred.sh.%J.out
 #SBATCH -e /vast/palmer/scratch/sbsc/ga254/stderr/sc10_point4snapingByTiles_flowred.sh.%J.err
 #SBATCH --job-name=sc10_point4snapingByTiles_flowred.sh 
@@ -9,8 +9,8 @@
 
 ### testing 58    h18v02
 ### testing 19    h06v02  points 3702   x_y_ID_h06v02.txt 
-#######1-116
-####   sbatch   /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/sc11_snapingByTiles_flowred.sh
+### 1-116
+### sbatch  /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/sc10_point4snapingByTiles_flowarea.sh
 
 ####  wc -l   quantiles/x_y_ID.txt  40813  # this are uniq pare of lat lon 
 ####  wc -l   quantiles/x_y.txt   orig_txt/x_y_ID_*.txt  41234 29 punti   lost because they are in antartica 
@@ -20,7 +20,7 @@
 ulimit -c 0
 
 source ~/bin/gdal3
-source ~/bin/pktools
+# source ~/bin/pktools
 
 export IN=/gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS
 export RAM=/dev/shm
@@ -37,9 +37,9 @@ find  /dev/shm/   -user $USER  -mtime +2  2>/dev/null  | xargs -n 1 -P 2 rm -ifr
 #### wc -l $IN/IDs_IDcu_x_y.txt   # IDs IDstation  # IDcu ID cordinate uniq     ## 41233 
 
 #### integrate
-#### /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt 
-#### /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/usgs/usgs_sites_USA.tsv 
-#### /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/grdc/GRDC_Stations.csv 
+#### $IN/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt 
+#### $IN/usgs/usgs_sites_USA.tsv 
+#### $IN/grdc/GRDC_Stations.csv 
 
   #  3616 ANA    done 
   #    17 ArcticGRO inserted as it is 
@@ -51,10 +51,19 @@ find  /dev/shm/   -user $USER  -mtime +2  2>/dev/null  | xargs -n 1 -P 2 rm -ifr
   # 18580 USGS   done 
   #   161 WRIS   to dificult to find
 
+# Global River Discharge Centre (GRDC),
+# U.S. Geological Survey (USGS)
+# National Water Information System, National Water Data Archive of Canada (HYDAT),
+# National Water Agency of Brazil (ANA),
+# the Chilean Centre for Climate and Resilience Research (CCCRR),
+# Arctic Great Rivers Observatory (ArcticGRO), China
+# Hydrological Yearbooks (CHY),
+# India Water Resources Information System (WRIS),
+# Australia Water Data from Australian Bureau of Meteorology (BOM)
 
 
 #### improve GRDC
-join -1 2 -2 1 <(grep GRDC /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | sort -k 2,2) <(awk -F  "," '{print $1,$8,$7,($9 == "-999" ? "-9999" : $9) }'    /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/grdc/GRDC_Stations.csv | sort -k 1,1 ) | awk '{ 
+join -1 2 -2 1 <(grep GRDC $IN/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | sort -k 2,2) <(awk -F  "," '{print $1,$8,$7,($9 == "-999" ? "-9999" : $9) }'    $IN/grdc/GRDC_Stations.csv | sort -k 1,1 ) | awk '{ 
   # Compare $4 vs $8 → choose more precise longitude
   p4 = match($4, /\./) ? length(substr($4, index($4, ".") + 1)) : 0;
   p8 = match($8, /\./) ? length(substr($8, index($8, ".") + 1)) : 0;
@@ -64,10 +73,10 @@ join -1 2 -2 1 <(grep GRDC /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantile
   p9 = match($9, /\./) ? length(substr($9, index($9, ".") + 1)) : 0;
   best_lat = (p9 > p5) ? $9 : $5;
   # Handle elevation: if $6 == -9999 and $10 != 0 then use $10, else keep -9999
-  area = ($6 == -9999 && $10 != 0) ? $10 : $6;
+  area =   area = ($6 == -9999 && $10 == -9999) ? -9999 : ($6 == -9999 && $10 == 0) ? -9999 : ($6 == -9999 && $10 != 0) ? $10 : ($6 != -9999 && $10 != -9999) ? $10 : $6 ;
   # Print selected fields
   print $2, $1, $3, best_lon, best_lat, area  , $7 
-}' |   sed 's/-9999\.0\b/-9999/g'   > /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogueGRDC_IDs_noori_db_lon_lat_area_alt.txt 
+}' |   sed 's/-9999\.0\b/-9999/g'   > $IN/quantiles/station_catalogueGRDC_IDs_noori_db_lon_lat_area_alt.txt 
 
 #### to correct this kind of errors 
 #### 2969151 6920 GRDC 103.429264 15.141556 -9999.0 -9999.0 103.429264 15.141556 6297.2
@@ -77,14 +86,14 @@ join -1 2 -2 1 <(grep GRDC /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantile
 #### 6242915 3692 GRDC 17.09611111 47.95222222 -9999.0 127.35 17.09611111 47.95222222 0
 #### 6854503 5162 GRDC 24.39158 60.420434 -9999.0 40.0 24.39158 60.420434 0
 
-join -1 2 -2 1 -v 1  <(grep GRDC /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | sort -k 2,2) <(awk -F   "," '{print $1,$8,$7,($9 == "-999" ? "-9999" : $9) }'    /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/grdc/GRDC_Stations.csv | sort -k 1,1 ) | awk '{print $2,$1,$3,$4,$5,$6,$7}'  |  sed 's/-9999\.0\b/-9999/g'  >> /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogueGRDC_IDs_noori_db_lon_lat_area_alt.txt 
+join -1 2 -2 1 -v 1  <(grep GRDC $IN/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | sort -k 2,2) <(awk -F   "," '{print $1,$8,$7,($9 == "-999" ? "-9999" : $9) }'    $IN/grdc/GRDC_Stations.csv | sort -k 1,1 ) | awk '{print $2,$1,$3,$4,$5,$6,$7}'  |  sed 's/-9999\.0\b/-9999/g'  >> $IN/quantiles/station_catalogueGRDC_IDs_noori_db_lon_lat_area_alt.txt 
 
-wc -l /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogueGRDC_IDs_noori_db_lon_lat_area_alt.txt ### 7926
-grep GRDC /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | wc -l ### 7926
+wc -l $IN/quantiles/station_catalogueGRDC_IDs_noori_db_lon_lat_area_alt.txt ### 7926
+grep GRDC $IN/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | wc -l ### 7926
 
 ################### USGS ################
 
-join -1 2 -2 1 <(grep USGS /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | sort -k 2,2) <(grep -e  USGS -e USFS  /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/usgs/usgs_sites_USA.tsv | awk -F '\t' '{  print int($2),$6,$5,$7,$8}' | sort -k 1,1 ) |  awk '{
+join -1 2 -2 1 <(grep USGS $IN/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | sort -k 2,2) <(grep -e USGS -e USFS  $IN/usgs/usgs_sites_USA.tsv | awk -F '\t' '{  print int($2),$6,$5,$7,$8}' | sort -k 1,1 ) |  awk '{
   # Compare $4 vs $8 → choose more precise longitude
   p4 = match($4, /\./) ? length(substr($4, index($4, ".") + 1)) : 0;
   p8 = match($8, /\./) ? length(substr($8, index($8, ".") + 1)) : 0;
@@ -93,24 +102,22 @@ join -1 2 -2 1 <(grep USGS /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantile
   p5 = match($5, /\./) ? length(substr($5, index($5, ".") + 1)) : 0;
   p9 = match($9, /\./) ? length(substr($9, index($9, ".") + 1)) : 0;
   best_lat = (p9 > p5) ? $9 : $5;
-  # Handle elevation: if $6 == -9999 and $10 != 0 then use $10, else keep -9999
-  area = ($6 == -9999 && $10 != 0) ? $10 : $6;
+  # Handle area 
+  area =   (($6 == -9999 && $10 == -9999) || ($6 == -9999 && $10 == 0) || ($6 == 0 && $10 == -9999) || ($6 == 0 && $10 == 0)) ? -9999 : (($6 == -9999 || $6 == 0) && $10 != -9999 && $10 != 0) ? ($10 * 2.58999) : ($6 != -9999 && $6 != 0 && $10 != -9999 && $10 != 0) ? ($10 * 2.58999) :   ($6 != -9999 && $6 != 0 && ($10 == -9999 || $10 == 0)) ? ($6 * 2.58999) : -9999 ;
   # Print selected fields
-  print $2, $1, $3, best_lon, best_lat, area  , $7 
-}' |   sed 's/-9999\.0\b/-9999/g'   > /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogueUSGS_IDs_noori_db_lon_lat_area_alt.txt 
+  print $2, $1, $3, best_lon, best_lat, area , $7 
+}' | sed 's/-9999\.0\b/-9999/g' > $IN/quantiles/station_catalogueUSGS_IDs_noori_db_lon_lat_area_alt.txt 
+####  usgs drain_area_va  in square miles 
 
+### add only one point  that is  -9999 
+join -1 2 -2 1 -v 1  <(grep USGS  $IN/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | sort -k 2,2) <(grep -e USGS -e USFS $IN/usgs/usgs_sites_USA.tsv | awk -F '\t' '{  print int($2),$6,$5,$7,$8}' | sort -k 1,1 ) | awk '{print $2,$1,$3,$4,$5,$6,$7}'  | sed 's/-9999\.0\b/-9999/g' >> $IN/quantiles/station_catalogueUSGS_IDs_noori_db_lon_lat_area_alt.txt 
 
-
-
-### add only one point 
-join -1 2 -2 1 -v 1  <(grep USGS  /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | sort -k 2,2) <(grep -e USGS -e USFS /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/usgs/usgs_sites_USA.tsv | awk -F '\t' '{  print int($2),$6,$5,$7,$8}' | sort -k 1,1 ) | awk '{print $2,$1,$3,$4,$5,$6,$7}'  | sed 's/-9999\.0\b/-9999/g' >> /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogueUSGS_IDs_noori_db_lon_lat_area_alt.txt 
-
-grep USGS  /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | wc -l ## 18580 
-wc -l /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogueUSGS_IDs_noori_db_lon_lat_area_alt.txt          ## 18580
+grep USGS $IN/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | wc -l ## 18580 
+wc -l $IN/quantiles/station_catalogueUSGS_IDs_noori_db_lon_lat_area_alt.txt          ## 18580
 
 ######################### HYDAT
 ### in HYDAT no elevation 
-join -1 2 -2 1 <(grep HYDAT /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | sort -k 2,2) <(awk -F '\t' '{  print $2,$7,$6,($8 == "" ? "-9999" : $8)}' /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/hydat/hydat_sel.tsv    | sort -k 1,1 )  |  awk '{ 
+join -1 2 -2 1 <(grep HYDAT $IN/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | sort -k 2,2) <(awk -F '\t' '{  print $2,$7,$6,($8 == "" ? "-9999" : $8)}' $IN/hydat/hydat_sel.tsv    | sort -k 1,1 )  |  awk '{ 
   # Compare $4 vs $8 → choose more precise longitude
   p4 = match($4, /\./) ? length(substr($4, index($4, ".") + 1)) : 0;
   p8 = match($8, /\./) ? length(substr($8, index($8, ".") + 1)) : 0;
@@ -120,30 +127,30 @@ join -1 2 -2 1 <(grep HYDAT /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantil
   p9 = match($9, /\./) ? length(substr($9, index($9, ".") + 1)) : 0;
   best_lat = (p9 > p5) ? $9 : $5;
   # Handle area: if $6 == -9999 and $10 != 0 then use $10, else keep -9999
-  area = ($6 == -9999 && $10 != 0) ? $10 : $6;
+  area = ($6 == -9999 && $10 == -9999) ? -9999 : ($6 == -9999) ? $10 : ($6 != -9999 && $10 != -9999) ? $10 : $6 ;
   # Print selected fields
   print $2, $1, $3, best_lon, best_lat, area  , $7
-}' |   sed 's/-9999\.0\b/-9999/g'   > /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogueHYDAT_IDs_noori_db_lon_lat_area_alt.txt 
+}' |   sed 's/-9999\.0\b/-9999/g'   > $IN/quantiles/station_catalogueHYDAT_IDs_noori_db_lon_lat_area_alt.txt 
 
-wc -l /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogueHYDAT_IDs_noori_db_lon_lat_area_alt.txt # 5444 
-grep HYDAT   /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | wc -l # 5444
+wc -l $IN/quantiles/station_catalogueHYDAT_IDs_noori_db_lon_lat_area_alt.txt # 5444 
+grep HYDAT   $IN/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | wc -l # 5444
 
 ##### BOM 
 
-grep BOM  /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | sed 's/-9999\.0\b/-9999/g' > /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogueBOM_IDs_noori_db_lon_lat_area_alt.txt
+grep BOM  $IN/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | sed 's/-9999\.0\b/-9999/g' > $IN/quantiles/station_catalogueBOM_IDs_noori_db_lon_lat_area_alt.txt
 
 ### CHY 
-grep CHY   /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | sed 's/-9999\.0\b/-9999/g' > /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogueCHY_IDs_noori_db_lon_lat_area_alt.txt
+grep CHY   $IN/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | sed 's/-9999\.0\b/-9999/g' > $IN/quantiles/station_catalogueCHY_IDs_noori_db_lon_lat_area_alt.txt
 
 ### WRIS
-grep WRIS  /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | sed 's/-9999\.0\b/-9999/g' > /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogueWRIS_IDs_noori_db_lon_lat_area_alt.txt
+grep WRIS $IN/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | awk '{print $1,"-9999",$2,$3,$4,$5,$6}' | sed 's/-9999\.0\b/-9999/g' > $IN/quantiles/station_catalogueWRIS_IDs_noori_db_lon_lat_area_alt.txt
 
 ### ArcticGRO
-grep ArcticGRO  /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | sed 's/-9999\.0\b/-9999/g' > /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogueArcticGRO_IDs_noori_db_lon_lat_area_alt.txt
+grep ArcticGRO  $IN/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | sed 's/-9999\.0\b/-9999/g' > $IN/quantiles/station_catalogueArcticGRO_IDs_noori_db_lon_lat_area_alt.txt
 
 #### ANA
 
-join -1 2 -2 1 <(grep " ANA " /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | sort -k 2,2) <(awk -F ',' '{print $3,$1,$2,($12 == "" ? "-9999" : $12) ,($11 == "" ? "-9999" : $11) }'  /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/ana/ana_full_all.csv   | sort -k 1,1 )  |  awk '{
+join -1 2 -2 1 <(grep " ANA " $IN/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | sort -k 2,2) <(awk -F ',' '{print $3,$1,$2,($12 == "" ? "-9999" : $12) ,($11 == "" ? "-9999" : $11) }'  $IN/ana/ana_full_all.csv   | sort -k 1,1 )  |  awk '{
   # Compare $4 vs $8 → choose more precise longitude  
   p4 = match($4, /\./) ? length(substr($4, index($4, ".") + 1)) : 0;  
   p8 = match($8, /\./) ? length(substr($8, index($8, ".") + 1)) : 0;  
@@ -153,29 +160,67 @@ join -1 2 -2 1 <(grep " ANA " /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quant
   p9 = match($9, /\./) ? length(substr($9, index($9, ".") + 1)) : 0;              
   best_lat = (p9 > p5) ? $9 : $5;            
   # Handle elevation: if $6 == -9999 and $10 != 0 then use $10, else keep -9999     
-  area = ($6 == -9999 && $10 != 0) ? $10 : $6;         
+  area = ($6 == -9999 && $10 == -9999) ? -9999 : ($6 == -9999 && $10 != 0) ? ($10) : ($6 != -9999 && $10 != -9999) ? ($10) : ($6) ;
   elv =  ($7 == -9999 && $11 != 0) ? $11 : $7;         
   # Print selected fields                            
   print $2, $1, $3, best_lon, best_lat, area  , elv
-}' | sed 's/-9999\.0\b/-9999/g' | sed 's/-99999\b/-9999/g'   > /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogueANA_IDs_noori_db_lon_lat_area_alt.txt
+}' | sed 's/-9999\.0\b/-9999/g' | sed 's/-99999\b/-9999/g'   > $IN/quantiles/station_catalogueANA_IDs_noori_db_lon_lat_area_alt.txt
 
-wc -l /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogueANA_IDs_noori_db_lon_lat_area_alt.txt # 3616
-grep " ANA " /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt  | wc -l # 3616
+wc -l $IN/quantiles/station_catalogueANA_IDs_noori_db_lon_lat_area_alt.txt # 3616
+grep " ANA " $IN/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt  | wc -l # 3616
 
 ############# CCCRR ##############
 
-join -1 2 -2 1 <(grep " CCCRR " /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | sort -k 2,2) <(awk -F ',' '{  print $1,$4,$3,$11  }'  /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/cccrr/catchment_attributes.csv    | sort -k 1,1 )  |  awk '{  print $2, $1, $3, $4 , $5 , $10  , $7 }' | sed 's/-9999\.0\b/-9999/g'   > /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogueCCCRR_IDs_noori_db_lon_lat_area_alt.txt
+join -1 2 -2 1 <(grep " CCCRR " $IN/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | sort -k 2,2) <(awk -F ',' '{  print $1,$4,$3,$11  }'  $IN/cccrr/catchment_attributes.csv    | sort -k 1,1 )  |  awk '{  print $2, $1, $3, $4 , $5 , $10  , $7 }' | sed 's/-9999\.0\b/-9999/g'   > $IN/quantiles/station_catalogueCCCRR_IDs_noori_db_lon_lat_area_alt.txt
+
+join -1 2 -2 1 -v 1 <(grep " CCCRR " $IN/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | sort -k 2,2) <(awk -F ',' '{ print $1,$4,$3,$11}' $IN/cccrr/catchment_attributes.csv | sort -k 1,1) |\
+ awk '{print $2,$1,$3,$4,$5,$6,$7}' |     sed 's/-9999\.0\b/-9999/g' >> $IN/quantiles/station_catalogueCCCRR_IDs_noori_db_lon_lat_area_alt.txt
+
+grep " CCCRR " $IN/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | wc -l # 699 
+wc -l $IN/quantiles/station_catalogueCCCRR_IDs_noori_db_lon_lat_area_alt.txt            # 699 
+
+############## MERGE all 
+
+head -1 $IN/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt > $IN/quantiles/station_catalogueUPD_IDs_noori_db_lon_lat_area_alt.txt
+
+awk '{printf "%s %s %s %.6f %.6f %s %s\n", $1, $2, $3, $4, $5, ($6 == -9999 ? -9999 : sprintf("%.2f", $6)), ($7 == -9999 ? -9999 : sprintf("%.2f", $7)) }'    $IN/quantiles/station_catalogue{USGS,ANA,ArcticGRO,BOM,CCCRR,CHY,GRDC,HYDAT,WRIS}_IDs_noori_db_lon_lat_area_alt.txt >> $IN/quantiles/station_catalogueUPD_IDs_noori_db_lon_lat_area_alt.txt
+
+#######
+
+awk '{if($6!=-9999 && NR>1) print $1,$2,$3,$4,$5,$6}' $IN/quantiles/station_catalogueUPD_IDs_noori_db_lon_lat_area_alt.txt | grep -v ArcticGRO  >  /tmp/test.txt 
+
+seq 1 $( wc -l /tmp/test.txt | cut -d " " -f 1  ) | xargs -n 1 -P 20 bash -c  $'
+export n=$1
+    read IDs IDl ST x y area <<< $(awk -v n=$n \'{if(NR==n) print  }\'   /tmp/test.txt   )
+    # echo proncessing coordinates $x $y
+    for file in ../HydroBASINS/hybas_??_lev12_v1c.shp ; do
+        areaHB=$(ogrinfo $file  -al -spat $x $y $x $y  2>/dev/null   | grep " UP_AREA" | awk  \'{ if (NR==1) print $4}\')
+	if [[ -n "$areaHB" ]]; then
+	    echo $IDs $IDl $ST $x $y $area $areaHB
+	fi
+    done
+' _ > $IN/quantiles/station_catalogueUPD_IDs_lon_lat_area_areaHB.txt
+
+###########################  points for snapping base on the flow area. 
+
+########### pints where are DB and HB are similar                  18920  
+awk '{ areaSP =  ($6 < $7) ? $6* 0.9 : $7*0.9 ; if ($6/$7 >= 0.8 && $6/$7 <= 1.2)   print $1,$2,$3,$4,$5,$6,$7,areaSP }' $IN/quantiles/station_catalogueUPD_IDs_lon_lat_area_areaHB.txt > $IN/snapFlow_area/station_catalogueUPD_IDs_lon_lat_areaDB_araHB_area4SN_DBHB.txt
+
+########### points where are DB is very large  compare to areaHB    1132
+awk '{ if ($6/$7 > 1.2) print $1,$2,$3,$4,$5,$6,$7,$6*0.8 }' $IN/quantiles/station_catalogueUPD_IDs_lon_lat_area_areaHB.txt > $IN/snapFlow_area/station_catalogueUPD_IDs_lon_lat_areaDB_araHB_area4SN_DBhb.txt 
+
+########### points where are DB is very small   compare to areaHB    13065  
+awk '{ if ($6/$7 < 0.8) print $1,$2,$3,$4,$5,$6,$7,$6*0.8 }' $IN/quantiles/station_catalogueUPD_IDs_lon_lat_area_areaHB.txt > $IN/snapFlow_area/station_catalogueUPD_IDs_lon_lat_areaDB_araHB_area4SN_dbHB.txt 
+
+########### pints where area DB has a value and HB not a value        1488 
+join -1 1 -2 1  -v 1 <( sort -k 1,1 $IN/quantiles/station_catalogueUPD_IDs_noori_db_lon_lat_area_alt.txt) <( sort -k 1,1   $IN/quantiles/station_catalogueUPD_IDs_lon_lat_area_areaHB.txt ) | awk '{ if ($6!=-9999) print $1,$2,$3,$4,$5,$6,$7,$6*0.8  }' > $IN/snapFlow_area/station_catalogueUPD_IDs_lon_lat_areaDB_araHB_area4SN_DB__.txt
+
+exit 
+
+#####
 
 
 
-join -1 2 -2 1 -v 1 <(grep " CCCRR " /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogue_IDs_noori_db_lon_lat_area_alt.txt | sort -k 2,2) <(awk -F ',' '{  print $1,$4,$3,$11  }'  /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/cccrr/catchment_attributes.csv    | sort -k 1,1 )   | sed 's/-9999\.0\b/-9999/g'   > /gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/quantiles/station_catalogueCCCRR_IDs_noori_db_lon_lat_area_alt.txt
-
-
-
-
-#########################
-
-														      
 
 join -1 1 -2 1 <( sort -k 1,1   $IN/quantiles/IDs_IDcu_x_y.txt ) <( sort -k 1,1  $IN/quantiles/station_catalogue_IDs_lon_lat_area_alt.txt ) | cut -d " " -f 1,2,3,4,7,8 | sort -k 1 -g > $IN/snapFlow_area/IDs_IDcu_x_y_area_alt.txt
 

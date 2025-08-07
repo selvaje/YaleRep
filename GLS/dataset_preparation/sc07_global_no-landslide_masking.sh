@@ -6,7 +6,7 @@
 #SBATCH -e /vast/palmer/scratch/sbsc/sm3665/stderr/sc07_global_no-landslide_masking.sh.%A_%a.err
 #SBATCH --job-name=sc07_global_no-landslide_masking.sh
 #SBATCH --mem=32G
-#SBATCH --array=1
+#SBATCH --array=1-116
 #### 1-116 TOTAL GLOBAL TILES
 
 ### === SBATCH LINE ===
@@ -19,8 +19,8 @@ export INPUT_TXT="$DATASET_FOLDER/IDu_x_y_pa.txt"
 export INPUT_GPKG="$DATASET_FOLDER/points_presence.gpkg"
 export INPUT_SUB="$RAM/points_tile_${TILE}.gpkg"
 export SLOPE="/gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT/geomorphometry_90m_wgs84/slope/all_slope_90M_dis.vrt"
-#TEST#export ICE="/gpfs/gibbs/pi/hydro/hydro/dataproces/ESALC/LC220_snowper/permanent_cryosphere_*_90m.tif"
-#TEST#export WATER="/gpfs/gibbs/pi/hydro/hydro/dataproces/ESALC/LC210_waterper/permanent_water_bodies_*_90m.tif"
+export ICE="/gpfs/gibbs/pi/hydro/hydro/dataproces/ESALC/LC220_snowper/permanent_cryosphere_*_90m.tif"
+export WATER="/gpfs/gibbs/pi/hydro/hydro/dataproces/ESALC/LC210_waterper/permanent_water_bodies_*_90m.tif"
 export OUTPUT_DIR="/gpfs/gibbs/pi/hydro/hydro/dataproces/GLS/global_no-landslide_area"
 export BUFFERSIZE=900
 export MH="/gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT_HYDRO"
@@ -72,14 +72,17 @@ echo "EXTENDED TILE CORNER: N=$Nplus, S=$Splus, E=$Eplus, W=$Wplus"
 ~/bin/echoerr "EXTENDED TILE CORNER: N=$Nplus, S=$Splus, E=$Eplus, W=$Wplus"
 
 ### === CREATE THE TILE EXTENSION FOR SLOPE, PERMANENT ICE COVER, PERMANENT WATER BODIES ===
-export TILE_FILE="$RAM/slope_tile_${TILE}.tif"
-gdal_translate -projwin $W $N $E $S -co COMPRESS=DEFLATE -co ZLEVEL=9 $SLOPE $TILE_FILE
+export SLOPE_TILE_FILE="$RAM/slope_tile_${TILE}.tif"
+gdal_translate -projwin $W $N $E $S -co COMPRESS=DEFLATE -co ZLEVEL=9 $SLOPE $SLOPE_TILE_FILE
+echo "GLOBAL SLOPE tile created."
 
-#TEST#export ICE_TILE_FILE="$RAM/ice_tile_${TILE}.tif"
-#TEST#gdal_translate -projwin $W $N $E $S -co COMPRESS=DEFLATE -co ZLEVEL=9 $ICE $ICE_TILE_FILE
+export ICE_TILE_FILE="$RAM/ice_tile_${TILE}.tif"
+gdal_translate -projwin $W $N $E $S -co COMPRESS=DEFLATE -co ZLEVEL=9 $ICE $ICE_TILE_FILE
+echo "GLOBAL CRYOSPHERE tile created."
 
-#TEST#export WATER_TILE_FILE="$RAM/water_tile_${TILE}.tif"
-#TEST#gdal_translate -projwin $W $N $E $S -co COMPRESS=DEFLATE -co ZLEVEL=9 $WATER $WATER_TILE_FILE
+export WATER_TILE_FILE="$RAM/water_tile_${TILE}.tif"
+gdal_translate -projwin $W $N $E $S -co COMPRESS=DEFLATE -co ZLEVEL=9 $WATER $WATER_TILE_FILE
+echo "GLOBAL HYDROSPHERE tile created."
 
 ### === SELECT ONLY VALID PRESENCE POINTS AND SAVE THEM AS GPKG ===
 ## Verify and create the presence file 'points_presence.gpkg'
@@ -115,17 +118,20 @@ POINT_COUNT=$(ogrinfo $INPUT_SUB -al -so 2>/dev/null | grep "Feature Count" | aw
 if [ "$POINT_COUNT" -eq 0 ]; then
 
     ## 1 - No points in tile case
-    echo "$POINT_COUNT points found in $TILE tile. Proceeding with slope-based masking only."
+    echo "$POINT_COUNT points found in $TILE tile. Proceeding with slope/ice/hydro masking only."
     module load GRASS/8.2.0-foss-2022b
-    grass -f --text --tmp-location $TILE_FILE <<'EOF'
+    grass -f --text --tmp-location $SLOPE_TILE_FILE <<'EOF'
       ### INGEST SLOPE BASED ON TILE EXTENSION
-      r.external input=$TILE_FILE output=slope --overwrite
-      #TEST#r.external input=$ICE_TILE_FILE output=ice --overwrite
-      #TEST#r.external input=$WATER_TILE_FILE output=water --overwrite
+      r.external input=$SLOPE_TILE_FILE output=slope --overwrite
+      r.external input=$ICE_TILE_FILE output=ice --overwrite
+      r.external input=$WATER_TILE_FILE output=water --overwrite
       
-      ### CREATE A MASK BASED ON A SLOPE THRESHOLDING (IF <=5 = 1 ELSE =0, NODATA=0)
-      r.mapcalc "no_landslide_area = if(slope <= 5, 1, 0)" --overwrite
-      #TEST#r.mapcalc "no_landslide_area = if(slope <= 5 && ice == 1 && water == 1, 1, 0)" --overwrite
+      ### CREATE A MASK BASED WITHOUT PRESENCE POINT EXCLUDING BUFFERS
+      ## Combine:
+      ## slope mask (slope <= 5 = 1, slope >5 = 0);
+      ## permanent cryosphere presence (=0 presence, =1 absence);
+      ## permanent hydrosphere presence (=0 presence, =1 absence):
+      r.mapcalc "no_landslide_area = if(slope <= 5 && ice == 1 && water == 1, 1, 0)" --overwrite
       
       ### EXPORT THE MASKED TILE
       r.out.gdal -f -c -m input=no_landslide_area output=$OUTPUT_DIR/no_landslide_area_${TILE}.tif format=GTiff nodata=0 createopt="COMPRESS=DEFLATE,ZLEVEL=9" type=Byte --overwrite
@@ -135,13 +141,13 @@ EOF
 else
 
     ## 2 - No points in tile case
-    echo "$POINT_COUNT points found in $TILE tile. Proceeding with combined buffer and slope based masking."
+    echo "$POINT_COUNT points found in $SLOPE_TILE_FILE tile. Proceeding with combined buffer and slope based masking."
     module load GRASS/8.2.0-foss-2022b
-    grass -f --text --tmp-location $TILE_FILE <<'EOF'
+    grass -f --text --tmp-location $SLOPE_TILE_FILE <<'EOF'
       ## INGEST SLOPE BASED ON TILE EXTENSION
-      r.external input=$TILE_FILE output=slope --overwrite
-      #TEST#r.external input=$ICE_TILE_FILE output=ice --overwrite
-      #TEST#r.external input=$WATER_TILE_FILE output=water --overwrite
+      r.external input=$SLOPE_TILE_FILE output=slope --overwrite
+      r.external input=$ICE_TILE_FILE output=ice --overwrite
+      r.external input=$WATER_TILE_FILE output=water --overwrite
 
       ## INCREASE TILE EXTENSION FOR THE BUFFER MASKING
       g.region n=$Nplus s=$Splus e=$Eplus w=$Wplus
@@ -157,9 +163,12 @@ else
       g.region n=$N s=$S e=$E w=$W
 
       ## CALCULATE FINAL RASTER MASK
-      ## Combine slope mask (slope <= 5 = 1, slope >5 = 0) and buffer mask (outside buffer = 1, inside = 0)
-      r.mapcalc "no_landslide_area = if(slope <= 5 && isnull(points_buffer_rast), 1, 0)" --overwrite
-      #TEST#r.mapcalc "no_landslide_area = if(slope <= 5 && isnull(points_buffer_rast) && ice == 1 && water == 1, 1, 0)" --overwrite 
+      ## Combine:
+      ## slope mask (slope <= 5 = 1, slope >5 = 0);
+      ## buffer mask (outside buffer = 1, inside = 0);
+      ## permanent cryosphere presence (=0 presence, =1 absence);
+      ## permanent hydrosphere presence (=0 presence, =1 absence):  
+      r.mapcalc "no_landslide_area = if(slope <= 5 && isnull(points_buffer_rast) && ice == 1 && water == 1, 1, 0)" --overwrite 
       
       ### MASKED TILE EXPORT
       r.out.gdal -f -c -m input=no_landslide_area output=$OUTPUT_DIR/no_landslide_area_${TILE}.tif format=GTiff nodata=0 createopt="COMPRESS=DEFLATE,ZLEVEL=9" type=Byte --overwrite
