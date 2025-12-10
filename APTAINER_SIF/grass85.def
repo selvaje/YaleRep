@@ -1,0 +1,169 @@
+Bootstrap: docker
+From: debian:bookworm
+
+%post
+
+# Configure APT sources
+echo "deb http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware" > /etc/apt/sources.list
+echo "deb http://deb.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware" >> /etc/apt/sources.list
+echo "deb http://deb.debian.org/debian bookworm-updates main contrib non-free non-free-firmware" >> /etc/apt/sources.list
+
+# Update and clean package lists
+apt clean
+rm -rf /var/lib/apt/lists/*
+apt update -y
+
+# Install required dependencies
+apt install -y \
+    build-essential \
+    curl \
+    git \
+    gzip \
+    tar \
+    unzip \
+    cmake \
+    libtool \
+    swig \
+    sqlite3 \
+    zlib1g-dev \
+    libproj-dev \
+    libgeotiff-dev \
+    libgsl-dev \
+    libfann-dev \
+    libfftw3-dev \
+    libssl-dev \
+    libshp-dev \
+    uthash-dev \
+    libopenblas-dev \
+    liblapack-dev \
+    liblapacke-dev \
+    libjsoncpp-dev \
+    libboost-serialization-dev \
+    libboost-filesystem-dev \
+    flex \
+    bison \
+    libncurses5-dev \
+    libreadline-dev \
+    libbz2-dev \
+    libx11-dev \
+    libxmu-dev \
+    libxi-dev \
+    libjpeg-dev \
+    libpng-dev \
+    libtiff-dev \
+    libsqlite3-dev \
+    libcurl4-openssl-dev \
+    libspatialite-dev \
+    libkml-dev \
+    libpq-dev \
+    libzstd-dev \
+    mesa-common-dev \
+    libglu1-mesa-dev \
+    libcairo2-dev \
+    gettext \
+    libomp-16-dev \
+    fakeroot \
+    python-is-python3 \
+    libnlopt-dev \
+    libarmadillo-dev \
+    pktools \
+    python3-gdal \
+    python3-numpy \
+    python3-six \
+    python3-matplotlib \
+    python3-dateutil \
+    wx-common \
+    gawk \
+    doxygen \
+    python3-sphinx
+
+# Set working directory
+mkdir -p /usr/local/src
+cd /usr/local/src
+
+##############################
+# Install GDAL 3.5.3
+##############################
+curl -L -o gdal-3.5.3.tar.gz https://github.com/OSGeo/gdal/archive/refs/tags/v3.5.3.tar.gz
+tar -xzvf gdal-3.5.3.tar.gz
+cd gdal-3.5.3
+mkdir build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -DGDAL_USE_OPENMP=ON
+make -j$(nproc)
+make install || exit 1
+ldconfig
+
+##############################
+# Install PDAL 2.5.4
+##############################
+cd /usr/local/src
+git clone https://github.com/PDAL/PDAL.git
+cd PDAL
+git checkout 2.5.4
+mkdir build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_PLUGIN_CPD=OFF -DGDAL_DIR=/usr/local
+make -j$(nproc)
+make install || exit 1
+ldconfig
+
+##############################
+# Install GRASS GIS 8.5 (snapshot)
+##############################
+cd /usr/local/src
+curl -L -o grass-8.5.git_src_snapshot_2025_05_17.tar.gz https://grass.osgeo.org/grass85/source/snapshot/grass-8.5.git_src_snapshot_2025_05_17.tar.gz
+tar -xzvf grass-8.5.git_src_snapshot_2025_05_17.tar.gz
+cd grass-8.5.git_src_snapshot_2025_05_17
+./configure \
+    --with-cxx \
+    --with-gdal=/usr/local/bin/gdal-config \
+    --with-proj=/usr/bin/proj \
+    --with-geos \
+    --with-python=/usr/bin/python3 \
+    --with-sqlite \
+    --with-fftw \
+    --with-readline \
+    --with-nls \
+    --with-blas \
+    --with-lapack \
+    --with-pdal \
+    --with-openmp \
+    --with-pthread \
+    --prefix=/usr/local/grass-8.5
+make -j$(nproc) || exit 1
+make install || exit 1
+
+# Verify GRASS GIS installation
+if [ ! -f /usr/local/grass-8.5/grass85/include/Make/Module.make ]; then
+    echo "Error: GRASS GIS installation incomplete, missing /usr/local/grass-8.5/grass85/include/Make/Module.make"
+    exit 1
+fi
+
+# Install GRASS Addons (r.stream.*, r.accumulate, r.flowaccumulation, r.mapcalc.tiled)
+cd /usr/local/src
+git clone --branch grass8 https://github.com/OSGeo/grass-addons.git grass-addons
+cd grass-addons/src/raster
+
+# Compile r.stream.*, r.accumulate, r.flowaccumulation, and r.mapcalc.tiled
+for module in r.stream.extract r.stream.order r.stream.basins r.stream.distance r.stream.channel r.stream.snap r.stream.stats r.accumulate r.flowaccumulation r.mapcalc.tiled; do
+    if [ -d "$module" ]; then
+        cd $module
+        # Modify Makefile to include OpenMP flags (if applicable)
+        sed -i 's/CFLAGS =/CFLAGS = -fopenmp/' Makefile || true
+        sed -i 's/LDFLAGS =/LDFLAGS = -fopenmp -lomp/' Makefile || true
+        make MODULE_TOPDIR=/usr/local/grass-8.5/grass85 || echo "Warning: Failed to compile $module"
+        # Check if binary exists in bin/ or scripts/
+        if [ -f "/usr/local/grass-8.5/grass85/bin/$module" ] || [ -f "/usr/local/grass-8.5/grass85/scripts/$module" ]; then
+            echo "Binary or script for $module already installed, skipping make install"
+        else
+            make MODULE_TOPDIR=/usr/local/grass-8.5/grass85 install || echo "Warning: Failed to install $module"
+        fi
+        cd ..
+    fi
+done
+
+# Clean up
+apt autoremove -y
+apt clean
+rm -rf /usr/local/src/*

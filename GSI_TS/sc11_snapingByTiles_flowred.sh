@@ -58,6 +58,8 @@ echo          $file
 
 #### old    awk '{ print $1, $2 }'  $RAM/x_y_ID_$TILE.txt >  $RAM/x_y_$TILE.txt
 
+##### quantiles/station_catalogueUPD_IDs_noori_db_lon_lat_area_alt.txt 41264 
+
 paste -d " " <( awk '{if(NR>1) print $1,$4,$5}'  $Q/station_catalogueUPD_IDs_noori_db_lon_lat_area_alt.txt )  <( gdallocationinfo -geoloc -valonly $file  <  <( awk '{if(NR>1) print $4,$5}'   $Q/station_catalogueUPD_IDs_noori_db_lon_lat_area_alt.txt  ) ) | awk '{if (NF==4) print $1, $2,$3,$4 }'  > $RAM/IDs_x_y_area_NOarea10_warea_$TILE.txt 
 
 if [ -s $RAM/IDs_x_y_area_NOarea10_warea_$TILE.txt   ] ; then
@@ -143,10 +145,52 @@ exit
 
 wc -l $Q/station_catalogueUPD_IDs_noori_db_lon_lat_area_alt.txt  ### 41264
 
-join -1 1 -2 1 <(awk '{print $1,$4,$5}' $Q/station_catalogueUPD_IDs_noori_db_lon_lat_area_alt.txt | sort -k 1,1) <(awk '{ if ($4 != 2)  print $3,$1,$2}' $INP/../snapFlow_txt_red/x_y_snapFlowYesSnap_*.txt | sort -k 1,1)  > $INP/IDs_x_y_xsnap_ysnap.txt
+join -1 1 -2 1 <(awk '{print $1,$4,$5}' $Q/station_catalogueUPD_IDs_noori_db_lon_lat_area_alt.txt | sort -k 1,1) <(awk '{ if ($4 != 2)  print $3,$1,$2}' $INP/../snapFlow_txt_red/x_y_snapFlowYesSnap_*.txt | sort -k 1,1)  > $INP/IDs_x_y_xsnap_ysnap.txt ### 41231 
 awk '{print $3,$2,$5,$4}' $INP/IDs_x_y_xsnap_ysnap.txt  >  /tmp/cord.txt
 
 awk -f /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/haversine_distance.awk /tmp/cord.txt > /tmp/distance.txt
 paste -d " " $INP/IDs_x_y_xsnap_ysnap.txt  /tmp/distance.txt > $INP/IDs_x_y_xsnap_ysnap_dist.txt 
 wc -l  $INP/IDs_x_y_xsnap_ysnap_dist.txt #### 41231  
+
+
+
 exit
+
+
+### the following stations fall out side the tile check later
+
+join -1 1 -2 1 -v 2 <( sort -k 1,1 snapFlow_red/IDs_x_y_xsnap_ysnap_dist.txt) <(sort -k 1,1  */station_catalogueUPD_IDs_noori_db_lon_lat_area_alt.txt ) 
+
+1 2901100 GRDC -179.250000 66.410000 207.00 42.00
+36301 CHY 109.983333 37.650000 -9999.000000 -9999 0.00
+37653 212270 BOM 74.767131 -85.527474 -9999 -9999
+37654 212271.2 BOM 74.767131 -85.527474 -9999 -9999
+37744 215240 BOM 74.767041 -85.527471 -9999 -9999
+37745 215241.2 BOM 74.767041 -85.527471 -9999 -9999
+39741 421903 BOM 74.767294 -85.527471 -9999 -9999
+41025 ACELBR031RCM BOM 26.767244 -85.527192 -9999 -9999
+41026 ACELBR032RCM BOM 26.767243 -85.527192 -9999 -9999
+41027 ACELBR033RCM BOM 26.767242 -85.527192 -9999 -9999
+41028 ACELBR034RCM BOM 26.767240 -85.527192 -9999 -9999
+41029 ACELBR035RCM BOM 26.767240 -85.527192 -9999 -9999
+41030 ACELBR036RCM BOM 26.767240 -85.527192 -9999 -9999
+41031 ANOBMRC001RCM BOM 26.767240 -85.527192 -9999 -9999
+41032 ANOBMRC002RCM BOM 26.767240 -85.527192 -9999 -9999
+41033 ANOBMRC003RCM BOM 26.767240 -85.527192 -9999 -9999
+41034 ANOBMRC006RCM BOM 26.767240 -85.527192 -9999 -9999
+41035 ANOBMRC007RCM BOM 26.767240 -85.527192 -9999 -9999
+41036 ANOBMRC008RCM BOM 26.767240 -85.527192 -9999 -9999
+41037 ARTPDMYSWS01_1 BOM 26.767240 -85.527192 -9999 -9999
+41038 ARTPDMYSWS02_1 BOM 26.767240 -85.527192 -9999 -9999
+41039 ARTPMRASWS07_1 BOM 26.767240 -85.527192 -9999 -9999
+41040 ARTPNYASWS03_1 BOM 26.767240 -85.527192 -9999 -9999
+41041 ARTPPRJSWS01_1 BOM 26.767240 -85.527192 -9999 -9999
+41042 ARTPWAGSWS15_1 BOM 26.767240 -85.527192 -9999 -9999
+41043 ARTPWAGSWS16_1 BOM 26.767240 -85.527192 -9999 -9999
+41044 ARTPWGNSWS01_1 BOM 26.767240 -85.527192 -9999 -9999
+41045 ARTPWOOSWS03_1 BOM 26.767240 -85.527192 -9999 -9999
+41046 ASCBAND001RCM BOM 26.767240 -85.527192 -9999 -9999
+41047 ASCBAND002RCM BOM 26.767240 -85.527192 -9999 -9999
+41254 W4260002.1 BOM 14.771119 -85.526133 -9999 -9999
+7115 5148250 GRDC 124.483333 1.483333 421.40 -9999
+no no_ori database longitude latitude area altitude

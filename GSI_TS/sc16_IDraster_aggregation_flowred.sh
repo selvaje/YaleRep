@@ -24,7 +24,8 @@ export MH=/gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT_HYDRO
 find  /tmp/       -user $USER  -mtime +2  2>/dev/null  | xargs -n 1 -P 2 rm -ifr  
 find  /dev/shm/   -user $USER  -mtime +2  2>/dev/null  | xargs -n 1 -P 2 rm -ifr  
 
-#### aggregate uniq tile IDraster  at uniq global IDraster 
+#### aggregate uniq tile IDraster  at uniq global IDraster
+###  wc -l   $IN/snapFlow_txt_red/IDs_xsnap_ysnap_IDseg_IDr_h??v??.txt  41231 
 rm -f $IN/snapFlow_txt_red/IDs_xsnap_ysnap_IDseg_IDrt_IDru_all.txt
 counter=0
 for file in $IN/snapFlow_txt_red/IDs_xsnap_ysnap_IDseg_IDr_h??v??.txt ; do
@@ -48,7 +49,7 @@ done
 
 join -1 1 -2 1 <( sort -k 1,1 $IN/snapFlow_red/IDs_x_y_xsnap_ysnap_dist_h??v??.txt) <( awk '{print $1,$2,$3,$6}' $IN/snapFlow_txt_red/IDs_xsnap_ysnap_IDseg_IDrt_IDru_all.txt | sort -k 1,1) | sort -k 1,1 -g | awk '{print $1,$2,$3,$4,$5,$6,$10}' > $IN/snapFlow_txt_red/IDs_ximpr_yimpr_xsnap_ysnap_dist_IDr_all.txt
 
-###  wc -l $IN/snapFlow_txt_red/IDs_ximpr_yimpr_areaDB_xsnap_ysnap_areaSFD_dist_IDr_all.txt   33929 
+### wc -l $IN/snapFlow_txt_red/IDs_ximpr_yimpr_xsnap_ysnap_dist_IDr_all.txt    IDrt=33929   IDru=40210    IDr=40212
                                 
 awk '{print $2,$3,$1}'       $IN/snapFlow_txt_red/IDs_ximpr_yimpr_xsnap_ysnap_dist_IDr_all.txt  > $IN/snapFlow_txt_red/ximpr_yimpr_IDs_all.txt
 awk '{print $4,$5,$1,$7}'    $IN/snapFlow_txt_red/IDs_ximpr_yimpr_xsnap_ysnap_dist_IDr_all.txt  > $IN/snapFlow_txt_red/xsnap_ysnap_IDs_IDr_all.txt
@@ -79,6 +80,9 @@ paste -d " "  <(ogrinfo -al $IN/snapFlow_gpkg_red/xsnap_ysnap_IDs_IDr_all_eqdist
 
 echo "IDs Xsnap Ysnap IDr Xcoord Ycoord" > $IN/snapFlow_txt_red/IDs_xsnap_ysnap_IDr_xcoord_ycoord.txt
 join -1 3 -2 1  <(sort -k 3,3 $IN/snapFlow_txt_red/xsnap_ysnap_IDs_IDr_all.txt   ) <(awk '{if (NR>1) print }' $IN/snapFlow_txt_red/IDs_IDr_xcoord_ycoord.txt  | sort -k 1,1)  |  awk '{ print $1,$2,$3,$4,$6,$7}'   >> $IN/snapFlow_txt_red/IDs_xsnap_ysnap_IDr_xcoord_ycoord.txt
+
+## IDs 41231 
+## IDs 40212
 
 ### IDstation IDraster Xcoord Ycoord (lon lat Equidistance)
 ### $IN/snapFlow_txt_red/IDs_xsnap_ysnap_IDr_xcoord_ycoord.txt

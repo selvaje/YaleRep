@@ -1,19 +1,17 @@
 #!/bin/bash
-#SBATCH -p scavenge
-#SBATCH -n 1 -c 22  -N 1
+#SBATCH -p bigmem
+#SBATCH -n 1 -c 16  -N 1
 #SBATCH -t 24:00:00 
 #SBATCH -o /vast/palmer/scratch/sbsc/ga254/stdout/sc31_modeling-pythonALL_RFrunMainRespRenkOptimSnapCor.sh.%A_%a.out
 #SBATCH -e /vast/palmer/scratch/sbsc/ga254/stderr/sc31_modeling_pythonALL_RFrunMainRespRenkOptimSnapCor.sh.%A_%a.err
-#SBATCH --job-name=sc31SnapCor_modeling_pythonALL_RFrunMainRespRenkOptim_split_IDraster_testSpars_RFunID_OOB_all_multicoreE.sh
-#SBATCH --array=400,500,600
-#SBATCH --mem=300G
+#SBATCH --job-name=sc31_SnapCorRFas30_flowred_OOB.sh
+#SBATCH --array=300
+#SBATCH --mem=1400G
 
 ##### #SBATCH --array=300,400,500,600     200,400 250G  500,600 380G
-################ sample is not need with oob_score=False
-#### for obs_leaf in 10 15 20 25 30  ; do for obs_split in 10 15 20 25 30  ; do for sample in 0.9  ; do sbatch --export=obs_leaf=$obs_leaf,obs_split=$obs_split,sample=$sample /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/sc31_modeling_pythonALL_RFrunMainRespRenkOptim_split_IDraster_testSpars_RFunID_SnapCorRFnormal.sh  ; done; done ; done 
+#### for obs_leaf in 100 500  ; do for obs_split in 100 500 ; do for sample in 0.9  ; do sbatch --export=obs_leaf=$obs_leaf,obs_split=$obs_split,sample=$sample  /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/sc31_modeling_pythonALL_RFrunMainRespRenkOptim_split_IDraster_testSpars_RFunID_SnapCorRFas30_flowred_OOB_5bos_chatPar3_imp.sh   ; done; done ; done 
 
-#### for obs_leaf in 2 4 5 8 10 12   ; do for obs_split in 2 4 5 8 10 12 ; do for sample in  0.3 0.4 0.5 0.6 0.7 ; do sbatch --export=obs_leaf=$obs_leaf,obs_split=$obs_split,sample=$sample --dependency=afterany:$(squeue -u $USER -o "%.9F %.80j" | grep sc30_modeling_pythonALL_RFrunMainRespRenk.sh | awk '{ printf ("%i:" , $1)} END {gsub(":","") ; print $1 }' ) /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/sc31_modeling_pythonALL_RFrunMainRespRenkOptim_split_IDraster_testSpars_RFunID_OOB_all_multicoreE.sh  ; done  ; done ; done 
-EXTRACT=/gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/extract4py
+EXTRACT=/gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/extract4py_red
 cd $EXTRACT
 
 module load StdEnv
@@ -34,16 +32,16 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.base import RegressorMixin
+from sklearn.base import RegressorMixin, BaseEstimator, clone
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.pipeline import Pipeline
 from sklearn.cluster import KMeans
 from sklearn import metrics
+from sklearn.utils import check_random_state
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from scipy import stats
 from scipy.stats import pearsonr, spearmanr
 from joblib import Parallel, delayed
-# import dill 
 pd.set_option('display.max_columns', None)  # Show all columns
 
 obs_leaf_s=(os.environ['obs_leaf'])
@@ -123,10 +121,10 @@ dtypes_Y = {
         'Q60', 'Q70', 'Q80', 'Q90', 'QMAX']}
 }
 
-importance = pd.read_csv('../extract4py_sample/importance_sampleAll.txt', header=None, sep=' ', engine='c',low_memory=False)
+importance = pd.read_csv('../extract4py_sample_red/importance_sampleAll.txt', header=None, sep='\s+' , engine='c', low_memory=False)
 # Extract the second column (index 1) for the first 30 rows
 
-include_variables = importance.iloc[:40, 1].tolist()
+include_variables = importance.iloc[:30, 1].tolist()
 # Additional columns to add
 additional_columns = ['IDs', 'IDr', 'YYYY', 'MM', 'Xsnap', 'Ysnap', 'Xcoord', 'Ycoord']
 
@@ -134,33 +132,38 @@ additional_columns = ['IDs', 'IDr', 'YYYY', 'MM', 'Xsnap', 'Ysnap', 'Xcoord', 'Y
 include_variables.extend(additional_columns)
 
 # Read CSV with correct data types 
-Y = pd.read_csv(rf'stationID_x_y_valueALL_predictors_Y1.txt', header=0,sep='\s+', dtype=dtypes_Y, engine='c', low_memory=False)
-X = pd.read_csv(rf'stationID_x_y_valueALL_predictors_X1.txt', header=0,sep='\s+', usecols=lambda col: col in include_variables, dtype=dtypes_X, engine='c', low_memory=False )
+Y = pd.read_csv(rf'stationID_x_y_valueALL_predictors_Y.txt', header=0,sep='\s+', dtype=dtypes_Y, engine='c', low_memory=False)
+X = pd.read_csv(rf'stationID_x_y_valueALL_predictors_X.txt', header=0,sep='\s+', usecols=lambda col: col in include_variables, dtype=dtypes_X, engine='c', low_memory=False )
 
-stations = pd.read_csv('/gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/snapFlow_txt/IDstation_lon_lat_IDraster_Xcoord_Ycoord_2sH.txt', sep=' ', usecols=['IDr', 'Xcoord', 'Ycoord']).drop_duplicates()
+# Ensure X and Y have the same index
+X = X.reset_index(drop=True)
+Y = Y.reset_index(drop=True)
 
-# Perform clustering on the unique station locations
-# num_clusters = 50  # Adjust as needed
-# kmeans = KMeans(n_clusters=num_clusters, random_state=42, n_init='auto')
-# stations['cluster'] = kmeans.fit_predict(stations[['Xcoord', 'Ycoord']])
+stations = pd.read_csv('/gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/snapFlow_txt_red/IDstation_lon_lat_IDraster_Xcoord_Ycoord_2sH.txt', sep='\s+' , usecols=['IDr', 'Xcoord', 'Ycoord']).drop_duplicates()
+
+# Filter IDr with >5 observations for training
+counts = X['IDr'].value_counts()
+valid_idr_train = counts[counts > 10 ].index
+print(f'Filtered training to {len(valid_idr_train)} stations with >5 observations')
 
 # Ensure unique IDraster values are split while maintaining spatial separation
-# train_rasters, test_rasters = train_test_split(stations[['IDr', 'cluster']], test_size=0.2, random_state=24, stratify=stations['cluster'])
-# X_train = X[X['IDr'].isin(train_rasters['IDr'])]
-# Y_train = Y[Y['IDr'].isin(train_rasters['IDr'])]
-# X_test = X[X['IDr'].isin(test_rasters['IDr'])]
-# Y_test = Y[Y['IDr'].isin(test_rasters['IDr'])]
+unique_stations = stations[['IDr', 'Xcoord', 'Ycoord']].drop_duplicates()
+kmeans = KMeans(n_clusters=20, random_state=24).fit(unique_stations[['Xcoord', 'Ycoord']])
+unique_stations['cluster'] = kmeans.labels_
+# Filter stations for training, keep all for testing
+train_stations = unique_stations[unique_stations['IDr'].isin(valid_idr_train)][['IDr', 'cluster']]
+test_stations = unique_stations[['IDr', 'cluster']]
+train_rasters, test_rasters = train_test_split(
+    train_stations,
+    test_size=0.2,
+    random_state=24,
+    stratify=train_stations['cluster']
+)
 
-#  Apply clustering and IDr separation to X and Y
-train_rasters, test_rasters = train_test_split(stations['IDr'], test_size=0.2, random_state=24)
-
-X_train = X[X['IDr'].isin(train_rasters)]
-Y_train = Y[Y['IDr'].isin(train_rasters)]
-X_test = X[X['IDr'].isin(test_rasters)]
-Y_test = Y[Y['IDr'].isin(test_rasters)]
-
-# random split 
-# X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.25, random_state=42)
+X_train = X[X['IDr'].isin(train_rasters['IDr'])]
+Y_train = Y[Y['IDr'].isin(train_rasters['IDr'])]
+X_test = X[X['IDr'].isin(test_rasters['IDr'])]
+Y_test = Y[Y['IDr'].isin(test_rasters['IDr'])]
 
 print('Training and Testing data')
 print('#### X TRAIN ###################')
@@ -177,11 +180,11 @@ print(Y_train.shape)
 print(X_test.shape)
 print(Y_test.shape)
 
-fmt='%i %f %f %i %f %f %i %i %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f'
+fmt = ' '.join(['%.f'] * (len(include_variables)))
 X_column_names = np.array(X.columns)
 X_column_names_str = ' '.join(X_column_names)
-np.savetxt(rf'../predict_splitting/stationID_x_y_valueALL_predictors_XTrainN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', X_train , delimiter=' ', fmt=fmt, header=X_column_names_str, comments='')
-np.savetxt(rf'../predict_splitting/stationID_x_y_valueALL_predictors_XTestN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', X_test , delimiter=' ', fmt=fmt, header=X_column_names_str, comments='')
+np.savetxt(rf'../predict_splitting_red/stationID_x_y_valueALL_predictors_XTrainN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', X_train , delimiter=' ', fmt=fmt, header=X_column_names_str, comments='')
+np.savetxt(rf'../predict_splitting_red/stationID_x_y_valueALL_predictors_XTestN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', X_test , delimiter=' ', fmt=fmt, header=X_column_names_str, comments='')
 
 #### the X_train and so on are sorted as the input
 X_train_index = X_train.index.to_numpy()
@@ -196,14 +199,20 @@ X_test = X_test.sort_values(by='IDr').reset_index(drop=True)
 Y_test_index = Y_test.index.to_numpy()
 Y_test = Y_test.sort_values(by='IDr').reset_index(drop=True)
 
+print(Y_train.describe())
+print(X_train.describe())
+
+print(Y_test.describe())
+print(X_test.describe())
+
 fmt='%i %f %f %i %f %f %i %i %f %f %f %f %f %f %f %f %f %f %f'
 Y_column_names = np.array(Y.columns)     
 Y_column_names_str = ' '.join(Y_column_names) 
-np.savetxt(rf'../predict_splitting/stationID_x_y_valueALL_predictors_YTrainN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', Y_train,  delimiter=' ', fmt=fmt, header=Y_column_names_str, comments='')
-np.savetxt(rf'../predict_splitting/stationID_x_y_valueALL_predictors_YTestN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt' , Y_test ,  delimiter=' ', fmt=fmt, header=Y_column_names_str, comments='')
+np.savetxt(rf'../predict_splitting_red/stationID_x_y_valueALL_predictors_YTrainN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', Y_train,  delimiter=' ', fmt=fmt, header=Y_column_names_str, comments='')
+np.savetxt(rf'../predict_splitting_red/stationID_x_y_valueALL_predictors_YTestN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt' , Y_test ,  delimiter=' ', fmt=fmt, header=Y_column_names_str, comments='')
 
 ### contain only IDr + variables and _np are not sorted
-X_train_np = X_train.drop(columns=['IDs', 'Xsnap', 'Ysnap', 'Xcoord', 'Ycoord', 'YYYY', 'MM','IDr']).to_numpy()  
+X_train_np = X_train.drop(columns=['IDs', 'Xsnap', 'Ysnap', 'Xcoord', 'Ycoord', 'YYYY', 'MM']).to_numpy()        ### only this with IDr
 Y_train_np = Y_train.drop(columns=['IDs', 'Xsnap', 'Ysnap', 'Xcoord', 'Ycoord', 'YYYY', 'MM','IDr']).to_numpy()
 
 X_test_np = X_test.drop(columns=['IDs', 'Xsnap', 'Ysnap', 'Xcoord', 'Ycoord', 'YYYY', 'MM','IDr']).to_numpy()
@@ -217,67 +226,127 @@ print(Y_train_np[:4])
 print(X_train_np.shape)
 print(X_train_np[:4])
 
-class GroupAwareDecisionTree(DecisionTreeRegressor):
-    def __init__(self, *, min_samples_leaf=1, min_samples_split=2):
-        super().__init__(min_samples_leaf=min_samples_leaf, min_samples_split=min_samples_split)
-
-    def fit(self, X, y, sample_weight=None, check_input=True):
-        super().fit(X, y, sample_weight=sample_weight, check_input=check_input)
-
-class BoundedGroupAwareRandomForest(RandomForestRegressor, RegressorMixin):
-    def __init__(self, *args, n_estimators=100, min_samples_leaf=1, min_samples_split=2, max_samples=None, **kwargs):
-        super().__init__(*args, **kwargs)
+class ClusteredRandomForestRegressor(BaseEstimator, RegressorMixin):
+    def __init__(self, 
+                 n_estimators=100, 
+                 max_features='sqrt', 
+                 min_samples_leaf=1, 
+                 min_samples_split=2, 
+                 random_state=None, 
+                 n_jobs=-1,       # parallel jobs
+                 subsample=1.0,   # fraction of rows per tree
+                 **rf_kwargs):
         self.n_estimators = n_estimators
+        self.max_features = max_features
         self.min_samples_leaf = min_samples_leaf
         self.min_samples_split = min_samples_split
-        self.max_samples = max_samples
+        self.random_state = random_state
+        self.n_jobs = n_jobs
+        self.subsample = subsample
+        self.rf_kwargs = rf_kwargs
 
-    def fit(self, X, Y):
-        X = X.astype(np.float32)  # Reduce precision
-        Y = Y.astype(np.float32)  # Reduce precision
-        unique_groups = np.unique(X[:, 0])
+    def _fit_single_tree(self, X_noID, y, groups, rng_seed):
+        rng = check_random_state(rng_seed)
+        unique_groups = np.unique(groups)
+        sampled_groups = rng.choice(unique_groups, size=len(unique_groups), replace=True)
+        mask = np.isin(groups, sampled_groups)
 
-        def train_tree(boot_groups):
-            train_mask = np.isin(X[:, 0], boot_groups)
-            tree = GroupAwareDecisionTree(min_samples_leaf=self.min_samples_leaf, min_samples_split=self.min_samples_split)
-            X_train_filtered = X[train_mask, 1:]
-            Y_train_filtered = Y[train_mask, 1:]
-            tree.fit(X_train_filtered, Y_train_filtered)
-            del X_train_filtered, Y_train_filtered  # Explicitly delete
-            gc.collect()  # Run garbage collection
-            return tree
+        # subsample fraction of rows
+        if self.subsample < 1.0:
+            idx = np.where(mask)[0]
+            n_sub = int(len(idx) * self.subsample)
+            idx_sub = rng.choice(idx, size=n_sub, replace=False)
+            mask_sub = np.zeros_like(mask, dtype=bool)
+            mask_sub[idx_sub] = True
+            mask = mask_sub
+            del idx, n_sub, idx_sub, mask_sub  # cleanup
 
-        self.estimators_ = Parallel(n_jobs=self.n_jobs, prefer='threads')(delayed(train_tree)(
-            np.random.choice(unique_groups, size=len(unique_groups), replace=True)
-        ) for _ in range(self.n_estimators))
+        est = RandomForestRegressor(
+            n_estimators=1,
+            bootstrap=True,
+            max_features=self.max_features,
+            min_samples_leaf=self.min_samples_leaf,
+            min_samples_split=self.min_samples_split,
+            random_state=rng.randint(0, 1e9),
+            **self.rf_kwargs
+        )
+        est.fit(X_noID[mask], y[mask])
+
+        # cleanup
+        del rng, unique_groups, sampled_groups, mask
+        gc.collect()
+
+        return est
+
+    def fit(self, X, y):
+        rng = check_random_state(self.random_state)
+        self.groups_ = X[:, 0].astype(int)
+        X_noID = X[:, 1:]
+
+        seeds = rng.randint(0, 1e9, size=self.n_estimators)
+
+        # Parallel training
+        self.estimators_ = Parallel(n_jobs=self.n_jobs)(
+            delayed(self._fit_single_tree)(X_noID, y, self.groups_, s) for s in seeds
+        )
+
+        # cleanup
+        del rng, seeds, X_noID
+        gc.collect()
+
+        return self
+
+    def _predict_single_tree(self, est, X):
+        preds = est.predict(X)
+
+        # cleanup
+        res = preds.copy()  # keep result alive
+        del preds
+        gc.collect()
+        return res
 
     def predict(self, X):
-        # Check if X has the IDr column
-        if X.shape[1] == X_train_np.shape[1]:  # Assuming X_train_np is available
-            X = X[:, 1:]  # Remove the first column (IDr)
+        # Drop IDr if present
+        if X.shape[1] == self.estimators_[0].n_features_in_ + 1:
+            X = X[:, 1:]
 
-        # Use joblib to parallelize the predictions
-        all_preds = Parallel(n_jobs=self.n_jobs, prefer='threads')(
-            delayed(tree.predict)(X) for tree in self.estimators_
+        # Parallel prediction
+        preds = Parallel(n_jobs=self.n_jobs)(
+            delayed(self._predict_single_tree)(est, X) for est in self.estimators_
         )
-        # Convert list to numpy array
-        all_preds = np.array(all_preds)
-        # Average the predictions
-        y_pred = np.mean(all_preds, axis=0)
-        return np.maximum(y_pred, 0)  # Ensure non-negative predictions
 
-RFreg = RandomForestRegressor(random_state=24, n_estimators=N_EST_I, n_jobs=-1, max_samples=sample_f, oob_score=True, bootstrap=True, min_samples_leaf=obs_leaf_i, min_samples_split=obs_split_i)
+        preds_stack = np.stack(preds, axis=0)
+
+        # cleanup
+        del preds
+        gc.collect()
+
+        return np.maximum(np.mean(preds_stack, axis=0), 0)  # clip at zero
+
+    @property
+    def feature_importances_(self):
+        if not hasattr(self, 'estimators_'):
+            raise ValueError('The model is not fitted yet.')
+        
+        # collect importances from each tree
+        importances = np.array([est.feature_importances_ for est in self.estimators_])
+        
+        # average across trees
+        return np.mean(importances, axis=0)
+
+
+RFreg  = ClusteredRandomForestRegressor(
+    n_estimators=N_EST_I,
+    max_features='sqrt',
+    min_samples_leaf=obs_leaf_i,
+    min_samples_split=obs_split_i,
+    subsample=0.9,
+    random_state=42,
+    n_jobs=-1
+)
 
 print('Fit RF on the training') 
 RFreg.fit(X_train_np, Y_train_np)
-
-if RFreg.oob_score:
-    oob_r2 = RFreg.oob_score_  # This is R² score on OOB samples
-    oob_error = 1 - oob_r2     # A simple proxy for error (depends on context)
-    print(f'OOB R² score: {oob_r2:.4f}')
-    print(f'OOB error (1 - R²): {oob_error:.4f}')
-else:
-    print('OOB scoring is disabled. Set oob_score=True and bootstrap=True to enable it.')
 
 # Make predictions on the training data
 Y_train_pred_nosort = RFreg.predict(X_train_np)
@@ -368,10 +437,10 @@ merge_kge = np.concatenate((initial_array, train_kge_all, test_kge_all, train_kg
 fmt = ' '.join(['%i'] + ['%.2f'] + ['%i'] + ['%i'] + ['%.2f'] * (merge_r.shape[1] - 4))
 
 # Save the results to separate files
-np.savetxt(rf'../predict_score/stationID_x_y_valueALL_predictors_YRFscorerN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', merge_r, delimiter=' ', fmt=fmt)
-np.savetxt(rf'../predict_score/stationID_x_y_valueALL_predictors_YRFscorerhoN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', merge_rho, delimiter=' ', fmt=fmt)
-np.savetxt(rf'../predict_score/stationID_x_y_valueALL_predictors_YRFscoremaeN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', merge_mae, delimiter=' ', fmt=fmt)
-np.savetxt(rf'../predict_score/stationID_x_y_valueALL_predictors_YRFscorekgeN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', merge_kge, delimiter=' ', fmt=fmt)
+np.savetxt(rf'../predict_score_red/stationID_x_y_valueALL_predictors_YscorerN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', merge_r, delimiter=' ', fmt=fmt)
+np.savetxt(rf'../predict_score_red/stationID_x_y_valueALL_predictors_YscorerhoN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', merge_rho, delimiter=' ', fmt=fmt)
+np.savetxt(rf'../predict_score_red/stationID_x_y_valueALL_predictors_YscoremaeN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', merge_mae, delimiter=' ', fmt=fmt)
+np.savetxt(rf'../predict_score_red/stationID_x_y_valueALL_predictors_YscorekgeN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', merge_kge, delimiter=' ', fmt=fmt)
 
 ## Get feature importances and sort them in descending order     
 
@@ -379,7 +448,7 @@ importance = pd.Series(RFreg.feature_importances_, index=X_column_names[8:])
 importance.sort_values(ascending=False, inplace=True)
 print(importance)
 
-importance.to_csv(rf'../predict_importance/stationID_x_y_valueALL_predictors_XimportanceN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', index=True, sep=' ', header=False)
+importance.to_csv(rf'../predict_importance_red/stationID_x_y_valueALL_predictors_XimportanceN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', index=True, sep=' ', header=False)
 
 # Create Pandas DataFrames with the appropriate indices
 Y_train_pred_indexed = pd.DataFrame(Y_train_pred_nosort, index=X_train_index[:Y_train_pred_nosort.shape[0]])
@@ -397,9 +466,14 @@ del Y_train_pred_indexed, Y_test_pred_indexed
 gc.collect()
 
 #### save prediction
+print(Y_train_pred_sort.shape)            
+print(Y_train_pred_sort[:4])        
+print(Y_test_pred_sort.shape)  
+print(Y_test_pred_sort[:4]) 
+
 fmt = '%.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f'
-np.savetxt(rf'../predict_prediction/stationID_x_y_valueALL_predictors_YpredictTrainN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', Y_train_pred_sort, delimiter=' ', fmt=fmt, header='QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='')
-np.savetxt(rf'../predict_prediction/stationID_x_y_valueALL_predictors_YpredictTestN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', Y_test_pred_sort , delimiter=' ', fmt=fmt, header='QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='')
+np.savetxt(rf'../predict_prediction_red/stationID_x_y_valueALL_predictors_YpredictTrainN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', Y_train_pred_sort, delimiter=' ', fmt=fmt, header='QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='')
+np.savetxt(rf'../predict_prediction_red/stationID_x_y_valueALL_predictors_YpredictTestN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{sample_s}sample_2RF.txt', Y_test_pred_sort , delimiter=' ', fmt=fmt, header='QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='')
 
 EOF
 " ## close the sif

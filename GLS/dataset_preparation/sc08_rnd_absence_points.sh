@@ -160,7 +160,7 @@ EOF
 ##  Update output absence file with landslide data structured informations
 	echo "$(date +'%Y-%m-%d %H:%M:%S') - Re-formatting output files..."
 	~/bin/echoerr "$(date +'%Y-%m-%d %H:%M:%S') - Re-formatting output files..."
-	awk 'BEGIN {OFS=" "} {print NR, $1, $2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1}' "$RANDOMPTS_DIR/random_points_${TILE}.txt" > "$RANDOMPTS_DIR/absence_points_${TILE}.txt"
+	awk 'BEGIN {OFS=" "} {print NR, $1, $2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1}' "$RANDOMPTS_DIR/random_points_${TILE}.txt" > "$RANDOMPTS_DIR/absence_points_${TILE}.txt"
 	if [ -f "$RANDOMPTS_DIR/absence_points_${TILE}.txt" ]; then
             NUM_ABSENCE_POINTS=$(wc -l < "$RANDOMPTS_DIR/absence_points_${TILE}.txt")
             echo "$(date +'%Y-%m-%d %H:%M:%S') - ABSENCE POINTS GENERATED: $NUM_ABSENCE_POINTS"

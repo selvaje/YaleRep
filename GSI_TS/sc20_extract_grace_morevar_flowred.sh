@@ -14,7 +14,7 @@
 #### 1825:1958-01-31    
 #### 2532:2016-12-31
 
-## grep CAN /vast/palmer/scratch/sbsc/ga254/stderr/sc20_extract_grace.sh.*_*.err   | awk -F "_" -F "." '{ gsub("_", " " ) ; print  $3 }'   | awk '{ printf("%i," , $2 ) }'
+## grep CAN /vast/palmer/scratch/sbsc/ga254/stderr/sc20_extract_grace.sh.*_*.err | awk -F "_" -F "." '{ gsub("_", " ") ; print $3}' | awk '{ printf("%i," , $2 ) }'
 module load StdEnv
 ulimit -c 0
 source ~/bin/gdal3
@@ -50,7 +50,7 @@ sort -k 1,1 $GSI_TS/snapFlow_txt_red/IDstation_lon_lat_IDraster_Xcoord_Ycoord_2.
 echo "IDs Xsnap Ysnap IDr Xcoord Ycoord" > $GSI_TS/snapFlow_txt_red/IDstation_lon_lat_IDraster_Xcoord_Ycoord_2sH.txt
 sort -k 4,4 -g $GSI_TS/snapFlow_txt_red/IDstation_lon_lat_IDraster_Xcoord_Ycoord_2s.txt >> $GSI_TS/snapFlow_txt_red/IDstation_lon_lat_IDraster_Xcoord_Ycoord_2sH.txt 
 else 
-xsleep 60
+sleep 60
 fi
 
 export DA_TE=$(awk -v ID=$SLURM_ARRAY_TASK_ID '{ if(NR==ID) print $1"_"$2 }' $GSI_TS/metadata/date.txt)
@@ -58,7 +58,7 @@ export YYYY=$(echo $DA_TE | awk -F "_"  '{ print $1 }')
 export MM=$(echo $DA_TE | awk  -F "_"   '{ print $2 }')
 
 echo          DA_TE $DA_TE YYYY $YYYY MM $MM
-~/bin/echoerr DA_TE $DA_TE YYYY $YYYY MM $MM
+~/bin/echoerr "DA_TE $DA_TE YYYY $YYYY MM $MM"
 
 export DA_TE1=$(awk -v n=1  -v ID=$SLURM_ARRAY_TASK_ID '{ if(NR==ID - n) print $1"_"$2 }' $GSI_TS/metadata/date.txt)
 export YYYY1=$(echo $DA_TE1  | awk -F "_"  '{ print $1 }')
@@ -82,7 +82,7 @@ export MM3=$(echo $DA_TE3    | awk -F "_"  '{ print $2 }')
 # mv /tmp/stationID_value_${DA_TE}.txt $EXTRACT/stationID_value_${DA_TE}.txt
 # fi
 
-cp $EXTRACT/../extract/stationID_value_${DA_TE}.txt $RAM/
+cp $EXTRACT/stationID_value_${DA_TE}.txt $RAM/
 
 echo "IDs Xsnap Ysnap IDr Xcoord Ycoord YYYY MM QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX" > $RAM/stationID_x_y_value_${DA_TE}.txt
 join -1 1 -2 1 <(sort -k 1,1 $GSI_TS/snapFlow_txt_red/IDstation_lon_lat_IDraster_Xcoord_Ycoord_2s.txt) <(sort -k 1,1 $RAM/stationID_value_${DA_TE}.txt) | awk -v MM=$MM -v YYYY=$YYYY '{print $1,$2,$3,$4,$5,$6,YYYY,MM,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17}'  >> $RAM/stationID_x_y_value_${DA_TE}.txt
@@ -102,6 +102,9 @@ time paste -d " " \
 <( gdallocationinfo -valonly -geoloc $TERRA/ppt_acc/$YYYY2/ppt_${YYYY2}_$MM2.vrt   < $RAM/x_y_${DA_TE}.txt )  \
 <( gdallocationinfo -valonly -geoloc $TERRA/ppt_acc/$YYYY3/ppt_${YYYY3}_$MM3.vrt   < $RAM/x_y_${DA_TE}.txt )   >> $RAM/predictors_values_a_${DA_TE}.txt  
 
+n_ppt=$(awk '{ if(NF!=4) print $0 }' $RAM/predictors_values_a_${DA_TE}.txt  | wc -l )
+echo n_ppt $n_ppt
+
 sleep 10 
 echo gdallocationinfo b tmin 4 col 
 
@@ -112,6 +115,9 @@ time paste -d " " \
 <( gdallocationinfo -valonly -geoloc $TERRA/tmin_acc/$YYYY1/tmin_${YYYY1}_$MM1.vrt < $RAM/x_y_${DA_TE}.txt ) \
 <( gdallocationinfo -valonly -geoloc $TERRA/tmin_acc/$YYYY2/tmin_${YYYY2}_$MM2.vrt < $RAM/x_y_${DA_TE}.txt ) \
 <( gdallocationinfo -valonly -geoloc $TERRA/tmin_acc/$YYYY3/tmin_${YYYY3}_$MM3.vrt < $RAM/x_y_${DA_TE}.txt )  >> $RAM/predictors_values_b_${DA_TE}.txt
+
+n_tmin=$(awk '{ if(NF!=4) print $0 }' $RAM/predictors_values_b_${DA_TE}.txt  | wc -l )
+echo n_tmin $n_tmin
 
 sleep 10 
 echo gdallocationinfo c tmax 4 col  
@@ -124,6 +130,9 @@ time paste -d " " \
 <( gdallocationinfo -valonly -geoloc $TERRA/tmax_acc/$YYYY2/tmax_${YYYY2}_$MM2.vrt < $RAM/x_y_${DA_TE}.txt ) \
 <( gdallocationinfo -valonly -geoloc $TERRA/tmax_acc/$YYYY3/tmax_${YYYY3}_$MM3.vrt < $RAM/x_y_${DA_TE}.txt )  >> $RAM/predictors_values_c_${DA_TE}.txt
 
+n_tmax=$(awk '{ if(NF!=4) print $0 }' $RAM/predictors_values_c_${DA_TE}.txt  | wc -l )
+echo n_tmax $n_tmax
+
 sleep 10
 echo gdallocationinfo d swe 4 col
 
@@ -135,8 +144,11 @@ time paste -d " " \
 <( gdallocationinfo -valonly -geoloc $TERRA/swe_acc/$YYYY2/swe_${YYYY2}_$MM2.vrt < $RAM/x_y_${DA_TE}.txt ) \
 <( gdallocationinfo -valonly -geoloc $TERRA/swe_acc/$YYYY3/swe_${YYYY3}_$MM3.vrt < $RAM/x_y_${DA_TE}.txt )   >> $RAM/predictors_values_d_${DA_TE}.txt
 
+n_swe=$(awk '{ if(NF!=4) print $0 }' $RAM/predictors_values_d_${DA_TE}.txt  | wc -l )
+echo n_tmin $n_swe
+
 sleep 10
-echo gdallocationinfo f soil 6 col
+echo gdallocationinfo f soil 4 col
 
 echo "soil0 soil1 soil2 soil3"  > $RAM/predictors_values_f_${DA_TE}.txt  
 time paste -d " " \
@@ -145,8 +157,11 @@ time paste -d " " \
 <( gdallocationinfo -valonly -geoloc $TERRA/soil_acc/$YYYY2/soil_${YYYY2}_$MM2.vrt < $RAM/x_y_${DA_TE}.txt ) \
 <( gdallocationinfo -valonly -geoloc $TERRA/soil_acc/$YYYY3/soil_${YYYY3}_$MM3.vrt < $RAM/x_y_${DA_TE}.txt )   >> $RAM/predictors_values_f_${DA_TE}.txt
 
+n_soil=$(awk '{ if(NF!=4) print $0 }' $RAM/predictors_values_f_${DA_TE}.txt  | wc -l )
+echo n_tmin $n_soil
+
 sleep 10 
-echo gdallocationinfo g   SOILGRIDS 2 col 
+echo gdallocationinfo g SOILGRIDS 5 col
 
 echo "SNDPPT SLTPPT CLYPPT AWCtS WWP"       >  $RAM/predictors_values_g_${DA_TE}.txt
 
@@ -157,6 +172,9 @@ time paste -d " " \
 <( gdallocationinfo -valonly -geoloc $SOILGRIDS/AWCtS_acc/AWCtS.vrt        < $RAM/x_y_${DA_TE}.txt )   \
 <( gdallocationinfo -valonly -geoloc $SOILGRIDS/WWP_acc/WWP.vrt            < $RAM/x_y_${DA_TE}.txt )   >> $RAM/predictors_values_g_${DA_TE}.txt
 
+n_soilg1=$(awk '{ if(NF!=5) print $0 }' $RAM/predictors_values_g_${DA_TE}.txt  | wc -l )
+echo n_soilg1 $n_soilg1
+
 sleep 10 
 echo "sand silt clay"  >  $RAM/predictors_values_h_${DA_TE}.txt
 
@@ -164,6 +182,9 @@ time paste -d " " \
 <( gdallocationinfo -valonly -geoloc $SOILGRIDS2/sand/sand_acc/sand_0-200cm.vrt   < $RAM/x_y_${DA_TE}.txt )   \
 <( gdallocationinfo -valonly -geoloc $SOILGRIDS2/silt/silt_acc/silt_0-200cm.vrt   < $RAM/x_y_${DA_TE}.txt )   \
 <( gdallocationinfo -valonly -geoloc $SOILGRIDS2/clay/clay_acc/clay_0-200cm.vrt   < $RAM/x_y_${DA_TE}.txt )   >> $RAM/predictors_values_h_${DA_TE}.txt
+
+n_soilg2=$(awk '{ if(NF!=3) print $0 }' $RAM/predictors_values_h_${DA_TE}.txt  | wc -l )
+echo n_soilg2 $n_soilg2
 
 sleep 10
 echo gdallocationinfo i GRWL 5 col
@@ -177,6 +198,9 @@ time paste -d " " \
 <( gdallocationinfo -valonly -geoloc $GRWL/GRWL_delta_acc/GRWL_delta.vrt              < $RAM/x_y_${DA_TE}.txt )   \
 <( gdallocationinfo -valonly -geoloc $GRWL/GRWL_canal_acc/GRWL_canal.vrt              < $RAM/x_y_${DA_TE}.txt )      >> $RAM/predictors_values_i_${DA_TE}.txt
 
+n_GRWL=$(awk '{ if(NF!=5) print $0 }' $RAM/predictors_values_i_${DA_TE}.txt  | wc -l )
+echo n_GRWL $n_GRWL
+
 sleep 10
 echo gdallocationinfo l GSW 5 col
 
@@ -188,9 +212,12 @@ time paste -d " " \
 <( gdallocationinfo -valonly -geoloc $GSW/occurrence_acc/occurrence.vrt                < $RAM/x_y_${DA_TE}.txt )   \
 <( gdallocationinfo -valonly -geoloc $GSW/extent_acc/extent.vrt                        < $RAM/x_y_${DA_TE}.txt )    >> $RAM/predictors_values_l_${DA_TE}.txt
 
+n_GSW=$(awk '{ if(NF!=4) print $0 }' $RAM/predictors_values_l_${DA_TE}.txt  | wc -l )
+echo n_GSW $n_GSW
+
 ##### hydrography
 
-echo gdallocationinfo x  hydrography 17  col
+echo gdallocationinfo x  hydrography 26  col
 
 touch $RAM/predictors_values_x_${DA_TE}.txt 
 time for vrt in $( ls $HYDRO/hydrography90m_v.1.0/*/*/*.vrt | grep -v -e basin.vrt -e depression.vrt -e direction.vrt -e outlet.vrt -e regional_unit.vrt -e segment.vrt -e sub_catchment.vrt -e order_vect.vrt     -e accumulation.vrt  -e cti.vrt -e spi.vrt -e sti.vrt -e stream_diff_dw_near -e stream_dist_proximity -e stream_dist_dw_near   )  ; do 
@@ -207,15 +234,24 @@ echo "" >> $RAM/predictors_values_l_${DA_TE}.txt
 cat  $RAM/predictors_values_x_${DA_TE}.txt >>  $RAM/predictors_values_l_${DA_TE}.txt
 rm   $RAM/predictors_values_xx_${DA_TE}.txt      $RAM/predictors_values_x_${DA_TE}.txt
 
+n_ydro=$(awk '{ if(NF!=26) print $0 }' $RAM/predictors_values_l_${DA_TE}.txt  | wc -l )
+echo n_hydro $n_hydro
+
 ###### positive accumulation. 
-echo "accumulation"   >   $RAM/predictors_values_t_${DA_TE}.txt
-gdallocationinfo -valonly -geoloc $HYDRO/hydrography90m_v.1.0/r.watershed/accumulation_tiles20d/accumulation_sfd.tif  < $RAM/x_y_${DA_TE}.txt >> $RAM/predictors_values_t_${DA_TE}.txt
+echo "accumulation" > $RAM/predictors_values_t_${DA_TE}.txt
+gdallocationinfo -valonly -geoloc $HYDRO/hydrography90m_v.1.0/r.watershed/accumulation_tiles20d/accumulation.tif  < $RAM/x_y_${DA_TE}.txt >> $RAM/predictors_values_t_${DA_TE}.txt
+
+n_acc=$(awk '{if(NF!=1) print $0}' $RAM/predictors_values_t_${DA_TE}.txt  | wc -l )
+echo n_acc $n_acc
 
 echo "cti spi sti" >   $RAM/predictors_values_u_${DA_TE}.txt
 time paste -d " " \
-<( gdallocationinfo -valonly -geoloc $HYDRO/CompUnit_stream_indices_tiles20d/all_tif_cti_sfd_dis.vrt      < $RAM/x_y_${DA_TE}.txt )   \
-<( gdallocationinfo -valonly -geoloc $HYDRO/CompUnit_stream_indices_tiles20d/all_tif_spi_sfd_dis.vrt      < $RAM/x_y_${DA_TE}.txt )   \
-<( gdallocationinfo -valonly -geoloc $HYDRO/CompUnit_stream_indices_tiles20d/all_tif_sti_sfd_dis.vrt      < $RAM/x_y_${DA_TE}.txt )    >> $RAM/predictors_values_u_${DA_TE}.txt
+<( gdallocationinfo -valonly -geoloc $HYDRO/CompUnit_stream_indices_tiles20d/all_tif_cti_dis.vrt      < $RAM/x_y_${DA_TE}.txt )   \
+<( gdallocationinfo -valonly -geoloc $HYDRO/CompUnit_stream_indices_tiles20d/all_tif_spi_dis.vrt      < $RAM/x_y_${DA_TE}.txt )   \
+<( gdallocationinfo -valonly -geoloc $HYDRO/CompUnit_stream_indices_tiles20d/all_tif_sti_dis.vrt      < $RAM/x_y_${DA_TE}.txt )    >> $RAM/predictors_values_u_${DA_TE}.txt
+
+n_index=$(awk '{if(NF!=3) print $0}' $RAM/predictors_values_u_${DA_TE}.txt  | wc -l )
+echo n_index $n_index
 
 ###### elevation 
 
@@ -223,6 +259,9 @@ echo gdallocationinfo m elevation  1  col
 
 echo "elev"   >   $RAM/predictors_values_m_${DA_TE}.txt
 gdallocationinfo -valonly -geoloc $MERIT_DEM/elv/all_tif_dis.vrt  < $RAM/x_y_${DA_TE}.txt >> $RAM/predictors_values_m_${DA_TE}.txt
+
+n_elev=$(awk '{if(NF!=1) print $0}' $RAM/predictors_values_m_${DA_TE}.txt  | wc -l )
+echo n_elev $n_elev
 
 #### geomorpho
 echo gdallocationinfo x  geomorpho90m 22  col
@@ -241,6 +280,9 @@ echo "" >> $RAM/predictors_values_n_${DA_TE}.txt
 
 cat  $RAM/predictors_values_z_${DA_TE}.txt >>  $RAM/predictors_values_n_${DA_TE}.txt
 rm   $RAM/predictors_values_zz_${DA_TE}.txt      $RAM/predictors_values_z_${DA_TE}.txt
+
+n_morpho=$(awk '{if(NF!=22) print $0}' $RAM/predictors_values_n_${DA_TE}.txt  | wc -l )
+echo n_morpho $n_morpho
 
 echo marege all 
 

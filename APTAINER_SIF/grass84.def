@@ -1,0 +1,84 @@
+Bootstrap: docker
+From: debian:trixie
+
+%post
+
+# Configure APT sources
+# echo "deb http://deb.debian.org/debian trixie main contrib non-free non-free-firmware" > /etc/apt/sources.list
+# echo "deb http://deb.debian.org/debian-security trixie-security/updates main contrib non-free non-free-firmware" >> /etc/apt/sources.list
+# echo "deb http://deb.debian.org/debian trixie-updates main contrib non-free non-free-firmware" >> /etc/apt/sources.list
+
+# Update and clean package lists
+apt clean
+rm -rf /var/lib/apt/lists/*
+apt update 
+apt upgrade -y 
+
+# Install required dependencies
+apt install -y \
+    build-essential \
+    curl \
+    git \
+    gzip \
+    tar \
+    unzip \
+    cmake \
+    libtool \
+    swig \
+    sqlite3 \
+    zlib1g-dev \
+    libproj-dev \
+    libgeotiff-dev \
+    libgsl-dev \
+    libfann-dev \
+    libfftw3-dev \
+    libssl-dev \
+    libshp-dev \
+    uthash-dev \
+    libopenblas-dev \
+    liblapack-dev \
+    liblapacke-dev \
+    libjsoncpp-dev \
+    libboost-serialization-dev \
+    libboost-filesystem-dev \
+    flex \
+    bison \
+    libncurses-dev \
+    libreadline-dev \
+    libbz2-dev \
+    libx11-dev \
+    libxmu-dev \
+    libxi-dev \
+    libjpeg-dev \
+    libpng-dev \
+    libtiff-dev \
+    libsqlite3-dev \
+    libcurl4-openssl-dev \
+    libspatialite-dev \
+    libkml-dev \
+    libpq-dev \
+    libzstd-dev \
+    mesa-common-dev \
+    libglu1-mesa-dev \
+    libcairo2-dev \
+    gettext \
+    fakeroot \
+    python-is-python3 \
+    libnlopt-dev \
+    libarmadillo-dev \
+    pktools \
+    python3-gdal \
+    python3-numpy \
+    python3-six \
+    python3-matplotlib \
+    python3-dateutil \
+    wx-common \
+    gawk \
+    doxygen \
+    python3-sphinx \
+    grass \
+    grass-dev \
+    gdal-bin \
+    python3-gdal
+
+

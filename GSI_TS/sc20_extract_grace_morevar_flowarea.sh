@@ -14,7 +14,7 @@
 #### 1825:1958-01-31    
 #### 2532:2016-12-31
 
-## grep CAN /vast/palmer/scratch/sbsc/ga254/stderr/sc20_extract_grace.sh.*_*.err   | awk -F "_" -F "." '{ gsub("_", " " ) ; print  $3 }'   | awk '{ printf("%i," , $2 ) }'
+## grep CAN /vast/palmer/scratch/sbsc/ga254/stderr/sc20_extract_grace.sh.*_*.err | awk -F "_" -F "." '{ gsub("_", " "); print $3}'| awk '{printf("%i," , $2 ) }'
 module load StdEnv
 ulimit -c 0
 source ~/bin/gdal3
@@ -58,7 +58,7 @@ export YYYY=$(echo $DA_TE | awk -F "_"  '{ print $1 }')
 export MM=$(echo $DA_TE | awk  -F "_"   '{ print $2 }')
 
 echo          DA_TE $DA_TE YYYY $YYYY MM $MM
-~/bin/echoerr DA_TE $DA_TE YYYY $YYYY MM $MM
+~/bin/echoerr "DA_TE $DA_TE YYYY $YYYY MM $MM"
 
 export DA_TE1=$(awk -v n=1  -v ID=$SLURM_ARRAY_TASK_ID '{ if(NR==ID - n) print $1"_"$2 }' $GSI_TS/metadata/date.txt)
 export YYYY1=$(echo $DA_TE1  | awk -F "_"  '{ print $1 }')
