@@ -35,14 +35,14 @@ export  RAM=/dev/shm
 export  SC=/gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT_HYDRO
 
 export  tifname=$(basename  $tif .vrt )
-export dir=$(echo $tifname | cut -d "_"  -f 1 )
-export file=/gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT_HYDRO_DEM/msk_sfd/${BOX}_box.tif
-export filename=$(basename $file .tif )
-export box=$BOX
-export xmin=$( getCorners4Gtranslate  $file | awk '{ print $1 }'  )
-export ymax=$( getCorners4Gtranslate  $file | awk '{ print $2 }'  )
-export xmax=$( getCorners4Gtranslate  $file | awk '{ print $3 }'  )
-export ymin=$( getCorners4Gtranslate  $file | awk '{ print $4 }'  )
+export  dir=$(echo $tifname | cut -d "_"  -f 1 )
+export  file=/gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT_HYDRO_DEM/msk_sfd/${BOX}_box.tif
+export  filename=$(basename $file .tif )
+export  box=$BOX
+export  xmin=$( getCorners4Gtranslate  $file | awk '{ print $1 }'  )
+export  ymax=$( getCorners4Gtranslate  $file | awk '{ print $2 }'  )
+export  xmax=$( getCorners4Gtranslate  $file | awk '{ print $3 }'  )
+export  ymin=$( getCorners4Gtranslate  $file | awk '{ print $4 }'  )
 
 echo SOILGRIDS file $tifname 
 echo box $file
@@ -52,23 +52,21 @@ echo "file $tifname box $file"
 
 # run the first time for one var and for all the box
 
-
 # gdal_translate -a_srs EPSG:4326 -co BIGTIFF=YES -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -projwin $ulx $uly $lrx $lry $MERITH/hydrography90m_v.1.0/r.watershed/accumulation_tiles20d/accumulation_sfd.tif $MERITH/flow_sfd/flow_sfd_$box.tif &
 # gdal_translate -a_srs EPSG:4326 -co BIGTIFF=YES -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -projwin $ulx $uly $lrx $lry $MERIT/are/all_tif_dis.vrt $MERIT/are/${box}_are.tif & 
 # gdal_translate -a_srs EPSG:4326 -co BIGTIFF=YES -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -projwin $ulx $uly $lrx $lry $MERITH/hydrography90m_v.1.0/r.watershed/direction_tiles20d/direction.tif $MERITH/dir_sfd/dir_sfd_$box.tif & 
 
-export GDAL_CACHEMAX=5000
+export GDAL_CACHEMAX=4G
 export GDAL_NUM_THREADS=8
 export GDAL_DISABLE_READDIR_ON_OPEN=TRUE
 export CPL_VSIL_CURL_ALLOWED_EXTENSIONS=".tif,.vrt"
 echo time gdalwarp
-time gdalwarp -s_srs EPSG:4326 -t_srs EPSG:4326  -r bilinear -ot Float32 -tr 0.000833333333333333333 0.000833333333333333333 -co BIGTIFF=YES -co COMPRESS=DEFLATE -co ZLEVEL=6 -co INTERLEAVE=BAND -co NUM_THREADS=ALL_CPUS -co TILED=YES -multi -wo NUM_THREADS=8  -te $xmin $ymin $xmax $ymax  $tif $RAM/${tifname}_${box}_var.tif
+time gdalwarp -s_srs EPSG:4326 -t_srs EPSG:4326  -r bilinear -ot Float32 -tr 0.000833333333333333333 0.000833333333333333333 -co BIGTIFF=YES -co COMPRESS=ZSTD  -co ZSTD_LEVEL=9 -co PREDICTOR=3 -co INTERLEAVE=BAND -co NUM_THREADS=8 -co TILED=YES -multi -wo NUM_THREADS=8  -te $xmin $ymin $xmax $ymax  $tif $RAM/${tifname}_${box}_var.tif
 mkdir -p $SOILGRIDSH/${dir}/${dir}_acc_sfd/intb
 mkdir -p $SOILGRIDSC/${dir}/${dir}_acc_sfd/intb
-cp $RAM/${tifname}_${box}_var.tif $SOILGRIDSC/${dir}/${dir}_acc_sfd/intb/${tifname}_${box}_var.tif 
+# cp $RAM/${tifname}_${box}_var.tif $SOILGRIDSC/${dir}/${dir}_acc_sfd/intb/${tifname}_${box}_var.tif 
 
 # cp $SOILGRIDSH/${dir}/${dir}_acc_sfd/intb/${tifname}_${box}_var.tif  $RAM/${tifname}_${box}_var.tif 
-wait
 
 cp $MERIT/are/${box}_are.tif              $RAM/${tifname}_are_sfd_$box.tif   & 
 cp $MERITH/dir_sfd/dir_sfd_$box.tif       $RAM/${tifname}_dir_sfd_$box.tif   & 
@@ -90,14 +88,17 @@ r.external  input=$RAM/${tifname}_are_sfd_$box.tif    output=are  --overwrite &
 r.external  input=$RAM/${tifname}_dir_sfd_$box.tif    output=dir  --overwrite 
 wait 
 
-/home/ga254/.grass8/addons/scripts/r.mapcalc.tiled   'var_are = float(var * are )'   nprocs=
+/home/ga254/.grass8/addons/scripts/r.mapcalc.tiled   'var_are = float(var * are )'   nprocs=8
+echo var_are
 r.info -r var_are
 
 export OMP_NUM_THREADS=8
 r.flowaccumulation input=dir type=DCELL weight=var_are   output=varare_acc nprocs=8
 g.remove -f type=raster name=var_are
+echo varare_acc
 r.info -r varare_acc
 /home/ga254/.grass8/addons/scripts/r.mapcalc.tiled   'varare_acc1  = int(varare_acc + 1 )'   nprocs=8
+echo varare_acc1
 r.info -r varare_acc1
 #### NA EUA AF  ... SPO ???? SA????  AU is odd 
 if [[  $box = NA  || $box = AF || $box = EUA  ]]; then
@@ -108,17 +109,21 @@ echo varare_acc1_tile-000-000 varare_acc1_tile-000-001 varare_acc1_tile-001-000 
 export tile=\$1
 export tilen=\$(echo \$1 | cut -d e -f 3)
 export GDAL_DISABLE_READDIR_ON_OPEN=TRUE
-export GDAL_CACHEMAX=2G
-export GDAL_NUM_THREADS=2
-r.out.gdal --o -f -c -m createopt=\'PREDICTOR=2,COMPRESS=LZW,BIGTIFF=YES,NUM_THREADS=2,TILED=YES,BLOCKXSIZE=256,BLOCKYSIZE=256\' nodata=0 type=UInt32 input=\$tile output=/tmp/\${tifname}_\${box}\${tilen}_acc_sfd_Int_g84.tif --overwrite
+export GDAL_CACHEMAX=4G
+export GDAL_NUM_THREADS=1
+
+r.out.gdal --o -f -c -m format=GTiff createopt=\'BIGTIFF=YES,TILED=YES,BLOCKXSIZE=256,BLOCKYSIZE=256\' nodata=0 type=UInt32 input=\$tile output=/tmp/\${tifname}_\${box}\${tilen}_acc_sfd_Int_g84.tif --overwrite --verbose
+
 ' _
 
 else
     echo processing sfd output without tiling
-export GDAL_CACHEMAX=2G
-export GDAL_NUM_THREADS=2
+export GDAL_CACHEMAX=G
+export GDAL_NUM_THREADS=1
 export GDAL_DISABLE_READDIR_ON_OPEN=TRUE
-r.out.gdal --o -f -c -m createopt='PREDICTOR=2,COMPRESS=LZW,BIGTIFF=YES,NUM_THREADS=2,TILED=YES,BLOCKXSIZE=256,BLOCKYSIZE=256' nodata=0 type=UInt32   input=varare_acc1  output=/tmp/${tifname}_${box}_acc_sfd_Int_g84.tif --overwrite
+
+r.out.gdal --o -f -c -m format=GTiff createopt='BIGTIFF=YES,TILED=YES,BLOCKXSIZE=256,BLOCKYSIZE=256' nodata=0 type=UInt32   input=varare_acc1  output=/tmp/${tifname}_${box}_acc_sfd_Int_g84.tif --overwrite  --verbose 
+
 fi
 EOF
 "
@@ -129,24 +134,24 @@ if [[  $box = NA  || $box = AF || $box = EUA  ]]; then
 echo varare_acc1_tile-000-000 varare_acc1_tile-000-001 varare_acc1_tile-001-000 varare_acc1_tile-001-001 | xargs -n 1 -P 4 bash -c $'
 tile=$1 
 tilen=$(echo $1 | cut -d "e" -f 3)
-export GDAL_CACHEMAX=2G
-export GDAL_NUM_THREADS=2
-gdalinfo -mm /tmp/${tifname}_${box}${tilen}_acc_sfd_Int_g84.tif  | grep Computed | awk \'{ gsub(/[=,]/," " , $0 ); print $3 , $4 }\' > $SOILGRIDSC/${dir}/${dir}_acc_sfd/intb/${tifname}_${box}${tilen}_acc_sfd_Int_g84.mm
+export GDAL_CACHEMAX=4G
+export GDAL_NUM_THREADS=1
+gdalinfo -mm /tmp/${tifname}_${box}${tilen}_acc_sfd_Int_g84_DCELL.tif  | grep Computed | awk \'{ gsub(/[=,]/," " , $0 ); print $3 , $4 }\' > $SOILGRIDSC/${dir}/${dir}_acc_sfd/intb/${tifname}_${box}${tilen}_acc_sfd_Int_g84_DCELL.mm
 
-if [ -f $SOILGRIDSC/${dir}/${dir}_acc_sfd/intb/${tifname}_${box}${tilen}_acc_sfd_Int_g84.mm  ] && [ ! -s $SOILGRIDSC/${dir}/${dir}_acc_sfd/intb/${tifname}_${box}${tilen}_acc_sfd_Int_g84.mm ]; then
-    rm -f $SOILGRIDSC/${dir}/${dir}_acc_sfd/intb/${tifname}_${box}${tilen}_acc_sfd_Int_g84.*
+if [ -f $SOILGRIDSC/${dir}/${dir}_acc_sfd/intb/${tifname}_${box}${tilen}_acc_sfd_Int_g84_DCELL.mm  ] && [ ! -s $SOILGRIDSC/${dir}/${dir}_acc_sfd/intb/${tifname}_${box}${tilen}_acc_sfd_Int_g84.mm ]; then
+    rm -f $SOILGRIDSC/${dir}/${dir}_acc_sfd/intb/${tifname}_${box}${tilen}_acc_sfd_Int_g84_DCELL.*
 else
 export GDAL_DISABLE_READDIR_ON_OPEN=TRUE
-export GDAL_CACHEMAX=2G
+export GDAL_CACHEMAX=4G
 export GDAL_NUM_THREADS=2
-gdal_translate -co COMPRESS=ZSTD  -co ZSTD_LEVEL=9  -co BIGTIFF=YES -co NUM_THREADS=2 -co TILED=YES /tmp/${tifname}_${box}${tilen}_acc_sfd_Int_g84.tif  $SOILGRIDSC/${dir}/${dir}_acc_sfd/intb/${tifname}_${box}${tilen}_acc_sfd_Int_g84.tif
-ls -lh  /tmp/${tifname}_${box}${tilen}_acc_sfd_Int_g84.tif
-ls -lh  $SOILGRIDSC/${dir}/${dir}_acc_sfd/intb/${tifname}_${box}${tilen}_acc_sfd_Int_g84.tif
+gdal_translate -co COMPRESS=ZSTD  -co ZSTD_LEVEL=9 -co PREDICTOR=2  -co BIGTIFF=YES -co NUM_THREADS=2 -co TILED=YES /tmp/${tifname}_${box}${tilen}_acc_sfd_Int_g84.tif  $SOILGRIDSC/${dir}/${dir}_acc_sfd/intb/${tifname}_${box}${tilen}_acc_sfd_Int_g84_DCELL.tif
+ls -lh  /tmp/${tifname}_${box}${tilen}_acc_sfd_Int_g84_DCELL.tif
+ls -lh  $SOILGRIDSC/${dir}/${dir}_acc_sfd/intb/${tifname}_${box}${tilen}_acc_sfd_Int_g84_DCELL.tif
 fi
 ' _
 
 else
-export GDAL_CACHEMAX=2G
+export GDAL_CACHEMAX=4G
 export GDAL_NUM_THREADS=4
 export GDAL_DISABLE_READDIR_ON_OPEN=TRUE
 gdalinfo -mm /tmp/${tifname}_${box}_acc_sfd_Int_g84.tif | grep Computed | awk '{ gsub(/[=,]/," " , $0 ); print $3 , $4 }' > $SOILGRIDSC/${dir}/${dir}_acc_sfd/intb/${tifname}_${box}_acc_sfd_Int_g84.mm
@@ -160,6 +165,13 @@ rm -f $RAM/${tifname}_are_sfd_$box.tif  $RAM/${tifname}_dir_sfd_$box.tif $RAM/${
 
 exit
 
+
+
+
+
+
+
+
 ### for checking
 for DIR in bdod cec cfvo clay nitrogen ocd ocs phh2o sand silt soc ; do
 for BOX in EUA AF AU GL NA NAO SA SAO SIO SPO ; do
@@ -172,3 +184,15 @@ done
 for n in $(grep bdod  /vast/palmer/scratch/sbsc/ga254/stderr/sc10_SOILGRIDS_sfd_Int_g84.sh.*.err | tr "." " " | cut -d " " -f 3 | sort | uniq ) ; do
     echo $(head -1 /vast/palmer/scratch/sbsc/ga254/stderr/sc10_SOILGRIDS_sfd_Int_g84.sh.$n.err | cut -d "/" -f 10 | cut -d "_" -f 1) $(seff $n | grep "Average Memory Usag" | awk '{ print int($4 + 80)"G"}')
 done
+
+
+/usr/bin/grass -f --text --tmp-project /vast/palmer/scratch/sbsc/hydro/dataproces/SOILGRIDS2/silt/silt_acc_sfd/intb/silt_0-200cm_SIO_var.tif  <<'EOF'
+r.external input=/vast/palmer/scratch/sbsc/hydro/dataproces/SOILGRIDS2/silt/silt_acc_sfd/intb/silt_0-200cm_SIO_var.tif output=test
+r.out.gdal --o -f -c -m format=GTiff createopt='PREDICTOR=2,COMPRESS=LZW,BIGTIFF=YES,NUM_THREADS=2,TILED=YES,BLOCKXSIZE=256,BLOCKYSIZE=256' nodata=0 type=UInt32   input=varare_acc1  output=/tmp/test_comp.tif --overwrite  --verbose
+r.out.gdal --o -f -c -m format=GTiff createopt='BIGTIFF=YES,NUM_THREADS=2,TILED=YES,BLOCKXSIZE=256,BLOCKYSIZE=256' nodata=0 type=UInt32   input=varare_acc1 output=/tmp/test_NOcomp.tif --overwrite  --verbose          
+EOF
+
+                                                                                 
+
+
+

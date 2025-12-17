@@ -44,3 +44,11 @@ pksetmask -m /gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT_HYDRO_DEM/msk/all_tif_d
 
 ' _
 
+### integrate these line in the xargs to create 
+# run the first time for one var and for all the box        
+# gdal_translate -a_srs EPSG:4326 -co BIGTIFF=YES -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -projwin $ulx $uly $lrx $lry $MERITH/hydrography90m_v
+.1.0/r.watershed/accumulation_tiles20d/accumulation_sfd.tif $MERITH/flow_sfd/flow_sfd_$box.tif &      
+# gdal_translate -a_srs EPSG:4326 -co BIGTIFF=YES -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -projwin $ulx $uly $lrx $lry $MERIT/are/all_tif_dis.v
+rt $MERIT/are/${box}_are.tif &              
+# gdal_translate -a_srs EPSG:4326 -co BIGTIFF=YES -co COMPRESS=DEFLATE -co ZLEVEL=9 -co INTERLEAVE=BAND -projwin $ulx $uly $lrx $lry $MERITH/hydrography90m_v
+.1.0/r.watershed/direction_tiles20d/direction.tif $MERITH/dir_sfd/dir_sfd_$box.tif &   
