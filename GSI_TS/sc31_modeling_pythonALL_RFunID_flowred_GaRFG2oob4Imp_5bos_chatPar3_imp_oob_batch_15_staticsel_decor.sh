@@ -6,10 +6,10 @@
 #SBATCH -e /vast/palmer/scratch/sbsc/ga254/stderr/sc31_modeling_pythonALL_RFrunMainRespRenkOptimSnapCor.sh.%A_%a.err
 #SBATCH --job-name=sc31_SnapCorRFas30_flowred_OOB.sh
 #SBATCH --array=500
-#SBATCH --mem=100G
+#SBATCH --mem=500G
 
 ##### #SBATCH --array=300,400,500,600  200,400 250G  500,600 380G
-#### for obs_leaf in 25 50 75 100  ; do for obs_split in 25 50 75 10 ; do for depth in 20 25 30  ;  do for sample in 0.9  ; do sbatch --export=obs_leaf=$obs_leaf,obs_split=$obs_split,sample=$sample,depth=$depth   /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/sc31_modeling_pythonALL_RFunID_flowred_GaRFG2oob4Imp_5bos_chatPar3_imp_oob_batch_15.sh    ; done; done ; done ; done 
+#### for obs_leaf in 25 50 75 100  ; do for obs_split in 25 50 75 10 ; do for depth in 20 25 30  ;  do for sample in 0.9  ; do sbatch --export=obs_leaf=$obs_leaf,obs_split=$obs_split,sample=$sample,depth=$depth /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/sc31_modeling_pythonALL_RFunID_flowred_GaRFG2oob4Imp_5bos_chatPar3_imp_oob_batch_15_staticsel_decor.sh ; done; done ; done ; done 
 
 EXTRACT=/gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/extract4py_red
 cd $EXTRACT
@@ -139,8 +139,8 @@ additional_columns = ['IDs', 'IDr', 'YYYY', 'MM', 'Xsnap', 'Ysnap', 'Xcoord', 'Y
 include_variables.extend(additional_columns)
 
 # Read CSV with correct data types 
-Y = pd.read_csv(rf'stationID_x_y_valueALL_predictors_Y11.txt', header=0, sep='\s+', dtype=dtypes_Y, engine='c', low_memory=False)
-X = pd.read_csv(rf'stationID_x_y_valueALL_predictors_X11.txt', header=0, sep='\s+', usecols=lambda col: col in include_variables, dtype=dtypes_X, engine='c', low_memory=False)
+Y = pd.read_csv(rf'stationID_x_y_valueALL_predictors_Y.txt', header=0, sep='\s+', dtype=dtypes_Y, engine='c', low_memory=False)
+X = pd.read_csv(rf'stationID_x_y_valueALL_predictors_X.txt', header=0, sep='\s+', usecols=lambda col: col in include_variables, dtype=dtypes_X, engine='c', low_memory=False)
 
 # Ensure X and Y have the same index
 X = X.reset_index(drop=True)
@@ -456,25 +456,147 @@ selector_estimator = GroupAwareMultiOutput(
 selector = GroupAwareRFECV(
     estimator=selector_estimator,
     step=0.1,
-    min_features_to_select=15,
+    min_features_to_select=10,
     scoring='r2',
-    n_jobs=8   # choose appropriate number (or -1) for RFECV parallelization
+    n_jobs=16   # choose appropriate number (or -1) for RFECV parallelization
 )
 
-# Fit RFECV with GroupKFold by passing groups
-selector.fit(
-    X_train_np,
-    Y_train_np,
-    groups=groups_train,
-    X_column_names=X_train_column_names
-)
+### Fit RFECV with GroupKFold by passing groups
 
-support_mask = selector.support_
-selected_names = np.array(X_train_column_names)[support_mask]
-X_train_selected = X_train_np[:, support_mask]
-X_test_selected  = X_test_np[:, support_mask]
-print(f'RFECV selected {len(selected_names)} features:')
-print(', '.join(selected_names))
+# ────────────────────────────────────────────────────────────────
+# Decorrelation helper function (Spearman based)
+# ────────────────────────────────────────────────────────────────
+def decorrelate_group(df, group_name, threshold=0.70, verbose=True):
+    if df.empty or len(df.columns) <= 1:
+        if verbose and not df.empty:
+            print(f' {group_name:20} : {len(df.columns)} vars (no decorrelation needed)')
+        return df
+    corr = df.corr(method='spearman').abs()
+    upper = corr.where(np.triu(np.ones(corr.shape), k=1).astype(bool))
+    to_drop = set()
+    for col in upper.columns:
+        if upper[col].max() > threshold:
+            high_corr_vars = [col] + upper.index[upper[col] > threshold].tolist()
+            if len(high_corr_vars) > 1:
+                mean_corr = corr.loc[high_corr_vars, high_corr_vars].mean(axis=1)
+                keep = mean_corr.idxmax()
+                to_drop.update(v for v in high_corr_vars if v != keep)
+    kept = [c for c in df.columns if c not in to_drop]
+    if verbose:
+        print(f' {group_name:20} : {len(df.columns):3d} → {len(kept):3d} (ρ > {threshold:.2f})')
+    return df[kept]
+
+
+# Define the static and dynamic variable lists you want to treat specially
+static_var = [
+    'cti', 'spi', 'sti', 'accumulation',
+    'outlet_diff_dw_scatch', 'outlet_dist_dw_scatch',
+    'stream_diff_dw_near', 'stream_diff_up_farth', 'stream_diff_up_near',
+    'stream_dist_dw_near', 'stream_dist_proximity',
+    'stream_dist_up_farth', 'stream_dist_up_near',
+    'slope_curv_max_dw_cel', 'slope_curv_min_dw_cel',
+    'slope_elv_dw_cel', 'slope_grad_dw_cel', 'channel_curv_cel',
+    'channel_dist_dw_seg', 'channel_dist_up_cel', 'channel_dist_up_seg',
+    'channel_elv_dw_cel', 'channel_elv_dw_seg', 'channel_elv_up_cel',
+    'channel_elv_up_seg','channel_grad_dw_seg', 'channel_grad_up_cel',
+    'channel_grad_up_seg','AWCtS', 'CLYPPT', 'SLTPPT', 'SNDPPT', 'WWP',
+    'GRWLw', 'GRWLr', 'GRWLl', 'GRWLd', 'GRWLc',
+    'GSWs', 'GSWr', 'GSWo', 'GSWe',
+    'order_hack', 'order_horton', 'order_shreve', 'order_strahler', 'order_topo',
+    'dx', 'dxx', 'dxy', 'dy', 'dyy', 'elev', 'aspect-cosine', 'aspect-sine',
+    'convergence', 'dev-magnitude', 'dev-scale', 'eastness', 'elev-stdev',
+    'northness', 'pcurv', 'rough-magnitude', 'roughness', 'rough-scale',
+    'slope', 'tcurv', 'tpi', 'tri', 'vrm'
+]
+
+dinamic_var = [
+    'ppt0', 'ppt1', 'ppt2', 'ppt3',
+    'tmin0', 'tmin1', 'tmin2', 'tmin3',
+    'tmax0', 'tmax1', 'tmax2', 'tmax3',
+    'swe0', 'swe1', 'swe2', 'swe3',
+    'soil0', 'soil1', 'soil2', 'soil3'
+]
+
+# ensure column names array is string dtype
+all_cols = X_train_column_names.astype(str)
+
+# compute which static/dynamic vars are actually available
+static_present = [c for c in static_var if c in all_cols]
+dynamic_present = [c for c in dinamic_var if c in all_cols]
+
+print(f'Found {len(static_present)} static vars present, {len(dynamic_present)} dynamic vars present.')
+
+if len(static_present) == 0:
+    # nothing to select from static vars - combine dynamic only
+    print('Warning: no static variables found in X_train_column_names. Using dynamic vars only.')
+    combined_names = dynamic_present
+    final_mask = np.isin(all_cols, combined_names)
+    X_train_selected = X_train_np[:, final_mask]
+    X_test_selected  = X_test_np[:, final_mask]
+    selected_names = all_cols[final_mask]
+else:
+    # Create station-level representative DataFrame for decorrelation (one row per IDr)
+    station_df = pd.DataFrame(X_train_np, columns=all_cols)
+    station_df['IDr'] = groups_train
+    # keep first row per station as representative (like earlier in your pipeline)
+    station_repr = station_df.groupby('IDr', as_index=False)[static_present].first()
+
+    print(f'Performing decorrelation on static variables (station-level aggregation) ...')
+    static_dec_df = decorrelate_group(station_repr[static_present], 'Static', threshold=0.70, verbose=True)
+    static_decorr = static_dec_df.columns.tolist()
+    print(f'Kept {len(static_decorr)} / {len(static_present)} static variables after decorrelation.')
+    if len(static_decorr) == 0:
+        print('Warning: no static vars left after decorrelation; using dynamic vars only.')
+        combined_names = dynamic_present
+        final_mask = np.isin(all_cols, combined_names)
+        X_train_selected = X_train_np[:, final_mask]
+        X_test_selected  = X_test_np[:, final_mask]
+        selected_names = all_cols[final_mask]
+    else:
+        # indices of decorrelated static vars in the full X matrix
+        static_idx = np.where(np.isin(all_cols, static_decorr))[0]
+        X_static_train = X_train_np[:, static_idx]
+
+        # Run GroupAwareRFECV only on the decorrelated static features
+        print(f'Running GroupAwareRFECV on {len(static_decorr)} decorrelated static features...')
+        selector.fit(
+            X_static_train,
+            Y_train_np,
+            groups=groups_train,
+            X_column_names=static_decorr
+        )
+
+        # support mask relative to the static (decorrelated) feature set
+        support_mask_static = selector.support_
+        selected_static_names = np.array(static_decorr)[support_mask_static].tolist()
+        print(f'Selected {len(selected_static_names)} static features by RFECV:')
+        if len(selected_static_names) <= 60:
+            print(', '.join(selected_static_names))
+        else:
+            print(', '.join(selected_static_names[:60]) + ', ...')
+
+        # Combine selected static variables with all dynamic variables (present in training)
+        combined_names = list(selected_static_names) + list(dynamic_present)
+
+        # Build final mask across all columns, preserving original column order
+        final_mask = np.isin(all_cols, combined_names)
+
+        # Extract final selected arrays
+        X_train_selected = X_train_np[:, final_mask]
+        X_test_selected  = X_test_np[:, final_mask]
+
+        # Compose selected_names in the same order as final_mask (so later code sees consistent ordering)
+        selected_names = all_cols[final_mask]
+
+# Overwrite the working feature arrays so the rest of the script (which uses X_train_np/X_test_np)
+# will automatically operate on the selected feature set without requiring further edits.
+X_train_np = X_train_selected
+X_test_np  = X_test_selected
+X_train_column_names = selected_names  # update column names array used elsewhere
+
+# Print summary
+print(f'Final feature set length: {X_train_np.shape[1]}')
+print('Final features (first 50):', list(X_train_column_names[:50]))
 
 # Define final RF factory
 def make_rf(**kw):
@@ -497,6 +619,9 @@ RFreg = GroupAwareMultiOutput(
     oob_metric='r2'
 )
 
+
+########## 
+
 RFreg.fit(
     X_train_selected,           # selected features
     Y_train_np,
@@ -514,7 +639,8 @@ print(RFreg.get_importances().head(15))
 RFreg.feature_importances_ = RFreg.final_importances_
 RFreg.kept_cols_ = selected_names.tolist()
 
-Y_test_pred_nosort  = RFreg.predict(X_test_np)
+Y_test_pred_nosort   = RFreg.predict(X_test_np)
+Y_train_pred_nosort  = RFreg.predict(X_train_np)
 
 def post_pred_check(Y_true_np, Y_pred_np, name='test'):
     print(f'{name} shapes: true {Y_true_np.shape}, pred {Y_pred_np.shape}')

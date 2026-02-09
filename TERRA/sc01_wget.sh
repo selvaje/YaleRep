@@ -48,7 +48,9 @@ export RAM=/dev/shm
 
 #  for VARTERRA in aet def pet ppt soil srad q swe tmax tmin vap ws vpd pdsi  ; do for YEAR in {1958..2019} ; do echo $VARTERRA $YEAR ; done ; done | xargs -n 2 -P 4 bash -c $'
 
-for VARTERRA in swe ; do for YEAR in {1958..2019} ; do echo $VARTERRA $YEAR ; done ; done | xargs -n 2 -P 4 bash -c $'
+#### {1958..2024}
+
+for VARTERRA in swe ; do for YEAR in {2020..2024} ; do echo $VARTERRA $YEAR ; done ; done | xargs -n 2 -P 4 bash -c $'
 VARTERRA=$1
 YEAR=$2
 cd $TERRAOUTDIR/$VARTERRA
