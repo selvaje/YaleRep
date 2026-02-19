@@ -16,7 +16,7 @@ module load StdEnv
 # PARAMETERIZED SAMPLING
 # ============================================================================
 
-SAMPLE_FRACTIONS="0.01 10"
+SAMPLE_FRACTIONS="0.005"
 
 # Loop through each sample fraction
 for SAMPLE_PCT in $SAMPLE_FRACTIONS; do
@@ -50,7 +50,7 @@ pd.set_option('display.max_columns', None)
 SAMPLE_PCT_STR = os.environ['SAMPLE_PCT']
 SAMPLE_FRACTION = float(SAMPLE_PCT_STR) / 100.0
 SAMPLE_PCT = float(SAMPLE_PCT_STR)
-RANDOM_STATE = 24
+RANDOM_STATE = 30
 CHUNK_SIZE = 200000
 
 print('='*130)
@@ -232,8 +232,8 @@ print(f'Time elapsed: {elapsed:.1f}s')
 print('\n[STEP 3] Saving sample datasets...\n')
 
 filename_suffix = f'{SAMPLE_PCT}pct'
-X_filename = f'Xsample_{filename_suffix}.txt'
-Y_filename = f'Ysample_{filename_suffix}.txt'
+X_filename = f'Xsample_{filename_suffix}_b.txt'
+Y_filename = f'Ysample_{filename_suffix}_b.txt'
 
 fmt_x = ' '.join(['%.f' if X_sample[col].dtype in ['int32', 'int16', 'int8'] else '%.4f' for col in X_sample.columns])
 X_column_names_str = ' '.join(X_sample.columns)
