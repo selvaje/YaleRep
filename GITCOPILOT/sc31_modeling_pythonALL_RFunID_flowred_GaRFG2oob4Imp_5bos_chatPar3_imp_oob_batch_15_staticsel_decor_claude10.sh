@@ -478,7 +478,7 @@ class GroupAwareMultiOutput(BaseEstimator, RegressorMixin):
             print(f'  {lbl:6s}: {status}')
 
 
-def decorrelate_group_fast(df, group_name, threshold=0.70, verbose=True):
+def decorrelate_group_fast(df, group_name, threshold=0.85, verbose=True):
     '''Remove highly correlated features using Spearman correlation (optimized).'''
     
     if df.empty or len(df.columns) <= 1:
@@ -523,21 +523,17 @@ print(f'  Total features: {len(static_present) + len(dynamic_present)}')
 
 print(f'\nFull data: {X_train_np.shape[0]} temporal rows (not aggregated!)')
 
-# ✓ SAMPLE DATA FOR FASTER FEATURE SELECTION (but preserve full temporal resolution)
-sample_size = min(150000, len(X_train_np))
-sample_idx = np.random.RandomState(24).choice(len(X_train_np), sample_size, replace=False)
+# ✓ USE FULL TRAINING DATA for feature selection (preserves temporal/spatial variance)
+X_sample = X_train_np.astype('float32')
+Y_sample = Y_train_np.astype('float32')
+groups_sample = groups_train
 
-X_sample = X_train_np[sample_idx].astype('float32')
-Y_sample = Y_train_np[sample_idx].astype('float32')
-groups_sample = groups_train[sample_idx]
-
-print(f'Sampling {sample_size} rows for feature selection...')
-print(f'Sampled data retains full temporal variance (no monthly aggregation)')
+print(f'Using full {X_sample.shape[0]} rows for feature selection (no sampling - preserves full variance)')
 
 # ✓ Decorrelate static features
 static_indices = [i for i, col in enumerate(all_cols) if col in static_present]
 X_static_sample = X_sample[:, static_indices]
-static_dec_df = decorrelate_group_fast(pd.DataFrame(X_static_sample, columns=static_present), 'Static', threshold=0.70, verbose=True)
+static_dec_df = decorrelate_group_fast(pd.DataFrame(X_static_sample, columns=static_present), 'Static', threshold=0.85, verbose=True)
 static_decorr = static_dec_df.columns.tolist()
 
 if len(static_decorr) == 0:
@@ -554,17 +550,17 @@ else:
     
     print('Fitting RFECV...')
     
-    step_size = max(5, int(len(static_decorr) * 0.40))
-    min_features = max(5, int(len(static_decorr) * 0.20))
+    step_size = max(5, int(len(static_decorr) * 0.20))
+    min_features = max(5, int(len(static_decorr) * 0.30))
     
     selector_fast = RFECV(
         estimator=ExtraTreesRegressor(
             n_estimators=50,
-            max_depth=15,
+            max_depth=None,
             n_jobs=1,
             random_state=24,
-            min_samples_leaf=5,
-            min_samples_split=10
+            min_samples_leaf=2,
+            min_samples_split=5
         ),
         step=step_size,
         min_features_to_select=min_features,
@@ -679,7 +675,7 @@ def make_rf(**kw):
 print(f'\nInitializing final model with {N_EST_I} trees...')
 RFreg = GroupAwareMultiOutput(
     base_estimator=make_rf,
-    n_cv_folds=5,
+    n_cv_folds=3,
     n_jobs=16,
     inner_n_jobs=1,
     random_state=24,
