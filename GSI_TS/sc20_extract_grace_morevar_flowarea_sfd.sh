@@ -253,7 +253,7 @@ rm -f $RAM/*_${DA_TE}.txt
 
 if [ $SLURM_ARRAY_TASK_ID -eq $SLURM_ARRAY_TASK_MAX  ] ; then 
 cd $EXTRACT/ 
-sleep 3000
+sleep 5000
 ## copy the headear 
 head -1 $EXTRACT/stationID_x_y_value_predictors_1958_04.txt   > $EXTRACT/stationID_x_y_valueALL_predictors_floareaSFD.txt
 

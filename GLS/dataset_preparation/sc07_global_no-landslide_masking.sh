@@ -15,14 +15,15 @@
 ### === VARIABLES ===
 export RAM="/dev/shm"
 export DATASET_FOLDER="/gpfs/gibbs/project/sbsc/sm3665/dataproces/GLS"
-export INPUT_TXT="$DATASET_FOLDER/IDu_x_y_pa.txt"
-export INPUT_GPKG="$DATASET_FOLDER/points_presence.gpkg"
+export INPUT_TXT="$DATASET_FOLDER/IDu_x_y_pa_rv.txt"
+export SCRATCH="/vast/palmer/scratch/sbsc/sm3665/dataproces/big_files"
+export INPUT_GPKG="$SCRATCH/points_presence.gpkg"
 export INPUT_SUB="$RAM/points_tile_${TILE}.gpkg"
-export SLOPE="/gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT/geomorphometry_90m_wgs84/slope/all_slope_90M_dis.vrt"
+#export SLOPE="/gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT/geomorphometry_90m_wgs84/slope/all_slope_90M_dis.vrt"
 export ICE="/gpfs/gibbs/pi/hydro/hydro/dataproces/ESALC/LC220_snowper/permanent_cryosphere_*_90m.tif"
 export WATER="/gpfs/gibbs/pi/hydro/hydro/dataproces/ESALC/LC210_waterper/permanent_water_bodies_*_90m.tif"
-export OUTPUT_DIR="/gpfs/gibbs/pi/hydro/hydro/dataproces/GLS/global_no-landslide_area"
-export BUFFERSIZE=900
+export OUTPUT_DIR="$SCRATCH/global_no-landslide_area"
+export BUFFERSIZE=360 #4 pixel
 export MH="/gpfs/gibbs/pi/hydro/hydro/dataproces/MERIT_HYDRO"
 
 ### === RAM CLEANING ===
@@ -72,9 +73,9 @@ echo "EXTENDED TILE CORNER: N=$Nplus, S=$Splus, E=$Eplus, W=$Wplus"
 ~/bin/echoerr "EXTENDED TILE CORNER: N=$Nplus, S=$Splus, E=$Eplus, W=$Wplus"
 
 ### === CREATE THE TILE EXTENSION FOR SLOPE, PERMANENT ICE COVER, PERMANENT WATER BODIES ===
-export SLOPE_TILE_FILE="$RAM/slope_tile_${TILE}.tif"
-gdal_translate -projwin $W $N $E $S -co COMPRESS=DEFLATE -co ZLEVEL=9 $SLOPE $SLOPE_TILE_FILE
-echo "GLOBAL SLOPE tile created."
+#export SLOPE_TILE_FILE="$RAM/slope_tile_${TILE}.tif"
+#gdal_translate -projwin $W $N $E $S -co COMPRESS=DEFLATE -co ZLEVEL=9 $SLOPE $SLOPE_TILE_FILE
+#echo "GLOBAL SLOPE tile created."
 
 export ICE_TILE_FILE="$RAM/ice_tile_${TILE}.tif"
 gdal_translate -projwin $W $N $E $S -co COMPRESS=DEFLATE -co ZLEVEL=9 $ICE $ICE_TILE_FILE
@@ -86,16 +87,16 @@ echo "GLOBAL HYDROSPHERE tile created."
 
 ### === SELECT ONLY VALID PRESENCE POINTS AND SAVE THEM AS GPKG ===
 ## Verify and create the presence file 'points_presence.gpkg'
-if [ ! -f "/gpfs/gibbs/project/sbsc/sm3665/dataproces/GLS/points_presence.gpkg" ]; then
+if [ ! -f "$INPUT_GPKG" ]; then
     echo " "
     echo "points_presence.gpkg file does not exist. Data processing..."
     
     ## Data filtering
-    awk 'NR>1 && $4==1 {print $2, $3}' "$INPUT_TXT" > "$DATASET_FOLDER/points_filtered.txt"
+    awk 'NR>1 && $4==1 {print $2, $3}' "$INPUT_TXT" > "$SCRATCH/points_filtered.txt"
     
     ## Converts selected data as GPKG
     source ~/bin/pktools
-    pkascii2ogr -f "GPKG" -a_srs EPSG:4326 -x 0 -y 1 -i "$DATASET_FOLDER/points_filtered.txt" -o "$INPUT_GPKG"
+    pkascii2ogr -f "GPKG" -a_srs EPSG:4326 -x 0 -y 1 -i "$SCRATCH/points_filtered.txt" -o "$INPUT_GPKG"
     
     ## Delete temp files
     rm -f /gpfs/gibbs/project/sbsc/sm3665/dataproces/GLS/points_filtered.txt
@@ -122,7 +123,7 @@ if [ "$POINT_COUNT" -eq 0 ]; then
     module load GRASS/8.2.0-foss-2022b
     grass -f --text --tmp-location $SLOPE_TILE_FILE <<'EOF'
       ### INGEST SLOPE BASED ON TILE EXTENSION
-      r.external input=$SLOPE_TILE_FILE output=slope --overwrite
+      #r.external input=$SLOPE_TILE_FILE output=slope --overwrite
       r.external input=$ICE_TILE_FILE output=ice --overwrite
       r.external input=$WATER_TILE_FILE output=water --overwrite
       
@@ -131,7 +132,8 @@ if [ "$POINT_COUNT" -eq 0 ]; then
       ## slope mask (slope <= 5 = 1, slope >5 = 0);
       ## permanent cryosphere presence (=0 presence, =1 absence);
       ## permanent hydrosphere presence (=0 presence, =1 absence):
-      r.mapcalc "no_landslide_area = if(slope <= 5 && ice == 1 && water == 1, 1, 0)" --overwrite
+      #if(slope <= 5 && removed for data redundancy with DEM features
+      r.mapcalc "no_landslide_area = if(ice == 1 && water == 1, 1, 0)" --overwrite
       
       ### EXPORT THE MASKED TILE
       r.out.gdal -f -c -m input=no_landslide_area output=$OUTPUT_DIR/no_landslide_area_${TILE}.tif format=GTiff nodata=0 createopt="COMPRESS=DEFLATE,ZLEVEL=9" type=Byte --overwrite
@@ -145,7 +147,7 @@ else
     module load GRASS/8.2.0-foss-2022b
     grass -f --text --tmp-location $SLOPE_TILE_FILE <<'EOF'
       ## INGEST SLOPE BASED ON TILE EXTENSION
-      r.external input=$SLOPE_TILE_FILE output=slope --overwrite
+      #r.external input=$SLOPE_TILE_FILE output=slope --overwrite
       r.external input=$ICE_TILE_FILE output=ice --overwrite
       r.external input=$WATER_TILE_FILE output=water --overwrite
 
@@ -168,7 +170,8 @@ else
       ## buffer mask (outside buffer = 1, inside = 0);
       ## permanent cryosphere presence (=0 presence, =1 absence);
       ## permanent hydrosphere presence (=0 presence, =1 absence):  
-      r.mapcalc "no_landslide_area = if(slope <= 5 && isnull(points_buffer_rast) && ice == 1 && water == 1, 1, 0)" --overwrite 
+      #if(slope <= 5 && removed for data redundancy with DEM features
+      r.mapcalc "no_landslide_area = if(isnull(points_buffer_rast) && ice == 1 && water == 1, 1, 0)" --overwrite 
       
       ### MASKED TILE EXPORT
       r.out.gdal -f -c -m input=no_landslide_area output=$OUTPUT_DIR/no_landslide_area_${TILE}.tif format=GTiff nodata=0 createopt="COMPRESS=DEFLATE,ZLEVEL=9" type=Byte --overwrite
@@ -203,8 +206,8 @@ if [ "$TILE_COUNT" -eq 116 ]; then
 		   -co COMPRESS=DEFLATE -co ZLEVEL=9\
 		   -tr 0.00833333333333 0.00833333333333\
 		   -r nearest\
-		   /gpfs/gibbs/pi/hydro/hydro/dataproces/GLS/global_no-landslide_area/no_landslide_area.vrt\
-		   /gpfs/gibbs/pi/hydro/hydro/dataproces/GLS/global_no-landslide_area/no_landslide_area_1km.tif
+		   $OUTPUT_DIR/no_landslide_area.vrt\
+		   $OUTPUT_DIR/no_landslide_area_1km.tif
 else
     echo "tile count: $TILE_COUNT / 116"
 fi

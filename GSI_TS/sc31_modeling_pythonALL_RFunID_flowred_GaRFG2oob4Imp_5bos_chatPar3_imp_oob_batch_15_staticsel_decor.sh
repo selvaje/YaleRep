@@ -6,7 +6,7 @@
 #SBATCH -e /vast/palmer/scratch/sbsc/ga254/stderr/sc31_modeling_pythonALL_RFrunMainRespRenkOptimSnapCor.sh.%A_%a.err
 #SBATCH --job-name=sc31_SnapCorRFas30_flowred_OOB.sh
 #SBATCH --array=500
-#SBATCH --mem=500G
+#SBATCH --mem=200G
 
 ##### #SBATCH --array=300,400,500,600  200,400 250G  500,600 380G
 #### for obs_leaf in 25 50 75 100  ; do for obs_split in 25 50 75 10 ; do for depth in 20 25 30  ;  do for sample in 0.9  ; do sbatch --export=obs_leaf=$obs_leaf,obs_split=$obs_split,sample=$sample,depth=$depth /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/sc31_modeling_pythonALL_RFunID_flowred_GaRFG2oob4Imp_5bos_chatPar3_imp_oob_batch_15_staticsel_decor.sh ; done; done ; done ; done 
@@ -128,10 +128,10 @@ dtypes_Y = {
         'Q60', 'Q70', 'Q80', 'Q90', 'QMAX']}
 }
 
-importance = pd.read_csv('../extract4py_sample_red/predict_importance_red/importance_sampleAll.txt', header=None, sep='\s+', engine='c', low_memory=False)
-# Extract the second column (index 1) for the first 30 rows
+## for var in $(head -1 stationID_x_y_valueALL_predictors_X11_floredSFD.txt) ; do echo -e $var ; done | tail  -78  > varX_list.txt 
+importance = pd.read_csv('varX_list.txt', header=None, sep='\s+', engine='c', low_memory=False)
 
-include_variables = importance.iloc[:86, 1].tolist()
+include_variables = importance.iloc[:78, 0].tolist()
 # Additional columns to add
 additional_columns = ['IDs', 'IDr', 'YYYY', 'MM', 'Xsnap', 'Ysnap', 'Xcoord', 'Ycoord']
 
@@ -139,8 +139,8 @@ additional_columns = ['IDs', 'IDr', 'YYYY', 'MM', 'Xsnap', 'Ysnap', 'Xcoord', 'Y
 include_variables.extend(additional_columns)
 
 # Read CSV with correct data types 
-Y = pd.read_csv(rf'stationID_x_y_valueALL_predictors_Y.txt', header=0, sep='\s+', dtype=dtypes_Y, engine='c', low_memory=False)
-X = pd.read_csv(rf'stationID_x_y_valueALL_predictors_X.txt', header=0, sep='\s+', usecols=lambda col: col in include_variables, dtype=dtypes_X, engine='c', low_memory=False)
+Y = pd.read_csv(rf'stationID_x_y_valueALL_predictors_Y1_floredSFD.txt', header=0, sep='\s+', dtype=dtypes_Y, engine='c', low_memory=False)
+X = pd.read_csv(rf'stationID_x_y_valueALL_predictors_X1_floredSFD.txt', header=0, sep='\s+', usecols=lambda col: col in include_variables, dtype=dtypes_X, engine='c', low_memory=False)
 
 # Ensure X and Y have the same index
 X = X.reset_index(drop=True)
@@ -464,9 +464,9 @@ selector = GroupAwareRFECV(
 ### Fit RFECV with GroupKFold by passing groups
 
 # ────────────────────────────────────────────────────────────────
-# Decorrelation helper function (Spearman based)
+# Decorrelation helper function (Spearman based)  ## rho < meno variabili selezionate 
 # ────────────────────────────────────────────────────────────────
-def decorrelate_group(df, group_name, threshold=0.70, verbose=True):
+def decorrelate_group(df, group_name, threshold=0.80, verbose=True):
     if df.empty or len(df.columns) <= 1:
         if verbose and not df.empty:
             print(f' {group_name:20} : {len(df.columns)} vars (no decorrelation needed)')
@@ -542,7 +542,7 @@ else:
     station_repr = station_df.groupby('IDr', as_index=False)[static_present].first()
 
     print(f'Performing decorrelation on static variables (station-level aggregation) ...')
-    static_dec_df = decorrelate_group(station_repr[static_present], 'Static', threshold=0.70, verbose=True)
+    static_dec_df = decorrelate_group(station_repr[static_present], 'Static', threshold=0.80, verbose=True)
     static_decorr = static_dec_df.columns.tolist()
     print(f'Kept {len(static_decorr)} / {len(static_present)} static variables after decorrelation.')
     if len(static_decorr) == 0:

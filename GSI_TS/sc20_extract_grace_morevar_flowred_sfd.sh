@@ -1,12 +1,12 @@
 #!/bin/bash
-#SBATCH -p scavenge
+#SBATCH -p day
 #SBATCH -n 1 -c 1 -N 1
 #SBATCH -t 24:00:00    
 #SBATCH -o /vast/palmer/scratch/sbsc/ga254/stdout/sc20_extract_grace.sh.%A_%a.out
 #SBATCH -e /vast/palmer/scratch/sbsc/ga254/stderr/sc20_extract_grace.sh.%A_%a.err
 #SBATCH --job-name=sc20_extract_grace.sh
 #SBATCH --mem=30G
-#SBATCH --array=4-12
+#SBATCH --array=744
 
 ####  200 array for the  1974 08  
 #### sbatch  /gpfs/gibbs/pi/hydro/hydro/scripts/GSI_TS/sc20_extract_grace_morevar_flowred_sfd.sh
@@ -297,24 +297,14 @@ rm -f $RAM/*_${DA_TE}.txt
 
 if [ $SLURM_ARRAY_TASK_ID -eq $SLURM_ARRAY_TASK_MAX  ] ; then 
 cd $EXTRACT/ 
-sleep 3000
+sleep 5000
 ## copy the headear 
-head -1 $EXTRACT/stationID_x_y_value_predictors_1958_04.txt   > $EXTRACT/stationID_x_y_valueALL_predictors_floredSFD.txt
+head -1 $EXTRACT/stationID_x_y_value_predictors_1958_04_floredSFD.txt   > $EXTRACT/stationID_x_y_valueALL_predictors_floredSFD.txt
 
 ### 72300000.000 & 61202000.000  is for QMAX value   in total 2 lines             | awk '{ if (NF==93) print }'
 ### -9999999  soil  layers
 ### -2147483648       ###  65535 there value for this but prob is 
 ### remove space in the midle ## remove space in the end  
-grep -h -v -e ID -e "\-2147483648 " -e "\-9999999 " -e "72300000.000" -e "61202000.000" $EXTRACT/stationID_x_y_value_predictors_????_??_floredSFD.txt | awk '{ if (NF==105) print }' | sed  's/  / /g'  | sed 's/ *$//'   >>  $EXTRACT/stationID_x_y_valueALL_predictors_floredSFD.txt
+grep -h -v -e ID -e "\-2147483648 " -e "\-9999999 " -e "72300000.000" -e "61202000.000" $EXTRACT/stationID_x_y_value_predictors_????_??_floredSFD.txt | awk '{ if (NF==97) print }' | sed  's/  / /g'  | sed 's/ *$//'   >>  $EXTRACT/stationID_x_y_valueALL_predictors_floredSFD.txt
 fi
-
-
 exit
-
-
-
-
-
-
-
-

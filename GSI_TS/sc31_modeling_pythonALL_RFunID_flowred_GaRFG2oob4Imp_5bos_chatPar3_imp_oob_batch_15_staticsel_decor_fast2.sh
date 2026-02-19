@@ -28,8 +28,11 @@ apptainer exec --env=PATH="/gpfs/gibbs/pi/hydro/hydro/scripts/APTAINER_SIF/pyjeo
 python3 <<'EOF'
 import os
 import gc
+import sys
+import psutil
 import numpy as np
 import pandas as pd
+from datetime import datetime
 from sklearn.model_selection import train_test_split, GroupKFold 
 from sklearn.feature_selection import RFECV
 from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
@@ -44,6 +47,29 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from scipy import stats
 from scipy.stats import pearsonr, spearmanr
 from joblib import Parallel, delayed, parallel_backend, dump, load
+
+# ========================================================================
+# PARALLELIZATION MONITORING & CONFIGURATION
+# ========================================================================
+def print_system_info():
+    \"\"\"Print system and parallelization configuration info\"\"\"
+    print('='*70)
+    print('SYSTEM & PARALLELIZATION CONFIGURATION')
+    print('='*70)
+    print(f'Timestamp: {datetime.now().isoformat()}')
+    print(f'Process PID: {os.getpid()}')
+    print(f'Total CPU cores available: {os.cpu_count()}')
+    print(f'CPU percent: {psutil.cpu_percent(interval=1)}%')
+    print(f'Available physical memory: {psutil.virtual_memory().available / 1e9:.2f} GB')
+    print(f'Total memory: {psutil.virtual_memory().total / 1e9:.2f} GB')
+    print(f'OMP_NUM_THREADS: {os.environ.get("OMP_NUM_THREADS", "not set")}')
+    print(f'MKL_NUM_THREADS: {os.environ.get("MKL_NUM_THREADS", "not set")}')
+    print(f'OPENBLAS_NUM_THREADS: {os.environ.get("OPENBLAS_NUM_THREADS", "not set")}')
+    print(f'NUMEXPR_NUM_THREADS: {os.environ.get("NUMEXPR_NUM_THREADS", "not set")}')
+    print('='*70)
+    print()
+
+print_system_info()
 
 pd.set_option('display.max_columns', None)  # Show all columns
 
@@ -127,7 +153,7 @@ dtypes_Y = {
         'Q60', 'Q70', 'Q80', 'Q90', 'QMAX']}
 }
 
-## for var in $(head -1 stationID_x_y_valueALL_predictors_X11_floredSFD.txt) ; do echo -e $var ; done | tail  -78  > varX_list.txt 
+## for var in $(head -1 stationID_x_y_valueALL_predictors_X11_floredSFD.txt) ; do echo -e \$var ; done | tail  -78  > varX_list.txt 
 importance = pd.read_csv('varX_list.txt', header=None, sep='\s+', engine='c', low_memory=False)
 
 include_variables = importance.iloc[:78, 0].tolist()
@@ -416,12 +442,16 @@ selector_estimator = GroupAwareMultiOutput(
 )
 
 # RFECV will parallelize across folds; set n_jobs here to number of cores you want for RFECV
+# ✅ FIXED: Set to appropriate number of cores (half to leave headroom)
+N_JOBS_RFECV = max(1, os.cpu_count() // 2)
+print(f'RFECV will use {N_JOBS_RFECV} cores for parallel fold processing')
+
 selector = GroupAwareRFECV(
     estimator=selector_estimator,
     step=0.20,
     min_features_to_select=10,
     scoring='r2',
-    n_jobs=16   # choose appropriate number (or -1) for RFECV parallelization
+    n_jobs=N_JOBS_RFECV   # ✅ FIXED: Use appropriate number
 )
 
 ### Fit RFECV with GroupKFold by passing groups
@@ -521,29 +551,31 @@ else:
         X_static_train = X_train_np[:, static_idx]
         # Run GroupAwareRFECV only on the decorrelated static features
         print(f'Running GroupAwareRFECV on {len(static_decorr)} decorrelated static features...')
-    with parallel_backend('threading', n_jobs=16):
-        selector.fit(X_static_train, Y_train_np, groups=groups_train, X_column_names=static_decorr)
-        # support mask relative to the static (decorrelated) feature set
-        support_mask_static = selector.support_
-        selected_static_names = np.array(static_decorr)[support_mask_static].tolist()
-        print(f'Selected {len(selected_static_names)} static features by RFECV:')
-        if len(selected_static_names) <= 60:
-            print(', '.join(selected_static_names))
-        else:
-            print(', '.join(selected_static_names[:60]) + ', ...')
+        
+        # ✅ FIXED: Use parallel_backend with correct n_jobs for RFECV
+        with parallel_backend('threading', n_jobs=N_JOBS_RFECV):
+            selector.fit(X_static_train, Y_train_np, groups=groups_train, X_column_names=static_decorr)
+            # support mask relative to the static (decorrelated) feature set
+            support_mask_static = selector.support_
+            selected_static_names = np.array(static_decorr)[support_mask_static].tolist()
+            print(f'Selected {len(selected_static_names)} static features by RFECV:')
+            if len(selected_static_names) <= 60:
+                print(', '.join(selected_static_names))
+            else:
+                print(', '.join(selected_static_names[:60]) + ', ...')
 
-        # Combine selected static variables with all dynamic variables (present in training)
-        combined_names = list(selected_static_names) + list(dynamic_present)
+            # Combine selected static variables with all dynamic variables (present in training)
+            combined_names = list(selected_static_names) + list(dynamic_present)
 
-        # Build final mask across all columns, preserving original column order
-        final_mask = np.isin(all_cols, combined_names)
+            # Build final mask across all columns, preserving original column order
+            final_mask = np.isin(all_cols, combined_names)
 
-        # Extract final selected arrays
-        X_train_selected = X_train_np[:, final_mask]
-        X_test_selected  = X_test_np[:, final_mask]
+            # Extract final selected arrays
+            X_train_selected = X_train_np[:, final_mask]
+            X_test_selected  = X_test_np[:, final_mask]
 
-        # Compose selected_names in the same order as final_mask (so later code sees consistent ordering)
-        selected_names = all_cols[final_mask]
+            # Compose selected_names in the same order as final_mask (so later code sees consistent ordering)
+            selected_names = all_cols[final_mask]
 
 # Overwrite the working feature arrays so the rest of the script (which uses X_train_np/X_test_np)
 # will automatically operate on the selected feature set without requiring further edits.
@@ -555,29 +587,47 @@ X_train_column_names = selected_names  # update column names array used elsewher
 print(f'Final feature set length: {X_train_np.shape[1]}')
 print('Final features (first 50):', list(X_train_column_names[:50]))
 
+# ========================================================================
+# FINAL MODEL TRAINING WITH FULL PARALLELIZATION
+# ========================================================================
+# Determine optimal n_jobs for final model
+# Use 16 cores if available, otherwise use available cores
+N_JOBS_FINAL = os.cpu_count() if os.cpu_count() is not None else 16
+print(f'\\nFinal model training will use {N_JOBS_FINAL} cores for OOB CV parallelization')
+print(f'Each base estimator (ExtraTreesRegressor) will use {1} thread (inner_n_jobs=1)')
+print('='*70)
+
 # Final wrapper: allow parallel folds for OOB (n_jobs) but ensure inner_n_jobs=1 to avoid nested jobs
 RFreg = GroupAwareMultiOutput(
     base_estimator=make_et,
     n_cv_folds=5,
-    n_jobs=16,         # parallelize across folds for OOB computation (set to 16 if you want all cores)
-    inner_n_jobs=1,    # ensure each base estimator uses single thread
+    n_jobs=N_JOBS_FINAL,   # ✅ FIXED: Use full cores for OOB fold parallelization
+    inner_n_jobs=1,        # ✅ FIXED: Ensure base estimators don't parallelize internally
     random_state=24,
     oob_metric='r2'
 )
 
-########## 
-with parallel_backend('threading', n_jobs=1):
-    RFreg.fit(X_train_selected, Y_train_np, groups=groups_train,  X_column_names=selected_names.tolist(), do_oob_cv=True )
+# ✅ FIXED: REMOVED the conflicting parallel_backend context
+# The n_jobs parameter in RFreg will now work correctly
+print(f'Starting final model training with GroupKFold OOB validation...')
+print(f'Start time: {datetime.now().isoformat()}')
+
+RFreg.fit(X_train_selected, Y_train_np, groups=groups_train,  
+          X_column_names=selected_names.tolist(), do_oob_cv=True)
+
+print(f'Finished model training at: {datetime.now().isoformat()}')
+print('='*70)
 
 ## RFreg.print_oob_summary()
 
 # final feature importances
+print('\\nTop 15 features by importance:')
 print(RFreg.get_importances().head(15))
 
 # For compatibility with later code:
 RFreg.feature_importances_ = RFreg.final_importances_
 RFreg.kept_cols_ = selected_names.tolist()
-print(f'Start the prediction')
+print(f'\\nStarting predictions on test and training sets...')
 Y_test_pred_nosort   = RFreg.predict(X_test_np)
 Y_train_pred_nosort  = RFreg.predict(X_train_np)
 
@@ -591,10 +641,11 @@ def post_pred_check(Y_true_np, Y_pred_np, name='test'):
         print(f'{name} col{i} std: true {tstd:.6f}, pred {pstd:.6f}, true NaNs {np.isnan(Y_true_np[:,i]).sum()}, pred NaNs {np.isnan(Y_pred_np[:,i]).sum()}')
         if tstd == 0:
             print('  -> WARNING: true column is constant; Pearson will be NaN.')
+
 post_pred_check(Y_test_np, Y_test_pred_nosort, 'Y_test')
 post_pred_check(Y_train_np, Y_train_pred_nosort, 'Y_train')
 
-print(f'Calculate error matrix')
+print(f'\\nCalculating error metrics...')
 
 # Compute Kling-Gupta Efficiency (KGE).
 def kge(y_true, y_pred):
@@ -688,6 +739,7 @@ np.savetxt(rf'../predict_score_red/stationID_x_y_valueALL_predictors_YscorekgeN{
 
 importance = pd.Series(RFreg.feature_importances_, index=X_train_column_names)
 importance.sort_values(ascending=False, inplace=True)
+print('\\nFeature importances (all):')
 print(importance)
 
 importance.to_csv(rf'../predict_importance_red/stationID_x_y_valueALL_predictors_XimportanceN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{depth_s}depth_{sample_s}sample_2RF.txt', index=True, sep=' ', header=False)
@@ -708,6 +760,7 @@ del Y_train_pred_indexed, Y_test_pred_indexed
 gc.collect()
 
 #### save prediction
+print('\\nFinal prediction shapes:')
 print(Y_train_pred_sort.shape)            
 print(Y_train_pred_sort[:4])        
 print(Y_test_pred_sort.shape)  
@@ -717,9 +770,11 @@ fmt = '%.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f %.2f'
 np.savetxt(rf'../predict_prediction_red/stationID_x_y_valueALL_predictors_YpredictTrainN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{depth_s}depth_{sample_s}sample_2RF.txt', Y_train_pred_sort, delimiter=' ', fmt=fmt, header='QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='')
 np.savetxt(rf'../predict_prediction_red/stationID_x_y_valueALL_predictors_YpredictTestN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{depth_s}depth_{sample_s}sample_2RF.txt', Y_test_pred_sort , delimiter=' ', fmt=fmt, header='QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='')
 
-print(f'End of the script!!!!!!!!!!!!')
+print(f'\\n{"="*70}')
+print(f'SCRIPT COMPLETED SUCCESSFULLY')
+print(f'End time: {datetime.now().isoformat()}')
+print(f'{"="*70}')
 
 EOF
 " ## close the sif
 exit
-
