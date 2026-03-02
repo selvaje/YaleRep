@@ -84,3 +84,22 @@ grep -e ^1   $EXTRACT/extract4py_red/stationID_x_y_valueALL_predictors_Y_floredS
 head -1  $EXTRACT/extract4py_red/stationID_x_y_valueALL_predictors_X_floredSFD.txt       >  $EXTRACT/extract4py_red/stationID_x_y_valueALL_predictors_X1_floredSFD.txt
 grep -e ^1   $EXTRACT/extract4py_red/stationID_x_y_valueALL_predictors_X_floredSFD.txt >>  $EXTRACT/extract4py_red/stationID_x_y_valueALL_predictors_X1_floredSFD.txt
 
+####### reomove the grep " 0 0 0 0 0 0 0 0 0 0 0 "
+
+EXTRACT=/gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS
+grep -v " 0 0 0 0 0 0 0 0 0 0 0 " $EXTRACT/extract_red/stationID_x_y_valueALL_predictors_floredSFD.txt |  cut -d " " -f1-19  >   $EXTRACT/extract4py_red/stationID_x_y_valueALL_predictors_0Y_floredSFD.txt
+
+grep -v " 0 0 0 0 0 0 0 0 0 0 0 " $EXTRACT/extract_red/stationID_x_y_valueALL_predictors_floredSFD.txt |  cut -d " " -f1-8,20-  >   $EXTRACT/extract4py_red/stationID_x_y_valueALL_predictors_0X_floredSFD.txt
+
+head -1  $EXTRACT/extract4py_red/stationID_x_y_valueALL_predictors_0Y_floredSFD.txt       >  $EXTRACT/extract4py_red/stationID_x_y_valueALL_predictors_0Y11_floredSFD.txt
+grep -e ^11   $EXTRACT/extract4py_red/stationID_x_y_valueALL_predictors_0Y_floredSFD.txt >>  $EXTRACT/extract4py_red/stationID_x_y_valueALL_predictors_0Y11_floredSFD.txt
+
+head -1  $EXTRACT/extract4py_red/stationID_x_y_valueALL_predictors_0X_floredSFD.txt       >  $EXTRACT/extract4py_red/stationID_x_y_valueALL_predictors_0X11_floredSFD.txt
+grep -e ^11   $EXTRACT/extract4py_red/stationID_x_y_valueALL_predictors_0X_floredSFD.txt >>  $EXTRACT/extract4py_red/stationID_x_y_valueALL_predictors_0X11_floredSFD.txt
+
+head -1  $EXTRACT/extract4py_red/stationID_x_y_valueALL_predictors_0Y_floredSFD.txt       >  $EXTRACT/extract4py_red/stationID_x_y_valueALL_predictors_0Y1_floredSFD.txt
+grep -e ^1   $EXTRACT/extract4py_red/stationID_x_y_valueALL_predictors_0Y_floredSFD.txt >>  $EXTRACT/extract4py_red/stationID_x_y_valueALL_predictors_0Y1_floredSFD.txt
+
+head -1  $EXTRACT/extract4py_red/stationID_x_y_valueALL_predictors_0X_floredSFD.txt       >  $EXTRACT/extract4py_red/stationID_x_y_valueALL_predictors_0X1_floredSFD.txt
+grep -e ^1   $EXTRACT/extract4py_red/stationID_x_y_valueALL_predictors_0X_floredSFD.txt >>  $EXTRACT/extract4py_red/stationID_x_y_valueALL_predictors_0X1_floredSFD.txt
+

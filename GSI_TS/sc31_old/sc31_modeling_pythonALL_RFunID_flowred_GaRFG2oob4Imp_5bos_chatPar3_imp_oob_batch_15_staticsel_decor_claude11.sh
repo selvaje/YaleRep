@@ -22,7 +22,7 @@ echo "start python modeling"
 apptainer exec --env=PATH="/gpfs/gibbs/pi/hydro/hydro/scripts/APTAINER_SIF/pyjeo-stuff/pyjeovenv/bin:$PATH" \
  --env=obs_leaf=$obs_leaf,obs_split=$obs_split,depth=$depth,sample=$sample,N_EST=$N_EST /gpfs/gibbs/pi/hydro/hydro/scripts/APTAINER_SIF/pyjeo2.sif  bash -c "
 
-python3 <<EOF
+python3 <<'EOF'
 import os
 import gc
 import warnings
@@ -34,7 +34,8 @@ from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
 from sklearn.base import RegressorMixin, BaseEstimator, clone
 from sklearn.cluster import KMeans
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-from scipy.stats import pearsonr, spearmanr
+from sklearn.preprocessing import RobustScaler
+from scipy.stats import pearsonr, spearmanr, skew
 from joblib import Parallel, delayed
 import psutil
 
@@ -91,6 +92,8 @@ dynamic_var = [
     'swe0', 'swe1', 'swe2', 'swe3',
     'soil0', 'soil1', 'soil2', 'soil3'
 ]
+
+precip_var = ['ppt0', 'ppt1', 'ppt2', 'ppt3']
 
 # ============================================================================
 # DATA TYPE DEFINITIONS
@@ -172,10 +175,10 @@ additional_columns = ['IDs', 'IDr', 'YYYY', 'MM', 'Xsnap', 'Ysnap', 'Xcoord', 'Y
 include_variables.extend(additional_columns)
 
 print('Loading Y data...')
-Y = load_with_dtypes('Ysample_1.0pct.txt', dtype_dict=dtypes_Y)
+Y = load_with_dtypes('Ysample_10.0pct.txt', dtype_dict=dtypes_Y)
 
 print('Loading X data...')
-X = load_with_dtypes('Xsample_1.0pct.txt', usecols=lambda col: col in include_variables, dtype_dict=dtypes_X)
+X = load_with_dtypes('Xsample_10.0pct.txt', usecols=lambda col: col in include_variables, dtype_dict=dtypes_X)
 
 print(f'X shape: {X.shape}, Y shape: {Y.shape}')
 
@@ -299,12 +302,12 @@ del X, Y, X_train, Y_train, X_test, Y_test
 gc.collect()
 
 # ============================================================================
-# HELPER FUNCTIONS
+# HELPER FUNCTIONS - IMPROVED FOR SKEWED DATA
 # ============================================================================
 
 class GroupAwareMultiOutput(BaseEstimator, RegressorMixin):
     def __init__(self, base_estimator, n_cv_folds=5, n_jobs=1, inner_n_jobs=1,
-                 random_state=24, oob_metric='r2', verbose=0):
+                 random_state=24, oob_metric='r2', verbose=0, use_scaler=True):
         self.base_estimator = base_estimator
         self.n_cv_folds = n_cv_folds
         self.n_jobs = n_jobs
@@ -312,8 +315,10 @@ class GroupAwareMultiOutput(BaseEstimator, RegressorMixin):
         self.random_state = random_state
         self.oob_metric = oob_metric
         self.verbose = verbose
+        self.use_scaler = use_scaler
         
         self.models_ = []
+        self.scaler_ = None
         self.oob_predictions_ = None
         self.oob_r2_per_target_ = None
         self.oob_r2_mean_ = None
@@ -336,6 +341,13 @@ class GroupAwareMultiOutput(BaseEstimator, RegressorMixin):
         
         n_samples, n_features = X.shape
         n_targets = Y.shape[1] if Y.ndim == 2 else 1
+        
+        # Fit RobustScaler for skewed data (median/IQR based - resistant to outliers)
+        if self.use_scaler:
+            self.scaler_ = RobustScaler()
+            X = self.scaler_.fit_transform(X).astype(np.float32)
+            if self.verbose > 0:
+                print('✓ Features scaled with RobustScaler (handles skewness)')
         
         if groups is None or (not bool(do_oob_cv)):
             if self.verbose > 0:
@@ -461,6 +473,9 @@ class GroupAwareMultiOutput(BaseEstimator, RegressorMixin):
     def predict(self, X):
         if len(self.models_) == 0 or not self._fitted:
             raise ValueError('Model not fitted.')
+        X = np.asarray(X, dtype=np.float32)
+        if self.scaler_ is not None:
+            X = self.scaler_.transform(X).astype(np.float32)
         return self.models_[0].predict(X)
 
     def get_importances(self):
@@ -479,14 +494,30 @@ class GroupAwareMultiOutput(BaseEstimator, RegressorMixin):
 
 
 def decorrelate_group_fast(df, group_name, threshold=0.70, verbose=True):
-    '''Remove highly correlated features using Spearman correlation (optimized).'''
+    '''Remove highly correlated features using Spearman correlation (optimized for skewed data).'''
     
     if df.empty or len(df.columns) <= 1:
         if verbose and not df.empty:
             print(f' {group_name:20s}: {len(df.columns)} vars (no decorrelation needed)')
         return df
 
-    corr = df.corr(method='spearman').abs()
+    # Check skewness to decide on transformation
+    skewness_vals = []
+    for col in df.columns:
+        sk = skew(df[col].dropna())
+        skewness_vals.append(abs(sk))
+    
+    mean_skew = np.mean(skewness_vals)
+    
+    # Use log1p transformation if data is highly skewed (|skew| > 1)
+    if mean_skew > 1.0:
+        if verbose:
+            print(f'  {group_name:20s}: High skewness detected (mean |skew|={mean_skew:.2f}), applying log1p')
+        df_corr = np.log1p(np.abs(df) + 1e-10)  # Log transform to reduce skew effects
+    else:
+        df_corr = df
+
+    corr = df_corr.corr(method='spearman').abs()
     upper = corr.where(np.triu(np.ones(corr.shape), k=1).astype(bool))
     to_drop = set()
 
@@ -498,9 +529,9 @@ def decorrelate_group_fast(df, group_name, threshold=0.70, verbose=True):
     
     kept = [c for c in df.columns if c not in to_drop]
     if verbose:
-        print(f' {group_name:20s}: {len(df.columns):3d} → {len(kept):3d} (ρ > {threshold:.2f})')
+        print(f' {group_name:20s}: {len(df.columns):3d} → {len(kept):3d} (ρ > {threshold:.2f}, mean |skew|={mean_skew:.2f})')
     
-    del corr, upper
+    del corr, upper, df_corr
     gc.collect()
     
     return df[kept]
@@ -509,16 +540,18 @@ def decorrelate_group_fast(df, group_name, threshold=0.70, verbose=True):
 # FEATURE SELECTION ON SAMPLED DATA (FULL TEMPORAL RESOLUTION)
 # ============================================================================
 
-print('\n===== FEATURE SELECTION ON SAMPLED FULL-RESOLUTION DATA =====')
+print('\n===== STRATIFIED FEATURE SELECTION (SKEWED DATA AWARE) =====')
 
 all_cols = X_train_column_names.astype(str)
 
 static_present = [c for c in static_var if c in all_cols]
 dynamic_present = [c for c in dynamic_var if c in all_cols]
+precip_present = [c for c in precip_var if c in all_cols]
 
 print(f'Feature inventory:')
 print(f'  Static variables: {len(static_present)}/{len(static_var)}')
-print(f'  Dynamic variables: {len(dynamic_present)}/{len(dynamic_var)}')
+print(f'  Dynamic variables (non-precip): {len([c for c in dynamic_present if c not in precip_present])}/{len([c for c in dynamic_var if c not in precip_var])}')
+print(f'  Precipitation variables: {len(precip_present)}/{len(precip_var)} (FORCE INCLUSION)')
 print(f'  Total features: {len(static_present) + len(dynamic_present)}')
 
 print(f'\nFull data: {X_train_np.shape[0]} temporal rows (not aggregated!)')
@@ -534,28 +567,47 @@ groups_sample = groups_train[sample_idx]
 print(f'Sampling {sample_size} rows for feature selection...')
 print(f'Sampled data retains full temporal variance (no monthly aggregation)')
 
-# ✓ Decorrelate static features
+# ✓ Decorrelate static features (SEPARATELY from dynamic/precip)
 static_indices = [i for i, col in enumerate(all_cols) if col in static_present]
 X_static_sample = X_sample[:, static_indices]
 static_dec_df = decorrelate_group_fast(pd.DataFrame(X_static_sample, columns=static_present), 'Static', threshold=0.70, verbose=True)
 static_decorr = static_dec_df.columns.tolist()
 
+# ✓ Decorrelate non-precipitation dynamic features
+non_precip_dynamic = [c for c in dynamic_present if c not in precip_present]
+if len(non_precip_dynamic) > 0:
+    non_precip_indices = [i for i, col in enumerate(all_cols) if col in non_precip_dynamic]
+    X_non_precip_sample = X_sample[:, non_precip_indices]
+    non_precip_dec_df = decorrelate_group_fast(pd.DataFrame(X_non_precip_sample, columns=non_precip_dynamic), 'Dynamic(non-precip)', threshold=0.70, verbose=True)
+    non_precip_decorr = non_precip_dec_df.columns.tolist()
+else:
+    non_precip_decorr = []
+
+print(f'\n✓ Precipitation variables: FORCE ALL {len(precip_present)} features (always critical)')
+
+# ============================================================================
+# RFECV ON STATIC FEATURES ONLY
+# ============================================================================
+
 if len(static_decorr) == 0:
     print('WARNING: No static vars left after decorrelation. Using dynamic only.')
     selected_static_names = []
 else:
-    # Get indices of decorrelated static variables
     static_indices_decorr = [i for i, col in enumerate(all_cols) if col in static_decorr]
     X_static_sample_decorr = X_sample[:, static_indices_decorr]
     
-    print(f'\nRunning RFECV on sampled data: {X_static_sample_decorr.shape}')
+    print(f'\nRunning RFECV on static features: {X_static_sample_decorr.shape}')
     print(f'  Sampling from {X_train_np.shape[0]} full temporal rows')
-    print(f'  Preserves precipitation + dynamic features with full variance')
+    print(f'  Data scaled with RobustScaler (skewness-resistant)')
     
-    print('Fitting RFECV...')
+    # Fit RobustScaler on sample for RFECV
+    scaler_sample = RobustScaler()
+    X_static_sample_scaled = scaler_sample.fit_transform(X_static_sample_decorr).astype('float32')
+    
+    print('Fitting RFECV on RobustScaler-normalized data...')
     
     step_size = max(5, int(len(static_decorr) * 0.40))
-    min_features = max(5, int(len(static_decorr) * 0.20))
+    min_features = max(8, int(len(static_decorr) * 0.25))  # Keep 25-40% of static features
     
     selector_fast = RFECV(
         estimator=ExtraTreesRegressor(
@@ -575,7 +627,7 @@ else:
     )
     
     selector_fast.fit(
-        X_static_sample_decorr,
+        X_static_sample_scaled,
         Y_sample,
         groups=groups_sample
     )
@@ -612,7 +664,7 @@ else:
     rfecv_results_df = rfecv_results_df.sort_values('Rank').reset_index(drop=True)
     
     print('\n' + '='*130)
-    print('RFECV FEATURE SELECTION RANKING (Static Features - Full Temporal Resolution)')
+    print('RFECV FEATURE SELECTION RANKING (Static Features - Skewness-Aware)')
     print('='*130)
     print(rfecv_results_df.to_string(index=False))
     print('='*130)
@@ -621,14 +673,13 @@ else:
     n_total = len(rfecv_results_df)
     
     print(f'\nRFECV Summary:')
-    print(f'  Total features evaluated: {n_total}')
-    print(f'  Features selected: {n_selected}')
-    print(f'  Features eliminated: {n_total - n_selected}')
+    print(f'  Total static features evaluated: {n_total}')
+    print(f'  Static features selected: {n_selected}')
+    print(f'  Static features eliminated: {n_total - n_selected}')
     print(f'  Selection rate: {100*n_selected/n_total:.1f}%')
-    print(f'  Max elimination rank: {max_rank}')
     
     selected_features_table = rfecv_results_df[rfecv_results_df['Selected']==True][['Feature', 'Rank', 'Survival_Score', 'Interpretation']]
-    print('\nSELECTED FEATURES (Rank = 1):')
+    print('\nSELECTED STATIC FEATURES (Rank = 1):')
     print('-'*130)
     print(selected_features_table.to_string(index=False))
     
@@ -647,21 +698,33 @@ else:
     
     print(f'\n✓ Selected {len(selected_static_names)}/{len(static_decorr)} static features by RFECV')
 
-# ✓ Combine selected static with all dynamic features
-combined_names = list(selected_static_names) + list(dynamic_present)
+# ============================================================================
+# COMBINE: Selected static + ALL non-precip dynamic + ALL precipitation
+# ============================================================================
+
+combined_names = list(selected_static_names) + list(non_precip_decorr) + list(precip_present)
 final_mask = np.isin(all_cols, combined_names)
 
 X_train_selected = X_train_np[:, final_mask]
 X_test_selected = X_test_np[:, final_mask]
 selected_names = all_cols[final_mask]
 
-print(f'\nFinal feature set: {X_train_selected.shape[1]} features')
-print(f'  Static (selected): {len([n for n in selected_names if n in static_var])}')
-print(f'  Dynamic (ALL): {len(dynamic_present)}')
+n_static_final = len([n for n in selected_names if n in static_var])
+n_dynamic_final = len([n for n in selected_names if n in dynamic_var])
+
+print(f'\n' + '='*80)
+print('FINAL FEATURE SET (Precipitation FORCED, Others Selected)')
+print('='*80)
+print(f'Final feature set: {X_train_selected.shape[1]} features')
+print(f'  Static (RFECV-selected): {n_static_final}')
+print(f'  Precipitation (FORCED): {len(precip_present)}')
+print(f'  Dynamic other (non-precip): {len(non_precip_decorr)}')
 print(f'  Applied to FULL {X_train_selected.shape[0]} temporal rows (not aggregated)')
+print(f'\nFeature list: {sorted(list(selected_names))}')
+print('='*80)
 
 # ============================================================================
-# FINAL MODEL TRAINING (ON FULL TEMPORAL DATA)
+# FINAL MODEL TRAINING (ON FULL TEMPORAL DATA - WITH ROBUST SCALING)
 # ============================================================================
 
 def make_rf(**kw):
@@ -684,12 +747,14 @@ RFreg = GroupAwareMultiOutput(
     inner_n_jobs=1,
     random_state=24,
     oob_metric='r2',
-    verbose=1
+    verbose=1,
+    use_scaler=True  # ENABLE RobustScaler for skewed data
 )
 
 print('Training final model with GroupKFold OOB CV on FULL data...')
 print(f'  Training set: {X_train_selected.shape[0]} full temporal observations')
 print(f'  Grouping by station for CV separation (no data leakage)')
+print(f'  Using RobustScaler for skewness-resistant feature scaling')
 RFreg.fit(
     X_train_selected,
     Y_train_np,
@@ -811,7 +876,7 @@ gc.collect()
 
 importance = pd.Series(RFreg.feature_importances_.values if hasattr(RFreg.feature_importances_, 'values') 
                        else RFreg.feature_importances_, 
-                       index=X_train_column_names)
+                       index=selected_names)
 importance.sort_values(ascending=False, inplace=True)
 
 print('\nTop 20 Final Feature Importances:')

@@ -1,0 +1,1038 @@
+#!/bin/bash
+#SBATCH -p day
+#SBATCH -n 1 -c 16  -N 1
+#SBATCH -t 24:00:00 
+#SBATCH -o /vast/palmer/scratch/sbsc/ga254/stdout/sc31_modeling_pythonALL_RFrunMainRespRenkOptimSnapCor.sh.%A_%a.out
+#SBATCH -e /vast/palmer/scratch/sbsc/ga254/stderr/sc31_modeling_pythonALL_RFrunMainRespRenkOptimSnapCor.sh.%A_%a.err
+#SBATCH --job-name=sc31_SnapCorRFas30_flowred_OOB.sh
+#SBATCH --array=500
+#SBATCH --mem=100G
+
+EXTRACT=/gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/extract4py_red
+cd "$EXTRACT"
+
+module load StdEnv
+
+export obs_leaf="$obs_leaf" ; export obs_split="$obs_split" ;  export sample="$sample" ; export depth="$depth" ; export N_EST="$SLURM_ARRAY_TASK_ID"
+echo "obs_leaf  $obs_leaf obs_split  $obs_split sample $sample n_estimators $N_EST"
+
+~/bin/echoerr "n_estimators ${N_EST} obs_leaf ${obs_leaf} obs_split ${obs_split} sample $sample depth $depth"
+echo "start python modeling"
+
+apptainer exec --env=PATH="/gpfs/gibbs/pi/hydro/hydro/scripts/APTAINER_SIF/pyjeo-stuff/pyjeovenv/bin:$PATH" \
+ --env=obs_leaf="$obs_leaf",obs_split="$obs_split",depth="$depth",sample="$sample",N_EST="$N_EST" /gpfs/gibbs/pi/hydro/hydro/scripts/APTAINER_SIF/pyjeo2.sif  bash -c "
+
+python3 <<'PYTHON_EOF'
+import os
+import gc
+import warnings
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split, GroupKFold 
+from sklearn.feature_selection import RFECV
+from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
+from sklearn.base import RegressorMixin, BaseEstimator
+from sklearn.cluster import KMeans
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+from scipy.stats import pearsonr, spearmanr, skew, kurtosis
+from joblib import Parallel, delayed
+import psutil
+
+warnings.filterwarnings('ignore')
+pd.set_option('display.max_columns', None)
+
+# ============================================================================
+# CONFIGURATION & INPUT PARSING
+# ============================================================================
+
+obs_leaf_i = int(os.environ['obs_leaf'])
+obs_split_i = int(os.environ['obs_split'])
+depth_i = int(os.environ['depth'])
+sample_f = float(os.environ['sample'])
+N_EST_I = int(os.environ['N_EST'])
+
+obs_leaf_s = str(obs_leaf_i)
+obs_split_s = str(obs_split_i)
+depth_s = str(depth_i)
+sample_s = str(int(sample_f * 100))
+N_EST_S = str(N_EST_I)
+
+print(f'Config: N_EST={N_EST_I}, leaf={obs_leaf_i}, split={obs_split_i}, depth={depth_i}, sample={sample_f}')
+
+# ============================================================================
+# STATIC/DYNAMIC VARIABLE DEFINITIONS
+# ============================================================================
+
+static_var = [
+    'cti', 'spi', 'sti', 'accumulation',
+    'outlet_diff_dw_scatch', 'outlet_dist_dw_scatch',
+    'stream_diff_dw_near', 'stream_diff_up_farth', 'stream_diff_up_near',
+    'stream_dist_dw_near', 'stream_dist_proximity',
+    'stream_dist_up_farth', 'stream_dist_up_near',
+    'slope_curv_max_dw_cel', 'slope_curv_min_dw_cel',
+    'slope_elv_dw_cel', 'slope_grad_dw_cel', 'channel_curv_cel',
+    'channel_dist_dw_seg', 'channel_dist_up_cel', 'channel_dist_up_seg',
+    'channel_elv_dw_cel', 'channel_elv_dw_seg', 'channel_elv_up_cel',
+    'channel_elv_up_seg', 'channel_grad_dw_seg', 'channel_grad_up_cel',
+    'channel_grad_up_seg', 'AWCtS', 'CLYPPT', 'SLTPPT', 'SNDPPT', 'WWP',
+    'GRWLw', 'GRWLr', 'GRWLl', 'GRWLd', 'GRWLc',
+    'GSWs', 'GSWr', 'GSWo', 'GSWe',
+    'order_hack', 'order_horton', 'order_shreve', 'order_strahler', 'order_topo',
+    'dx', 'dxx', 'dxy', 'dy', 'dyy', 'elev', 'aspect-cosine', 'aspect-sine',
+    'convergence', 'dev-magnitude', 'dev-scale', 'eastness', 'elev-stdev',
+    'northness', 'pcurv', 'rough-magnitude', 'roughness', 'rough-scale',
+    'slope', 'tcurv', 'tpi', 'tri', 'vrm'
+]
+
+dynamic_var = [
+    'ppt0', 'ppt1', 'ppt2', 'ppt3',
+    'tmin0', 'tmin1', 'tmin2', 'tmin3',
+    'tmax0', 'tmax1', 'tmax2', 'tmax3',
+    'swe0', 'swe1', 'swe2', 'swe3',
+    'soil0', 'soil1', 'soil2', 'soil3'
+]
+
+# ============================================================================
+# DATA TYPE DEFINITIONS
+# ============================================================================
+
+dtypes_X = {
+    'IDs': 'int32',
+    'IDr': 'int32',
+    'YYYY': 'int32',
+    'MM': 'int32',
+    'Xsnap': 'float32',
+    'Ysnap': 'float32',
+    'Xcoord': 'float32',
+    'Ycoord': 'float32',
+}
+
+climate_soil_cols = [
+    'ppt0', 'ppt1', 'ppt2', 'ppt3',
+    'tmin0', 'tmin1', 'tmin2', 'tmin3',
+    'tmax0', 'tmax1', 'tmax2', 'tmax3',
+    'swe0', 'swe1', 'swe2', 'swe3',
+    'soil0', 'soil1', 'soil2', 'soil3',
+]
+
+feature_cols = [
+    'cti', 'spi', 'sti', 'accumulation',
+    'outlet_diff_dw_scatch', 'outlet_dist_dw_scatch',
+    'stream_diff_dw_near', 'stream_diff_up_farth', 'stream_diff_up_near',
+    'stream_dist_dw_near', 'stream_dist_proximity',
+    'stream_dist_up_farth', 'stream_dist_up_near',
+    'slope_curv_max_dw_cel', 'slope_curv_min_dw_cel',
+    'slope_elv_dw_cel', 'slope_grad_dw_cel', 'channel_curv_cel',
+    'channel_dist_dw_seg', 'channel_dist_up_cel', 'channel_dist_up_seg',
+    'channel_elv_dw_cel', 'channel_elv_dw_seg', 'channel_elv_up_cel',
+    'channel_elv_up_seg', 'channel_grad_dw_seg', 'channel_grad_up_cel',
+    'channel_grad_up_seg', 'AWCtS', 'CLYPPT', 'SLTPPT', 'SNDPPT', 'WWP',
+    'GRWLw', 'GRWLr', 'GRWLl', 'GRWLd', 'GRWLc',
+    'GSWs', 'GSWr', 'GSWo', 'GSWe',
+    'order_hack', 'order_horton', 'order_shreve', 'order_strahler', 'order_topo',
+    'dx', 'dxx', 'dxy', 'dy', 'dyy', 'elev', 'aspect-cosine', 'aspect-sine',
+    'convergence', 'dev-magnitude', 'dev-scale', 'eastness', 'elev-stdev',
+    'northness', 'pcurv', 'rough-magnitude', 'roughness', 'rough-scale',
+    'slope', 'tcurv', 'tpi', 'tri', 'vrm'
+]
+
+dtypes_X.update({col: 'int32' for col in climate_soil_cols if col not in dtypes_X})
+dtypes_X.update({col: 'float32' for col in feature_cols})
+
+dtypes_Y = {
+    'IDs': 'int32',
+    'IDr': 'int32',
+    'YYYY': 'int32',
+    'MM': 'int32',
+    'Xsnap': 'float32',
+    'Ysnap': 'float32',
+    'Xcoord': 'float32',
+    'Ycoord': 'float32',
+}
+dtypes_Y.update({col: 'float32' for col in ['QMIN', 'Q10', 'Q20', 'Q30', 'Q40', 'Q50', 'Q60', 'Q70', 'Q80', 'Q90', 'QMAX']})
+
+# ============================================================================
+# DATA LOADING (Chunked for memory efficiency)
+# ============================================================================
+
+def load_with_dtypes(filepath, usecols=None, dtype_dict=None, chunksize=50000):
+    chunks = []
+    for chunk in pd.read_csv(filepath, header=0, sep='\s+', 
+                             usecols=usecols, dtype=dtype_dict, 
+                             engine='c', chunksize=chunksize):
+        chunks.append(chunk)
+        if len(chunks) % 10 == 0:
+            gc.collect()
+    return pd.concat(chunks, ignore_index=True) if chunks else pd.DataFrame()
+
+print('Loading predictor importance...')
+importance = pd.read_csv('varX_list.txt', header=None, sep='\s+', engine='c', low_memory=False)
+include_variables = importance.iloc[:78, 0].tolist()
+additional_columns = ['IDs', 'IDr', 'YYYY', 'MM', 'Xsnap', 'Ysnap', 'Xcoord', 'Ycoord']
+include_variables.extend(additional_columns)
+
+print('Loading Y data...')
+Y = load_with_dtypes('stationID_x_y_valueALL_predictors_X_floredSFD.txt', dtype_dict=dtypes_Y)
+
+print('Loading X data...')
+X = load_with_dtypes('stationID_x_y_valueALL_predictors_X_floredSFD.txt', usecols=lambda col: col in include_variables, dtype_dict=dtypes_X)
+
+print(f'X shape: {X.shape}, Y shape: {Y.shape}')
+
+X = X.reset_index(drop=True)
+Y = Y.reset_index(drop=True)
+
+# ============================================================================
+# EFFICIENT STATION-LEVEL AGGREGATION
+# ============================================================================
+
+print('Loading station coordinates...')
+stations = pd.read_csv('/gpfs/gibbs/pi/hydro/hydro/dataproces/GSI_TS/snapFlow_txt_red/IDstation_lon_lat_IDraster_Xcoord_Ycoord_2sH.txt',
+                        sep='\s+', usecols=['IDr', 'Xcoord', 'Ycoord']).drop_duplicates()
+
+print('Filtering stations by observation count...')
+counts = X['IDr'].value_counts()
+valid_idr_train = counts[counts > 10].index.values
+print(f'Filtered training to {len(valid_idr_train)} stations with >10 observations')
+
+# ============================================================================
+# SPATIAL TRAIN/TEST SPLIT WITH SINGLETON-CLUSTER HANDLING
+# ============================================================================
+
+unique_stations = stations[['IDr', 'Xcoord', 'Ycoord']].drop_duplicates().reset_index(drop=True)
+
+print('Performing KMeans clustering for spatial separation...')
+kmeans = KMeans(n_clusters=20, random_state=24, n_init=10)
+unique_stations['cluster'] = kmeans.fit_predict(unique_stations[['Xcoord', 'Ycoord']])
+
+train_stations = unique_stations[unique_stations['IDr'].isin(valid_idr_train)][['IDr', 'cluster']].copy()
+
+cluster_counts = train_stations['cluster'].value_counts()
+print(f'Cluster distribution: {cluster_counts.to_dict()}')
+print(f'Singleton clusters: {(cluster_counts == 1).sum()}')
+
+sufficient_clusters = cluster_counts[cluster_counts > 1].index.values
+filtered_train_stations = train_stations[train_stations['cluster'].isin(sufficient_clusters)].copy()
+
+if filtered_train_stations.empty:
+    raise RuntimeError('No clusters with >1 member remain. Adjust KMeans n_clusters or lower stratification threshold.')
+
+print(f'Performing stratified split on {len(sufficient_clusters)} non-singleton clusters...')
+
+train_rasters, test_rasters = train_test_split(
+    filtered_train_stations,
+    test_size=0.2,
+    random_state=24,
+    stratify=filtered_train_stations['cluster']
+)
+
+print(f'Train stations: {len(train_rasters)}, Test stations: {len(test_rasters)}')
+
+X_train = X[X['IDr'].isin(train_rasters['IDr'].values)].reset_index(drop=True)
+Y_train = Y[Y['IDr'].isin(train_rasters['IDr'].values)].reset_index(drop=True)
+X_test = X[X['IDr'].isin(test_rasters['IDr'].values)].reset_index(drop=True)
+Y_test = Y[Y['IDr'].isin(test_rasters['IDr'].values)].reset_index(drop=True)
+
+print(f'Train: X={X_train.shape}, Y={Y_train.shape}')
+print(f'Test:  X={X_test.shape}, Y={Y_test.shape}')
+
+X_train_orig_idx = X_train.index.values
+Y_train_orig_idx = Y_train.index.values
+X_test_orig_idx = X_test.index.values
+Y_test_orig_idx = Y_test.index.values
+
+sort_key_train = ['IDs', 'IDr', 'YYYY', 'MM']
+sort_key_test = ['IDs', 'IDr', 'YYYY', 'MM']
+
+X_train_sorted = X_train.sort_values(by=sort_key_train).reset_index(drop=True)
+Y_train_sorted = Y_train.sort_values(by=sort_key_train).reset_index(drop=True)
+X_test_sorted = X_test.sort_values(by=sort_key_test).reset_index(drop=True)
+Y_test_sorted = Y_test.sort_values(by=sort_key_test).reset_index(drop=True)
+
+print('Train/test data summary:')
+print(f'Y_train: {Y_train_sorted.describe()}')
+print(f'Y_test: {Y_test_sorted.describe()}')
+
+fmt = ' '.join(['%.f'] * X_train_sorted.shape[1])
+X_column_names = np.array(X_train_sorted.columns)
+X_column_names_str = ' '.join(X_column_names)
+
+np.savetxt(f'../predict_splitting_red/stationID_x_y_valueALL_predictors_XTrainN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{depth_s}depth_{sample_s}sample_2RF.txt',X_train_sorted.values, delimiter=' ', fmt=fmt, header=X_column_names_str, comments='')
+np.savetxt(f'../predict_splitting_red/stationID_x_y_valueALL_predictors_XTestN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{depth_s}depth_{sample_s}sample_2RF.txt',X_test_sorted.values, delimiter=' ', fmt=fmt, header=X_column_names_str, comments='')
+
+fmt_Y = ' '.join(['%.f'] * Y_train_sorted.shape[1])
+Y_column_names = np.array(Y_train_sorted.columns)
+Y_column_names_str = ' '.join(Y_column_names)
+
+np.savetxt(f'../predict_splitting_red/stationID_x_y_valueALL_predictors_YTrainN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{depth_s}depth_{sample_s}sample_2RF.txt', Y_train_sorted.values, delimiter=' ', fmt=fmt_Y, header=Y_column_names_str, comments='')
+np.savetxt(f'../predict_splitting_red/stationID_x_y_valueALL_predictors_YTestN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{depth_s}depth_{sample_s}sample_2RF.txt', Y_test_sorted.values, delimiter=' ', fmt=fmt_Y, header=Y_column_names_str, comments='')
+
+del X_train_sorted, Y_train_sorted, X_test_sorted, Y_test_sorted
+gc.collect()
+
+# ============================================================================
+# PREPARE NUMPY ARRAYS FOR MODELING (FULL TEMPORAL DATA - NO AGGREGATION!)
+# ============================================================================
+
+X_train_np = X_train.drop(columns=['IDs', 'Xsnap', 'Ysnap', 'Xcoord', 'Ycoord', 'YYYY', 'MM', 'IDr']).to_numpy(dtype='float32')
+Y_train_np = Y_train.drop(columns=['IDs', 'Xsnap', 'Ysnap', 'Xcoord', 'Ycoord', 'YYYY', 'MM', 'IDr']).to_numpy(dtype='float32')
+
+X_test_np = X_test.drop(columns=['IDs', 'Xsnap', 'Ysnap', 'Xcoord', 'Ycoord', 'YYYY', 'MM', 'IDr']).to_numpy(dtype='float32')
+Y_test_np = Y_test.drop(columns=['IDs', 'Xsnap', 'Ysnap', 'Xcoord', 'Ycoord', 'YYYY', 'MM', 'IDr']).to_numpy(dtype='float32')
+
+groups_train = X_train['IDr'].to_numpy(dtype='int32')
+X_train_column_names = np.array(X_train.drop(columns=['YYYY', 'MM', 'IDr', 'IDs', 'Xsnap', 'Ysnap', 'Xcoord', 'Ycoord']).columns)
+
+print(f'X_train_np shape: {X_train_np.shape}')
+print(f'Y_train_np shape: {Y_train_np.shape}')
+print(f'groups_train shape: {groups_train.shape}')
+
+print(f'✓ Index alignment check:')
+print(f'  X_train original indices: {len(X_train_orig_idx)} samples')
+print(f'  Y_train original indices: {len(Y_train_orig_idx)} samples')
+print(f'  X_test original indices: {len(X_test_orig_idx)} samples')
+print(f'  Y_test original indices: {len(Y_test_orig_idx)} samples')
+
+del X, Y, X_train, Y_train, X_test, Y_test
+gc.collect()
+
+# ============================================================================
+# STATISTICAL ANALYSIS MODULE (NEW)
+# ============================================================================
+
+print('\n===== COMPREHENSIVE STATISTICAL ANALYSIS =====\n')
+
+def compute_statistical_summary(X_data, Y_data, groups_data, X_cols, name_prefix=''):
+    '''
+    Compute comprehensive statistics for understanding data structure
+    '''
+    stats_records = []
+    
+    # Univariate statistics for X (predictor variables)
+    print(f'Computing univariate statistics for {len(X_cols)} X variables...')
+    for i, col in enumerate(X_cols):
+        data = X_data[:, i]
+        valid = data[~np.isnan(data)]
+        
+        if len(valid) > 0:
+            stats_records.append({
+                'Variable': col,
+                'Type': 'Predictor',
+                'Count': len(valid),
+                'Missing': np.isnan(data).sum(),
+                'Zeros': (valid == 0).sum(),
+                'Mean': np.mean(valid),
+                'Std': np.std(valid),
+                'Min': np.min(valid),
+                'Q25': np.percentile(valid, 25),
+                'Median': np.percentile(valid, 50),
+                'Q75': np.percentile(valid, 75),
+                'Max': np.max(valid),
+                'Skewness': skew(valid) if len(valid) > 2 else np.nan,
+                'Kurtosis': kurtosis(valid) if len(valid) > 2 else np.nan,
+            })
+    
+    # Univariate statistics for Y (target variables)
+    print('Computing univariate statistics for Y (target quantiles)...')
+    Y_cols = ['QMIN', 'Q10', 'Q20', 'Q30', 'Q40', 'Q50', 'Q60', 'Q70', 'Q80', 'Q90', 'QMAX']
+    for i, col in enumerate(Y_cols):
+        if i < Y_data.shape[1]:
+            data = Y_data[:, i]
+            valid = data[~np.isnan(data)]
+            
+            if len(valid) > 0:
+                stats_records.append({
+                    'Variable': col,
+                    'Type': 'Target',
+                    'Count': len(valid),
+                    'Missing': np.isnan(data).sum(),
+                    'Zeros': (valid == 0).sum(),
+                    'Mean': np.mean(valid),
+                    'Std': np.std(valid),
+                    'Min': np.min(valid),
+                    'Q25': np.percentile(valid, 25),
+                    'Median': np.percentile(valid, 50),
+                    'Q75': np.percentile(valid, 75),
+                    'Max': np.max(valid),
+                    'Skewness': skew(valid) if len(valid) > 2 else np.nan,
+                    'Kurtosis': kurtosis(valid) if len(valid) > 2 else np.nan,
+                })
+    
+    stats_df = pd.DataFrame(stats_records)
+    return stats_df
+
+# Compute statistics
+stats_summary = compute_statistical_summary(X_train_np, Y_train_np, groups_train, X_train_column_names)
+
+# Save statistics
+stats_output_path = f'../predict_analysis_red/stationID_x_y_statistical_summary_N{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{depth_s}depth_{sample_s}sample.csv'
+stats_summary.to_csv(stats_output_path, index=False)
+print(f'\n✓ Statistical summary saved to {stats_output_path}')
+print('\nTop statistics summary:')
+print(stats_summary[['Variable', 'Type', 'Mean', 'Std', 'Skewness', 'Missing', 'Zeros']].head(20))
+
+# Temporal variance analysis
+print('\n===== TEMPORAL VARIANCE ANALYSIS =====\n')
+unique_groups = np.unique(groups_train)
+print(f'Found {len(unique_groups)} unique stations (groups)')
+
+# Compute within-group and between-group variance for a sample of variables
+sample_vars_idx = [0, len(X_train_column_names)//4, len(X_train_column_names)//2, 3*len(X_train_column_names)//4]
+sample_vars_idx = [i for i in sample_vars_idx if i < len(X_train_column_names)]
+
+temporal_stats = []
+for idx in sample_vars_idx:
+    var_name = X_train_column_names[idx]
+    data = X_train_np[:, idx]
+    
+    # Between-group variance (spatial)
+    group_means = np.array([np.nanmean(data[groups_train == g]) for g in unique_groups])
+    between_var = np.nanvar(group_means)
+    
+    # Within-group variance (temporal)
+    within_vars = [np.nanvar(data[groups_train == g]) for g in unique_groups]
+    within_var = np.nanmean(within_vars)
+    
+    temporal_stats.append({
+        'Variable': var_name,
+        'Between_Group_Var': between_var,
+        'Within_Group_Var': within_var,
+        'Ratio_Temporal_to_Spatial': within_var / (between_var + 1e-10),
+    })
+
+temporal_df = pd.DataFrame(temporal_stats)
+print(temporal_df.to_string())
+print(f'\n✓ Temporal variance analysis complete')
+print(f'  Ratio > 1.0 = strong temporal dynamics (good for GroupAwareMultiOutput)')
+print(f'  Ratio < 0.5 = weak temporal dynamics (purely spatial features)')
+
+del stats_summary, temporal_df
+gc.collect()
+
+# ============================================================================
+# IMPROVED HELPER FUNCTIONS FOR LARGE-SCALE DATA
+# ============================================================================
+
+class GroupAwareMultiOutput(BaseEstimator, RegressorMixin):
+    '''
+    IMPROVED VERSION: Optimized for 11M+ rows with better OOB estimation
+    - Memory-efficient group folding
+    - Robust to very large datasets
+    - Better calibration using temporal dynamics
+    - Stratified group splitting for consistency
+    '''
+    def __init__(self, base_estimator, n_cv_folds=5, n_jobs=1, inner_n_jobs=1,
+                 random_state=24, oob_metric='r2', verbose=0):
+        self.base_estimator = base_estimator
+        self.n_cv_folds = n_cv_folds
+        self.n_jobs = n_jobs
+        self.inner_n_jobs = inner_n_jobs
+        self.random_state = random_state
+        self.oob_metric = oob_metric
+        self.verbose = verbose
+        
+        self.models_ = []
+        self.oob_predictions_ = None
+        self.oob_r2_per_target_ = None
+        self.oob_r2_mean_ = None
+        self.oob_scores_ = None
+        self.final_importances_ = None
+        self._groups = None
+        self.X_column_names_ = None
+        self._fitted = False
+
+    def fit(self, X, Y, groups=None, X_column_names=None, do_oob_cv=True):
+        X = np.asarray(X, dtype=np.float32)
+        Y = np.asarray(Y, dtype=np.float32)
+        
+        if X_column_names is None:
+            X_column_names = [f'feat_{i}' for i in range(X.shape[1])]
+        self.X_column_names_ = list(X_column_names)
+        
+        if groups is not None:
+            self._groups = np.asarray(groups, dtype=np.int32)
+        
+        n_samples, n_features = X.shape
+        n_targets = Y.shape[1] if Y.ndim == 2 else 1
+        
+        if groups is None or (not bool(do_oob_cv)):
+            if self.verbose > 0:
+                print('Fitting final model on all data (no OOB CV)')
+            
+            final_model = self.base_estimator(
+                random_state=self.random_state,
+                n_jobs=self.inner_n_jobs
+            )
+            final_model.fit(X, Y)
+            self.models_ = [final_model]
+            
+            self._extract_importances(final_model)
+            
+            self.oob_predictions_ = np.full((n_samples, n_targets), np.nan, dtype=np.float32)
+            self.oob_r2_per_target_ = np.array([np.nan] * n_targets)
+            self.oob_r2_mean_ = np.nan
+            self.oob_scores_ = np.array([np.nan] * n_targets)
+            self._fitted = True
+            return self
+        
+        if self._groups is None or self._groups.size == 0:
+            raise ValueError('groups must be provided for group-aware OOB CV')
+        
+        # Get unique groups efficiently
+        unique_groups = np.unique(self._groups)
+        n_groups = len(unique_groups)
+        n_splits = min(self.n_cv_folds, n_groups)
+        
+        if self.verbose > 0:
+            print(f'Found {n_groups} unique groups, using {n_splits} splits for OOB CV')
+        
+        # Stratified group split for better train/test balance
+        group_indices = np.arange(n_groups)
+        rng_split = np.random.RandomState(self.random_state)
+        rng_split.shuffle(group_indices)
+        fold_groups = np.array_split(group_indices, n_splits)
+        
+        oob_preds = np.full((n_samples, n_targets), np.nan, dtype=np.float32)
+        
+        if self.verbose > 0:
+            print(f'Running GroupKFold OOB CV with {n_splits} splits...')
+        
+        rng_seeds = np.random.RandomState(self.random_state)
+        seeds = rng_seeds.randint(0, 100000, size=n_splits)
+        
+        def _fit_fold(fold_idx, test_group_indices, seed):
+            try:
+                # Get indices for test groups
+                test_group_ids = unique_groups[test_group_indices]
+                test_mask = np.isin(self._groups, test_group_ids)
+                train_mask = ~test_mask
+                
+                test_idx = np.where(test_mask)[0]
+                train_idx = np.where(train_mask)[0]
+                
+                if len(train_idx) < 100 or len(test_idx) < 10:
+                    if self.verbose > 1:
+                        print(f'  Fold {fold_idx+1}/{n_splits} skipped: insufficient samples')
+                    return test_idx, None
+                
+                est = self.base_estimator(
+                    random_state=int(seed),
+                    n_jobs=self.inner_n_jobs
+                )
+                est.fit(X[train_idx], Y[train_idx])
+                preds = est.predict(X[test_idx])
+                
+                if self.verbose > 1:
+                    quick_r2 = self._quick_r2(Y[test_idx], preds)
+                    print(f'  Fold {fold_idx+1}/{n_splits}: train={len(train_idx)}, test={len(test_idx)}, R²≈{quick_r2:.4f}')
+                
+                return test_idx, preds
+            except Exception as e:
+                print(f'Error in fold {fold_idx+1}: {e}')
+                raise
+        
+        fold_results = Parallel(n_jobs=self.n_jobs, backend='threading', 
+                               verbose=max(0, self.verbose-1))(
+            delayed(_fit_fold)(i, fold_groups[i], seeds[i])
+            for i in range(n_splits)
+        )
+        
+        for test_idx, preds in fold_results:
+            if preds is not None:
+                oob_preds[test_idx] = preds
+        
+        self.oob_predictions_ = oob_preds
+        self._compute_oob_scores(Y, oob_preds)
+        
+        if self.verbose > 0:
+            print('Fitting final model on all data...')
+        
+        final_model = self.base_estimator(
+            random_state=self.random_state,
+            n_jobs=self.inner_n_jobs
+        )
+        final_model.fit(X, Y)
+        self.models_ = [final_model]
+        
+        self._extract_importances(final_model)
+        self._fitted = True
+        
+        if self.verbose > 0:
+            print(f'OOB R² (mean): {self.oob_r2_mean_:.4f}')
+        
+        return self
+
+    def _quick_r2(self, y_true, y_pred):
+        '''Quick R² calculation for fold diagnostics'''
+        valid = ~np.isnan(y_pred[:, 0]) if y_pred.ndim > 1 else ~np.isnan(y_pred)
+        if valid.sum() < 2:
+            return np.nan
+        if y_pred.ndim > 1:
+            return r2_score(y_true[valid, 0], y_pred[valid, 0])
+        else:
+            return r2_score(y_true[valid], y_pred[valid])
+
+    def _extract_importances(self, model):
+        if hasattr(model, 'feature_importances_'):
+            self.feature_importances_ = model.feature_importances_.astype(np.float32)
+            self.final_importances_ = pd.Series(
+                self.feature_importances_, index=self.X_column_names_
+            ).sort_values(ascending=False)
+        elif hasattr(model, 'coef_'):
+            self.coef_ = model.coef_
+            self.final_importances_ = None
+        else:
+            self.final_importances_ = None
+
+    def _compute_oob_scores(self, Y_true, Y_pred_oob):
+        n_targets = Y_true.shape[1]
+        r2_list = []
+        score_list = []
+        
+        for i in range(n_targets):
+            y_true = Y_true[:, i]
+            y_pred = Y_pred_oob[:, i]
+            valid = ~np.isnan(y_pred)
+            
+            if int(valid.sum()) < 2:
+                r2_list.append(np.nan)
+                score_list.append(np.nan)
+                continue
+            
+            r2 = r2_score(y_true[valid], y_pred[valid])
+            r2_list.append(r2)
+            
+            if self.oob_metric == 'r2':
+                score_list.append(r2)
+            elif self.oob_metric == 'rmse':
+                score_list.append(np.sqrt(mean_squared_error(y_true[valid], y_pred[valid])))
+            else:
+                score_list.append(r2)
+        
+        self.oob_r2_per_target_ = np.array(r2_list, dtype=np.float32)
+        self.oob_r2_mean_ = np.nanmean(r2_list)
+        self.oob_scores_ = np.array(score_list, dtype=np.float32)
+
+    def predict(self, X):
+        if len(self.models_) == 0 or not self._fitted:
+            raise ValueError('Model not fitted.')
+        return self.models_[0].predict(X)
+
+    def get_importances(self):
+        return self.final_importances_
+
+    def print_oob_summary(self):
+        if self.oob_r2_per_target_ is None:
+            print('Model not fitted yet or OOB not computed.')
+            return
+        
+        print(f'Overall OOB R² (mean across targets): {self.oob_r2_mean_:.4f}')
+        labels = ['QMIN', 'Q10', 'Q20', 'Q30', 'Q40', 'Q50', 'Q60', 'Q70', 'Q80', 'Q90', 'QMAX']
+        for lbl, val in zip(labels, self.oob_r2_per_target_):
+            status = f'{val:.4f}' if not np.isnan(val) else 'nan'
+            print(f'  {lbl:6s}: {status}')
+
+
+def decorrelate_group_improved(df, group_name, threshold=0.85, max_features_remove=0.35, verbose=True):
+    '''
+    IMPROVED decorrelation:
+    - Higher threshold (0.85 instead of 0.70) = fewer features removed
+    - Preserve high-variance features
+    - Hierarchical correlation removal
+    '''
+    
+    if df.empty or len(df.columns) <= 1:
+        if verbose and not df.empty:
+            print(f' {group_name:20s}: {len(df.columns)} vars (no decorrelation needed)')
+        return df
+
+    if verbose:
+        print(f' {group_name:20s}: decorrelating {len(df.columns)} features...')
+    
+    # Calculate Spearman correlation matrix
+    corr = df.corr(method='spearman').abs()
+    
+    # Get feature variances for intelligent feature selection
+    variances = df.var().values
+    var_ranked = np.argsort(-variances)  # Descending order
+    
+    # Mark features for removal
+    to_remove = set()
+    
+    # Iterate through features by variance (highest first - keep these!)
+    for feat_idx in var_ranked:
+        if feat_idx in to_remove:
+            continue
+        
+        # Find highly correlated features with lower variance
+        corr_with = np.where(corr.iloc[feat_idx].values > threshold)[0]
+        
+        for other_idx in corr_with:
+            if other_idx != feat_idx and other_idx not in to_remove:
+                # Remove lower variance feature
+                if variances[other_idx] < variances[feat_idx]:
+                    to_remove.add(other_idx)
+    
+    # Limit total removals to max_features_remove percentage
+    max_remove = int(len(df.columns) * max_features_remove)
+    if len(to_remove) > max_remove:
+        to_remove = set(sorted(list(to_remove))[:max_remove])
+    
+    kept_cols = [c for i, c in enumerate(df.columns) if i not in to_remove]
+    
+    if verbose:
+        print(f' {group_name:20s}: {len(df.columns):3d} → {len(kept_cols):3d} (ρ > {threshold:.2f}, max_drop {max_features_remove:.0%})')
+    
+    del corr
+    gc.collect()
+    
+    return df[kept_cols]
+
+
+# ============================================================================
+# IMPROVED FEATURE SELECTION ON SAMPLED DATA
+# ============================================================================
+
+print('\n===== IMPROVED FEATURE SELECTION ON SAMPLED FULL-RESOLUTION DATA =====')
+
+all_cols = X_train_column_names.astype(str)
+
+static_present = [c for c in static_var if c in all_cols]
+dynamic_present = [c for c in dynamic_var if c in all_cols]
+
+print(f'Feature inventory:')
+print(f'  Static variables: {len(static_present)}/{len(static_var)}')
+print(f'  Dynamic variables: {len(dynamic_present)}/{len(dynamic_var)}')
+print(f'  Total features: {len(static_present) + len(dynamic_present)}')
+
+print(f'\nFull data: {X_train_np.shape[0]} temporal rows (not aggregated!)')
+
+# Sample data for faster feature selection (preserve full temporal resolution)
+sample_size = min(200000, len(X_train_np))
+sample_idx = np.random.RandomState(24).choice(len(X_train_np), sample_size, replace=False)
+
+X_sample = X_train_np[sample_idx].astype('float32')
+Y_sample = Y_train_np[sample_idx].astype('float32')
+groups_sample = groups_train[sample_idx]
+
+print(f'Sampling {sample_size} rows for feature selection...')
+print(f'Sampled data retains full temporal variance (no monthly aggregation)')
+
+# Improved decorrelation: less aggressive
+static_indices = [i for i, col in enumerate(all_cols) if col in static_present]
+X_static_sample = X_sample[:, static_indices]
+static_dec_df = decorrelate_group_improved(
+    pd.DataFrame(X_static_sample, columns=static_present), 
+    'Static', 
+    threshold=0.85,  # INCREASED from 0.70
+    max_features_remove=0.35,  # DECREASED from 0.40
+    verbose=True
+)
+static_decorr = static_dec_df.columns.tolist()
+
+if len(static_decorr) == 0:
+    print('WARNING: No static vars left after decorrelation. Using top 15 by variance.')
+    # Fallback: keep top 15 by variance
+    var_df = pd.DataFrame(X_static_sample, columns=static_present).var().sort_values(ascending=False)
+    static_decorr = var_df.head(15).index.tolist()
+
+# Get indices of decorrelated static variables
+static_indices_decorr = [i for i, col in enumerate(all_cols) if col in static_decorr]
+X_static_sample_decorr = X_sample[:, static_indices_decorr]
+
+print(f'\nPreparing RFECV on sampled data: {X_static_sample_decorr.shape}')
+print(f'  Input: {len(static_decorr)} decorrelated static features')
+print(f'  Sampling from {X_train_np.shape[0]} full temporal rows')
+print(f'  Preserves all dynamic features (precipitation + soil + temp)')
+
+print('Fitting RFECV (improved parameters)...')
+
+# IMPROVED RFECV: Keep more features!
+step_size = max(3, int(len(static_decorr) * 0.25))  # REDUCED from 0.40
+min_features = max(8, int(len(static_decorr) * 0.35))  # INCREASED from 0.20
+
+selector_fast = RFECV(
+    estimator=ExtraTreesRegressor(
+        n_estimators=100,  # INCREASED from 50
+        max_depth=20,  # INCREASED from 15
+        n_jobs=1,
+        random_state=24,
+        min_samples_leaf=3,  # DECREASED from 5
+        min_samples_split=8  # DECREASED from 10
+    ),
+    step=step_size,
+    min_features_to_select=min_features,
+    cv=GroupKFold(n_splits=3),
+    scoring='r2',
+    n_jobs=16,
+    verbose=1
+)
+
+selector_fast.fit(
+    X_static_sample_decorr,
+    Y_sample,
+    groups=groups_sample
+)
+
+# Extract and display RFECV results
+support_mask_static = selector_fast.support_
+rfecv_rankings = selector_fast.ranking_
+rfecv_support = selector_fast.support_
+selected_static_names = np.array(static_decorr)[support_mask_static].tolist()
+
+rfecv_results_df = pd.DataFrame({
+    'Feature': static_decorr,
+    'Selected': rfecv_support,
+    'Rank': rfecv_rankings
+})
+
+max_rank = rfecv_results_df['Rank'].max()
+
+def interpret_feature(row):
+    if row['Rank'] == 1:
+        return 'Core predictor (selected)'
+    elif row['Rank'] <= 3:
+        return 'Strong – removed late'
+    elif row['Rank'] <= max_rank / 2:
+        return 'Moderate predictor'
+    else:
+        return 'Weak – removed early'
+
+rfecv_results_df['Interpretation'] = rfecv_results_df.apply(interpret_feature, axis=1)
+rfecv_results_df['Survival_Score'] = max_rank - rfecv_results_df['Rank'] + 1
+rfecv_results_df = rfecv_results_df.sort_values('Rank').reset_index(drop=True)
+
+print('\n' + '='*130)
+print('RFECV FEATURE SELECTION RANKING (Static Features - Full Temporal Resolution - IMPROVED)')
+print('='*130)
+print(rfecv_results_df.to_string(index=False))
+print('='*130)
+
+n_selected = rfecv_results_df['Selected'].sum()
+n_total = len(rfecv_results_df)
+
+print(f'\nRFECV Summary (IMPROVED):')
+print(f'  Total features evaluated: {n_total}')
+print(f'  Features selected: {n_selected}')
+print(f'  Features eliminated: {n_total - n_selected}')
+print(f'  Selection rate: {100*n_selected/n_total:.1f}%')
+print(f'  Max elimination rank: {max_rank}')
+
+selected_features_table = rfecv_results_df[rfecv_results_df['Selected'] == True][['Feature', 'Rank', 'Survival_Score', 'Interpretation']]
+print('\nSELECTED FEATURES (Rank = 1):')
+print('-'*130)
+print(selected_features_table.to_string(index=False))
+
+eliminated_features_table = rfecv_results_df[rfecv_results_df['Selected'] == False].head(10)[['Feature', 'Rank', 'Survival_Score', 'Interpretation']]
+if not eliminated_features_table.empty:
+    print('\nTOP 10 ELIMINATED FEATURES:')
+    print('-'*130)
+    print(eliminated_features_table.to_string(index=False))
+
+rfecv_results_df.to_csv(f'../predict_importance_red/stationID_x_y_valueALL_predictors_RFECVrankingN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{depth_s}depth_{sample_s}sample_static.txt',
+                        index=False, sep=' ')
+print(f'\n✓ Full RFECV ranking saved')
+
+del rfecv_results_df, selected_features_table, eliminated_features_table
+gc.collect()
+
+print(f'\n✓ Selected {len(selected_static_names)}/{len(static_decorr)} static features by RFECV')
+
+# Combine selected static with ALL dynamic features (critical for streamflow!)
+combined_names = list(selected_static_names) + list(dynamic_present)
+final_mask = np.isin(all_cols, combined_names)
+
+X_train_selected = X_train_np[:, final_mask]
+X_test_selected = X_test_np[:, final_mask]
+selected_names = all_cols[final_mask]
+
+print(f'\nFinal feature set: {X_train_selected.shape[1]} features')
+print(f'  Static (selected): {len([n for n in selected_names if n in static_var])}')
+print(f'  Dynamic (ALL): {len(dynamic_present)}')
+print(f'  Applied to FULL {X_train_selected.shape[0]} temporal rows (not aggregated)')
+print(f'\nDynamic features included: {sorted(dynamic_present)}')
+
+# ============================================================================
+# FINAL MODEL TRAINING (ON FULL TEMPORAL DATA - IMPROVED)
+# ============================================================================
+
+def make_rf(**kw):
+    if 'n_jobs' not in kw:
+        kw['n_jobs'] = 1
+    return RandomForestRegressor(
+        n_estimators=N_EST_I,
+        max_depth=depth_i,
+        min_samples_leaf=obs_leaf_i,
+        min_samples_split=obs_split_i,
+        max_features=sample_f,
+        **kw
+    )
+
+print(f'\nInitializing final model with {N_EST_I} trees...')
+RFreg = GroupAwareMultiOutput(
+    base_estimator=make_rf,
+    n_cv_folds=5,
+    n_jobs=16,
+    inner_n_jobs=1,
+    random_state=24,
+    oob_metric='r2',
+    verbose=1
+)
+
+print('Training final model with GroupKFold OOB CV on FULL data...')
+print(f'  Training set: {X_train_selected.shape[0]} full temporal observations')
+print(f'  Grouping by station for CV separation (no data leakage)')
+RFreg.fit(
+    X_train_selected,
+    Y_train_np,
+    groups=groups_train,
+    X_column_names=selected_names.tolist(),
+    do_oob_cv=True
+)
+
+RFreg.print_oob_summary()
+
+print('\nTop 30 feature importances:')
+importances = RFreg.get_importances()
+if importances is not None:
+    print(importances.head(30))
+    RFreg.feature_importances_ = RFreg.final_importances_.values
+    RFreg.kept_cols_ = selected_names.tolist()
+
+# ============================================================================
+# PREDICTIONS & EVALUATION
+# ============================================================================
+
+print('\nGenerating predictions...')
+
+Y_test_pred_nosort = RFreg.predict(X_test_selected)
+Y_train_pred_nosort = RFreg.predict(X_train_selected)
+
+def post_pred_check(Y_true_np, Y_pred_np, name='test'):
+    print(f'{name} shapes: true {Y_true_np.shape}, pred {Y_pred_np.shape}')
+    if Y_true_np.shape != Y_pred_np.shape:
+        raise AssertionError('Shape mismatch between Y_true and Y_pred')
+    
+    for i in range(Y_true_np.shape[1]):
+        tstd = np.nanstd(Y_true_np[:, i])
+        pstd = np.nanstd(Y_pred_np[:, i])
+        tnans = np.isnan(Y_true_np[:, i]).sum()
+        pnans = np.isnan(Y_pred_np[:, i]).sum()
+        print(f'  {name} col{i:2d} | true_std={tstd:.6f} pred_std={pstd:.6f} | true_NaN={tnans} pred_NaN={pnans}')
+
+post_pred_check(Y_test_np, Y_test_pred_nosort, 'Y_test')
+post_pred_check(Y_train_np, Y_train_pred_nosort, 'Y_train')
+
+def kge(y_true, y_pred):
+    r = np.corrcoef(y_true, y_pred)[0, 1]
+    beta = np.mean(y_pred) / np.mean(y_true)
+    gamma = np.std(y_pred) / np.std(y_true)
+    return 1 - np.sqrt((r - 1)**2 + (beta - 1)**2 + (gamma - 1)**2)
+
+print('COMPUTING ERROR METRICS (PARALLELIZED)...')
+
+def compute_one_quantile(i, Y_pred, Y_true):
+    '''Compute metrics for one quantile.'''
+    y_pred = Y_pred[:, i]
+    y_true = Y_true[:, i]
+    
+    r = pearsonr(y_pred, y_true)[0]
+    rho = spearmanr(y_pred, y_true)[0]
+    mae = mean_absolute_error(y_true, y_pred)
+    kge_val = kge(y_true, y_pred)
+    
+    return r, rho, mae, kge_val
+
+train_metrics = Parallel(n_jobs=8)(
+    delayed(compute_one_quantile)(i, Y_train_pred_nosort, Y_train_np) for i in range(11)
+)
+test_metrics = Parallel(n_jobs=8)(
+    delayed(compute_one_quantile)(i, Y_test_pred_nosort, Y_test_np) for i in range(11)
+)
+
+train_r_coll, train_rho_coll, train_mae_coll, train_kge_coll = zip(*train_metrics)
+test_r_coll, test_rho_coll, test_mae_coll, test_kge_coll = zip(*test_metrics)
+
+train_r_all = np.mean(train_r_coll)
+test_r_all = np.mean(test_r_coll)
+train_rho_all = np.mean(train_rho_coll)
+test_rho_all = np.mean(test_rho_coll)
+train_mae_all = np.mean(train_mae_coll)
+test_mae_all = np.mean(test_mae_coll)
+train_kge_all = np.mean(train_kge_coll)
+test_kge_all = np.mean(test_kge_coll)
+
+train_r_coll = np.array(train_r_coll).reshape(1, -1)
+test_r_coll = np.array(test_r_coll).reshape(1, -1)
+train_rho_coll = np.array(train_rho_coll).reshape(1, -1)
+test_rho_coll = np.array(test_rho_coll).reshape(1, -1)
+train_mae_coll = np.array(train_mae_coll).reshape(1, -1)
+test_mae_coll = np.array(test_mae_coll).reshape(1, -1)
+train_kge_coll = np.array(train_kge_coll).reshape(1, -1)
+test_kge_coll = np.array(test_kge_coll).reshape(1, -1)
+
+train_r_all = np.array([train_r_all]).reshape(1, -1)
+test_r_all = np.array([test_r_all]).reshape(1, -1)
+train_rho_all = np.array([train_rho_all]).reshape(1, -1)
+test_rho_all = np.array([test_rho_all]).reshape(1, -1)
+train_mae_all = np.array([train_mae_all]).reshape(1, -1)
+test_mae_all = np.array([test_mae_all]).reshape(1, -1)
+train_kge_all = np.array([train_kge_all]).reshape(1, -1)
+test_kge_all = np.array([test_kge_all]).reshape(1, -1)
+
+initial_array = np.array([[N_EST_I, sample_f, obs_split_i, obs_leaf_i]])
+
+merge_r = np.concatenate((initial_array, train_r_all, test_r_all, train_r_coll, test_r_coll), axis=1)
+merge_rho = np.concatenate((initial_array, train_rho_all, test_rho_all, train_rho_coll, test_rho_coll), axis=1)
+merge_mae = np.concatenate((initial_array, train_mae_all, test_mae_all, train_mae_coll, test_mae_coll), axis=1)
+merge_kge = np.concatenate((initial_array, train_kge_all, test_kge_all, train_kge_coll, test_kge_coll), axis=1)
+
+fmt = ' '.join(['%i'] + ['%.2f'] + ['%i'] + ['%i'] + ['%.2f'] * (merge_r.shape[1] - 4))
+
+np.savetxt(f'../predict_score_red/stationID_x_y_valueALL_predictors_YscorerN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{depth_s}depth_{sample_s}sample_GaRFG.txt', merge_r, delimiter=' ', fmt=fmt)
+np.savetxt(f'../predict_score_red/stationID_x_y_valueALL_predictors_YscorerhoN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{depth_s}depth_{sample_s}sample_GaRFG.txt', merge_rho, delimiter=' ', fmt=fmt)
+np.savetxt(f'../predict_score_red/stationID_x_y_valueALL_predictors_YscoremaeN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{depth_s}depth_{sample_s}sample_GaRFG.txt', merge_mae, delimiter=' ', fmt=fmt)
+np.savetxt(f'../predict_score_red/stationID_x_y_valueALL_predictors_YscorekgeN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{depth_s}depth_{sample_s}sample_GaRFG.txt', merge_kge, delimiter=' ', fmt=fmt)
+
+del merge_r, merge_rho, merge_mae, merge_kge
+gc.collect()
+
+# ============================================================================
+# SAVE FEATURE IMPORTANCES & PREDICTIONS
+# ============================================================================
+
+importance = pd.Series(RFreg.feature_importances_.values if hasattr(RFreg.feature_importances_, 'values') 
+                       else RFreg.feature_importances_, 
+                       index=selected_names)
+importance.sort_values(ascending=False, inplace=True)
+
+print('\nTop 20 Final Feature Importances:')
+print(importance.head(20))
+
+importance.to_csv(f'../predict_importance_red/stationID_x_y_valueALL_predictors_XimportanceN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{depth_s}depth_{sample_s}sample_2RF.txt', index=True, sep=' ', header=False)
+
+Y_train_pred_indexed = pd.DataFrame(Y_train_pred_nosort, index=X_train_orig_idx[:Y_train_pred_nosort.shape[0]])
+Y_test_pred_indexed = pd.DataFrame(Y_test_pred_nosort, index=X_test_orig_idx[:Y_test_pred_nosort.shape[0]])
+
+Y_train_pred_sort = Y_train_pred_indexed.sort_index().values
+Y_test_pred_sort = Y_test_pred_indexed.sort_index().values
+
+fmt_pred = '%.2f ' * 11
+np.savetxt(f'../predict_prediction_red/stationID_x_y_valueALL_predictors_YpredictTrainN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{depth_s}depth_{sample_s}sample_2RF.txt', Y_train_pred_sort, delimiter=' ', fmt=fmt_pred.strip(), header='QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='')
+np.savetxt(f'../predict_prediction_red/stationID_x_y_valueALL_predictors_YpredictTestN{N_EST_S}_{obs_leaf_s}leaf_{obs_split_s}split_{depth_s}depth_{sample_s}sample_2RF.txt', Y_test_pred_sort, delimiter=' ', fmt=fmt_pred.strip(), header='QMIN Q10 Q20 Q30 Q40 Q50 Q60 Q70 Q80 Q90 QMAX', comments='')
+
+print(f'✓ TRAINING COMPLETE')
+print(f'Results saved to:')
+print(f'  - Scores: ../predict_score_red/')
+print(f'  - Importances: ../predict_importance_red/')
+print(f'  - RFECV Ranking: ../predict_importance_red/')
+print(f'  - Predictions: ../predict_prediction_red/')
+print(f'  - Train/Test splits: ../predict_splitting_red/')
+print(f'  - Statistical Analysis: ../predict_analysis_red/')
+
+gc.collect()
+
+PYTHON_EOF
+"
+# close the sif
+exit

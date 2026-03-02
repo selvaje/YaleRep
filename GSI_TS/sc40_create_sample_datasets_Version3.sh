@@ -16,7 +16,7 @@ module load StdEnv
 # PARAMETERIZED SAMPLING
 # ============================================================================
 
-SAMPLE_FRACTIONS="0.005"
+SAMPLE_FRACTIONS="0.002"
 
 # Loop through each sample fraction
 for SAMPLE_PCT in $SAMPLE_FRACTIONS; do
