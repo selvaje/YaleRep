@@ -63,8 +63,8 @@ RANDOM_STATE = 24
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # Data Files
-DATA_X = 'stationID_x_y_valueALL_predictors_X11_floredSFD.txt'
-DATA_Y = 'stationID_x_y_valueALL_predictors_Y11_floredSFD.txt'
+DATA_X = 'stationID_x_y_valueALL_predictors_X1_floredSFD.txt'
+DATA_Y = 'stationID_x_y_valueALL_predictors_Y1_floredSFD.txt'
 
 # =========================================================================
 # STATIC AND DYNAMIC VARIABLE DEFINITIONS
