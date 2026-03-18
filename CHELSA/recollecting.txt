@@ -1,0 +1,1000 @@
+   20  pwd
+   21  ll
+   22  cd hydro
+   23  ll
+   24  ls dataproces/
+   25  cd TERRA
+   26  cd dataproces/TERRA/
+   27  pwd
+   28  cd /gpfs/loomis/scratch60/fas/sbsc/
+   29  pwd
+   30  ls
+   31  cd jg2657/
+   32  ll
+   33  exit
+   34  ll
+   35  pwd
+   36  cd /gpfs/loomis/project/fas/sbsc
+   37  ll
+   38  cd /gpfs/loomis/project/fas/sbsc
+   39  cd /gpfs/loomis/scratch60/fas/sbsc
+   40  ll
+   41  cd jg2657/
+   42  ll
+   43  pwd
+   44  mkdir stderr
+   45  mkdir stdout
+   46  ll
+   47  pwd
+   48  err
+   49  alias
+   50  pwd
+   51  err
+   52  ll ~/bin/
+   53  pwd
+   54  ll
+   55  cd /gpfs/gibbs/pi/hydro/
+   56  ll
+   57  sublime
+   58  alias
+   59  interactivex 
+   60  exit
+   61  cd /project/fas/sbsc/hydro/
+   62  ll
+   63  cd scripts/
+   64  ll
+   65  cd TERRA/
+   66  ll 
+   67  bash sc01_terraclimate_wget.sh 
+   68  ls
+   69  more sc01_wget_delate.sh 
+   70  ll
+   71  bash sc01_terraclimate_wget.sh 
+   72  ll /dev/shm/
+   73  ll ../../dataproces/TERRA/
+   74  ll /dev/shm/
+   75  ll
+   76  rm TerraClimate_aet_1958.nc 
+   77  bash sc01_terraclimate_wget.sh 
+   78  ll /dev/shm/
+   79  ll
+   80  rm TerraClimate_aet_1958.nc 
+   81  ll
+   82  cd ../../dataproces/TERRA/
+   83  ll
+   84  mkdir aet def pet ppt soil srad swe tmax tmin vap ws vpd pdsi
+   85  ll
+   86  bash sc01_terraclimate_wget.sh 
+   87  pwd
+   88  ll
+   89  cd ../../scripts/TERRA/
+   90  ll
+   91  bash sc01_terraclimate_wget.sh 
+   92  cd ../../dataproces/TERRA/
+   93  ll
+   94  ll aet
+   95  pwd
+   96  cd ../../scripts/CHELSA/
+   97  ll
+   98  mv CHELSA_wget_prep.sh sc01_CHELSA_wget.sh
+   99  ll
+  100  pwd
+  101  git -add sc01_CHELSA_wget.sh 
+  102  git add sc01_CHELSA_wget.sh 
+  103  git status
+  104  git commit -m 'add wget CHELSA'
+  105  git push
+  106  git status
+  107  git commit -m 'add wget CHELSA'
+  108  git commit -m "add wget CHELSA"
+  109  git config --local user.email "jrgarcia.marquez@gmail.com"
+  110  git config --local user.name "Jaime Garcia Marquez"
+  111  git commit -m 'add wget CHELSA'
+  112  git status
+  113  ll
+  114  git add sc01_CHELSA_wget.sh 
+  115  git commit -m "wget CHELSA"
+  116  git status
+  117  cd ..
+  118  git add CHELSA/sc01_CHELSA_wget.sh 
+  119  git status
+  120  git push
+  121  ls
+  122  alias
+  123  ls
+  124  cd TERRA/
+  125  ls
+  126  bash sc01_terraclimate_wget.sh 
+  127  gdal_translate
+  128  gdalinfo
+  129  gdal
+  130  bash sc01_terraclimate_wget.sh 
+  131  cd ../../dataproces/TERAA/
+  132  cd ../../dataproces/TERRA/
+  133  ll
+  134  ll aet
+  135  bash sc01_terraclimate_wget.sh 
+  136  ls
+  137  cd ../../scripts/TERRA/
+  138  ls
+  139  bash sc01_terraclimate_wget.sh 
+  140  cd ../../dataproces/TERRA/
+  141  ls
+  142  ls ppt
+  143  exit
+  144  cd /project/
+  145  ls
+  146  cd
+  147  cd /gpfs/gibbs/pi/hydro/hydro/
+  148  ls
+  149  cd scripts/
+  150  ls
+  151  cd TERRA/
+  152  ls
+  153  mv terraclimate_wget.sh sc01_terraclimate_wget.sh
+  154  emacs sc01_terraclimate_wget.sh  
+  155  emacs -nw  sc01_terraclimate_wget.sh  
+  156  nano sc01_terraclimate_wget.sh  
+  157  ll
+  158  nano sc01_terraclimate_wget.sh  
+  159  emacs -nw sc01_terraclimate_wget.sh
+  160  exit
+  161  pwd
+  162  ll
+  163  cd project/
+  164  ls
+  165  cd
+  166  cd ..
+  167  ld
+  168  ls
+  169  cd ..
+  170  ll
+  171  cd ..
+  172  ll
+  173  l
+  174  pwd
+  175  cd sbsc/
+  176  ll
+  177  cd jg2657/
+  178  ll
+  179  cd project
+  180  ll
+  181  cd scratch
+  182  cd scratch60
+  183  cd
+  184  ls
+  185  cd scratch60/
+  186  ll
+  187  cd
+  188  ls
+  189  cd ..
+  190  ls
+  191  cd ..
+  192  ls
+  193  exit
+  194  top 
+  195  exit
+  196  cd /project/
+  197  ll
+  198  ll fes
+  199  cd /gpfs/gibbs/pi/hydro/ga254 
+  200  cd /gpfs/gibbs/pi/hydro/hydro/
+  201  cd scripts/
+  202  ll 
+  203  git add --all 
+  204  git status 
+  205  git push 
+  206  ll CHELSA/
+  207  touch  CHELSA/test.sh 
+  208  cd   CHELSA/
+  209  ll
+  210  echo test > test.sh 
+  211  add test.sh 
+  212  git add test.sh 
+  213  git commit -m "adding test "
+  214  git status 
+  215  git push 
+  216  more .gitconfig
+  217  alias gdal 
+  218  more /gpfs/loomis/home.grace/sbsc/$USER/bin/gdal
+  219  gdal
+  220  git config --global credential.helper store 
+  221  cd ..
+  222  ll -a 
+  223  cd CHELSA/
+  224  ll
+  225  echo test > test1.sh 
+  226  git add test1.sh 
+  227  git commit -m "adding test1"
+  228  git status 
+  229  git push 
+  230  ll -a ../
+  231  echo test > test2.sh 
+  232  git commit -m "adding test2"
+  233  git push 
+  234  echo test > test4_JG.sh 
+  235  git add test4_JG.sh  
+  236  git commit -m "adding test4 from JG"
+  237  git push 
+  238  git config --global push.default simple
+  239  ll
+  240  git rm test1*
+  241  git rm test*
+  242  ll
+  243  cd ..
+  244  cd TERRA/
+  245  ll
+  246  cd ..
+  247  ll
+  248  git add --all 
+  249  git commit -m "general push"
+  250  git push 
+  251  myq 
+  252  qmy 
+  253  myq
+  254  err 
+  255  out
+  256  ll /gpfs/scratch60/fas/sbsc/jg2657/stdout/
+  257  ll TERRA/
+  258  more  TERRA/sc01_terraclimate_wget.sh
+  259  ll /gpfs/scratch60/fas/sbsc/$USER/stdout/
+  260  ll /gpfs/scratch60/fas/sbsc/$USER/*/
+  261  ll ../
+  262  err
+  263  errlmore 
+  264  outlmore 
+  265  outl
+  266  err
+  267  cd ../dataproces/TERRA/
+  268  ll
+  269  ll *
+  270  ll */*.nc 
+  271  gdal
+  272  for file in  */*.nc  ; do gdal_translate -b 1  $file $(basename $file .nc).tif ; done   
+  273  ll
+  274  gdalinfo TerraClimate_aet_1958.tif
+  275  openev  TerraClimate_aet_1958.tif
+  276  openev  TerraClimate_*_1958.tif
+  277  ll
+  278  pktools 
+  279  for file in  *.tif  ; do  pkstat -mm  $file  ; done   
+  280  for file in  *.tif  ; do  pkstat  -mm  -i $file  ; done   
+  281  pksetmask --help 
+  282  for file in  *.tif  ; do  gdalinfo  -mm   $file | grep Comp   ; done   
+  283  gdal_edit.py 
+  284  ll 
+  285  pksetmask  -m TerraClimate_aet_1958.tif -msknodata -32766 -data -9999 -p "<" -i TerraClimate_aet_1958.tif -o test.tif 
+  286  alias pktools
+  287  more /gpfs/loomis/home.grace/sbsc/$USER/bin/pktools
+  288  ll ~/bin/gdal
+  289  chmod 777  ~/bin/gdal
+  290  chmod 777  ~/bin/pktools
+  291  chmod 777  ~/bin/grass 
+  292  bash /gpfs/gibbs/pi/hydro/hydro/scripts/TERRA/sc01_terraclimate_wget.sh
+  293  ll ~/bin/
+  294  ll ~/bin/gdal
+  295  bash /gpfs/gibbs/pi/hydro/hydro/scripts/TERRA/sc01_terraclimate_wget.sh
+  296  chmod 777 ~/bin/gdal.sh
+  297  chmod 777 ~/bin/pktools.sh
+  298  chmod 777 ~/bin/grass.sh 
+  299  more ~/bin/pktools.sh
+  300  bash /gpfs/gibbs/pi/hydro/hydro/scripts/TERRA/sc01_terraclimate_wget.sh
+  301  ~/bin/gdal.sh
+  302  gdal_translate 
+  303  module purge
+  304  ~/bin/gdal.sh
+  305  source ~/bin/gdal.sh
+  306  gdal_translate 
+  307  module purge
+  308  bash /gpfs/gibbs/pi/hydro/hydro/scripts/TERRA/sc01_terraclimate_wget.sh
+  309  alias gdal 
+  310  ll /gpfs/loomis/home.grace/sbsc/$USER/bin/gdal
+  311  more  /gpfs/loomis/home.grace/sbsc/$USER/bin/gdal
+  312  more  /gpfs/loomis/home.grace/sbsc/$USER/bin/gdal.sh 
+  313  bash /gpfs/gibbs/pi/hydro/hydro/scripts/TERRA/sc01_terraclimate_wget.sh
+  314  module purge
+  315  gdal
+  316  bash /gpfs/gibbs/pi/hydro/hydro/scripts/TERRA/sc01_terraclimate_wget.sh
+  317  ll 
+  318  ll */*.tif 
+  319  ll -t  */*.tif 
+  320  gdalinfo swe/swe_1958_01.tif
+  321  gdal_edit.py 
+  322  openev swe/swe_1958_01.tif
+  323  ll
+  324  openev TerraClimate_swe_1958.tif 
+  325  gdalinfo  TerraClimate_swe_1958.tif 
+  326  gdalinfo -mm  TerraClimate_swe_1958.tif 
+  327  gdalinfo  TerraClimate_swe_1958.tif 
+  328  pksetmask  -m  TerraClimate_swe_1958.tif     -msknodata -32766   -data -9999  -p "<"  TerraClimate_swe_1958.tif  -o test.tif 
+  329  pktools 
+  330  pksetmask  -m  TerraClimate_swe_1958.tif     -msknodata -32766   -data -9999  -p "<"  TerraClimate_swe_1958.tif  -o test.tif 
+  331  pksetmask  -m  TerraClimate_swe_1958.tif     -msknodata -32766   -data -9999  -p "<" -i  TerraClimate_swe_1958.tif  -o test.tif 
+  332  openev test.tif
+  333  pkstat -mm   TerraClimate_swe_1958.tif    
+  334  pkstat -mm  -i  TerraClimate_swe_1958.tif    
+  335  ll
+  336  gdalinfo TerraClimate_pdsi_1958.tif
+  337  gdalinfo  test.tif 
+  338  gdalinfo   test.tif 
+  339  gdalinfo  TerraClimate_swe_1958.tif    
+  340  pksetmask  -m  TerraClimate_swe_1958.tif     -msknodata -2147483648    -data -9999  -p "=" -i  TerraClimate_swe_1958.tif  -o test.tif 
+  341  openev test.tif
+  342  pksetmask  -m  TerraClimate_swe_1958.tif     -msknodata -2147483648    -nodata -9999  -p "=" -i  TerraClimate_swe_1958.tif  -o test.tif 
+  343  openev test.tif
+  344  pksetmask  -m  TerraClimate_swe_1958.tif     -msknodata -32766     -nodata -9999  -p "=" -i  TerraClimate_swe_1958.tif  -o test.tif 
+  345  pksetmask  -m  TerraClimate_swe_1958.tif     -msknodata -32766     -nodata -9999  -p "<" -i  TerraClimate_swe_1958.tif  -o test.tif 
+  346  openev test.tif
+  347  bash /gpfs/gibbs/pi/hydro/hydro/scripts/TERRA/sc01_terraclimate_wget.sh
+  348  ll
+  349  ll */*.tif 
+  350  ll -t  */*.tif 
+  351  rm   */*.tif 
+  352  bash /gpfs/gibbs/pi/hydro/hydro/scripts/TERRA/sc01_terraclimate_wget.sh
+  353  ll    */*.tif 
+  354  ll q
+  355  ll
+  356  mkdir q
+  357  ll
+  358  history  > hystory4datacheck.txt 
+  359  tail  hystory4datacheck.txt 
+  360  grep gdal  hystory4datacheck.txt 
+  361  ll
+  362  cd /gpfs/gibbs/pi/hydro/hydro/
+  363  cd dataproces/TERRA/
+  364  ll
+  365  emacs -nw  ../../scripts/TERRA/sc01_terraclimate_wget.sh 
+  366  rl   ../../scripts/TERRA/sc01_terraclimate_wget.sh 
+  367  emacs -nw  ../../scripts/TERRA/sc01_terraclimate_wget.sh 
+  368  ll
+  369  cd /gpfs/loomis/
+  370  ll
+  371  cd project/
+  372  ll
+  373  cd sbsc/
+  374  ll
+  375  cd hydro
+  376  ll
+  377  cd dataproces/TERRA/
+  378  ls
+  379  ls aet
+  380  ls ppt
+  381  ls aet
+  382  module avail gdal
+  383  alias
+  384  module avail pkt
+  385  module avail geo
+  386  pwd
+  387  ll
+  388  ls aet
+  389  openev aet/aet_1958_01.tif 
+  390  ls ppt
+  391  openev ppt/ppt_1958_01.tif 
+  392  openev ppt/ppt_1958_04.tif 
+  393  gdalinfo aet/aet_1958_12.tif 
+  394  gdal
+  395  gdalinfo aet/aet_1958_12.tif 
+  396  gdalinfo ppt/ppt_1958_12.tif 
+  397  ls
+  398  ll
+  399  cd /gpfs/gibbs/pi/hydro/hydro/scripts
+  400  ll
+  401  cd TERRA/
+  402  ll
+  403  bash sc01_terraclimate_wget.sh 
+  404  rgdal
+  405  gdal
+  406  bash sc01_terraclimate_wget.sh 
+  407  ls
+  408  cd ../../dataproces/TERRA/
+  409  ls
+  410  ls ppt
+  411  cd ../../scripts/TERRA/
+  412  bash sc01_terraclimate_wget.sh 
+  413  ll
+  414  pwd
+  415  bash sc01_terraclimate_wget.sh 
+  416  ll
+  417  pwd
+  418  bash sc01_terraclimate_wget.sh 
+  419  module purge
+  420   sbatch /gpfs/gibbs/pi/hydro/hydro/scripts/TERRA/sc01_terraclimate_wget.sh 
+  421  myq 
+  422  err
+  423  out
+  424   sbatch /gpfs/gibbs/pi/hydro/hydro/scripts/TERRA/sc01_terraclimate_wget.sh 
+  425  myq
+  426  ssh p08r05n01 
+  427  cd ../..
+  428  ll dataproces/
+  429  ll dataproces/TERRA/
+  430  ll dataproces/TERRA/*
+  431  myq
+  432  pwd
+  433   sbatch /gpfs/gibbs/pi/hydro/hydro/scripts/TERRA/sc01_terraclimate_wget.sh 
+  434  myq
+  435  ssh c23n06
+  436  outlmore 
+  437  top
+  438  myq
+  439  ll dataproces/TERRA/
+  440  ll dataproces/TERRA/*
+  441  errlmore 
+  442   sbatch /gpfs/gibbs/pi/hydro/hydro/scripts/TERRA/sc01_terraclimate_wget.sh 
+  443  myq
+  444  errlmore
+  445  err 
+  446  errlmore
+  447  myq
+  448  errlmore
+  449   bash   /gpfs/gibbs/pi/hydro/hydro/scripts/TERRA/sc01_terraclimate_wget.sh 
+  450  ll
+  451  cd ..
+  452  ls
+  453  pwd
+  454  cd /gpfs/gibbs/pi/hydro/hydro/dataproces/
+  455  ls
+  456  cd ..
+  457  ls
+  458  ls dataproces/TERRA/
+  459  ls dataproces/TERRA/aet
+  460  ls dataproces/TERRA/ppt
+  461  ls dataproces/TERRA/pet
+  462  cd scripts/
+  463  ls
+  464  cd TERRA/
+  465  ls
+  466  emacs sc01_terraclimate_wget.sh
+  467  emacs nw sc01_terraclimate_wget.sh
+  468  emacs -nw sc01_terraclimate_wget.sh
+  469  ll
+  470  cd /gpfs/gibbs/pi/hydro/hydro/dataproces/TERRA/
+  471  ll
+  472  ll /*.tif
+  473  more hystory4datacheck.txt 
+  474  cat hystory4datacheck.txt 
+  475  ll */*.tif 
+  476  rm */*.tif 
+  477  ll */*.tif 
+  478  ll *.tif 
+  479  rm *.tif 
+  480  bash /gpfs/gibbs/pi/hydro/hydro/scripts/TERRA/sc01_terraclimate_wget.sh
+  481  pwd
+  482  ll
+  483  ll */*.tif
+  484  rm */*.tif 
+  485  ll */*.tif
+  486  bash /gpfs/gibbs/pi/hydro/hydro/scripts/TERRA/sc01_terraclimate_wget.sh
+  487  ll */*.tif
+  488  openev aet/aet_1958_01.tif
+  489  openev swe/swe_1958_01.tif
+  490  rm */*.tif
+  491  bash /gpfs/gibbs/pi/hydro/hydro/scripts/TERRA/sc01_terraclimate_wget.sh
+  492  ll */*.tif
+  493  cat hystory4datacheck.txt 
+  494  for file in  *.tif  ; do  pkstat  -mm  -i $file  ; done
+  495  pktools
+  496  for file in  *.tif  ; do  pkstat  -mm  -i $file  ; done
+  497  for file in  */*.tif  ; do  pkstat  -mm  -i $file  ; done
+  498  gdal
+  499  for file in  */*.tif  ; do  pkstat  -mm  -i $file  ; done
+  500  bash /gpfs/gibbs/pi/hydro/hydro/scripts/TERRA/sc01_terraclimate_wget.sh
+  501  ll */*.tif
+  502  openev ppt/ppt_1958_01.tif
+  503  gdalinfo ppt/ppt_1958_01.tif
+  504  openev ppt/ppt_1958_01.tif
+  505  pkstat ppt/ppt_1958_01.tif
+  506  pkstat -i ppt/ppt_1958_01.tif
+  507  pwd
+  508  ll
+  509  ll */*.tif
+  510  pkstat -help
+  511  pkstat --help
+  512  pkstat -i ppt/ppt_1958_01.tif 
+  513  gdalinfo ppt/ppt_1958_01.tif
+  514  ll */*.nc
+  515  sbash /gpfs/gibbs/pi/hydro/hydro/scripts/TERRA/sc01_terraclimate_wget.sh
+  516  sbatch /gpfs/gibbs/pi/hydro/hydro/scripts/TERRA/sc01_terraclimate_wget.sh
+  517  myq
+  518  ssh c06n01
+  519  myq
+  520  ll */*.tif
+  521  ll */*.nc
+  522  gdalinfo ppt/ppt_1958_01.tif
+  523  gdalinfo swe/swe_1958_01.tif
+  524  ll
+  525  cd ../../scripts/TERRA/
+  526  ll
+  527  git add sc01_terraclimate_wget.sh
+  528  git commit -m 'updated version'
+  529  git push
+  530  sbatch /gpfs/gibbs/pi/hydro/hydro/scripts/TERRA/sc01_terraclimate_wget.sh
+  531  ll * 
+  532  cd ../../dataproces/
+  533  ll
+  534  cd T
+  535  cd TERRA/
+  536  ll
+  537  ll *
+  538  myq
+  539  ll *
+  540  ll */*.tif 
+  541  date 
+  542  ll */
+  543  myq
+  544  errlmore 
+  545  ll
+  546  ll 
+  547  ll *
+  548  ll */*.nc 
+  549  ll aet/
+  550  myq
+  551  scancelgrep   terra 
+  552  rmerr  
+  553  rmerr   sc 
+  554  ll
+  555  cd /gpfs/gibbs/pi/hydro/hydro
+  556  ls
+  557  cd scripts
+  558  ls
+  559  cd TERRA/
+  560  ll
+  561  emacs -nw sc01_terraclimate_wget.sh
+  562  myq
+  563  ll
+  564  cd /gpfs/gibbs/pi/hydro/hydro
+  565  ls
+  566  clear
+  567  ls
+  568  myq
+  569  ll dataproces/CHELSA/*/*
+  570  emacs -nw scripts/CHELSA/sc01_CHELSA_wget_jarray.sh
+  571  exit
+  572  ll
+  573  cd /gpfs/gibbs/pi/hydro/hydro/dataproces/TERRA/
+  574  ll */*.tif
+  575  ls
+  576  ll *.tif
+  577  ll pdsi/*.tif
+  578  ll aet/*.tif
+  579  ll */*.nc
+  580  ll */*.nc | wc -l
+  581  ls
+  582  14*12
+  583  14*12 | bc
+  584  echo 14*12 | bc
+  585  echo 14*12*(2015-1958) | bc
+  586  ls
+  587  cd ..
+  588  ls
+  589  ls scripts/CHELSA/
+  590  ll */*.nc | wc -l
+  591  ll ../../*/*.nc | wc -l
+  592  ls
+  593  ll dataproces/TERRA/*/*.nc | wc -l
+  594  myq
+  595  for VAR in swe fcf bio01 bio02 bio03 bio04 bio05 bio06 bio07 bio08 bio09 bio10 bio11 bio12 bio13 bio14 bio15 bio16 bio17 bio18 bio19 ; do for YEAR in {1979..2013} ; do echo ${VAR} ${YEAR} ; done ; done
+  596  for VAR in swe fcf bio01 bio02 bio03 bio04 bio05 bio06 bio07 bio08 bio09 bio10 bio11 bio12 bio13 bio14 bio15 bio16 bio17 bio18 bio19 ; do for YEAR in {1979..2013} ; do echo ${VAR} ${YEAR} ; done ; done | wc -l
+  597  cd /gpfs/gibbs/pi/hydro/hydro/scripts/CHELSA/
+  598  ll
+  599  cd /gpfs/gibbs/pi/hydro/hydro/dataproces/CHELSA/
+  600  ls
+  601  mkdir swe fcf bio01 bio02 bio03 bio04 bio05 bio06 bio07 bio08 bio09 bio10 bio11 bio12 bio13 bio14 bio15 bio16 bio17 bio18 bio19
+  602  ls
+  603  more job_array_list.txt 
+  604  ls
+  605  for VAR in swe fcf bio01 bio02 bio03 bio04 bio05 bio06 bio07 bio08 bio09 bio10 bio11 bio12 bio13 bio14 bio15 bio16 bio17 bio18 bio19 ; do for YEAR in {1979..2013} ; do echo ${VAR} ${YEAR} ; done ; done  > /gpfs/gibbs/pi/hydro/hydro/dataproces/CHELSA/job_array_bios_list.txt 
+  606  ls
+  607  more job_array_bios_list.txt 
+  608  myq
+  609  ls
+  610  pwd
+  611  cd ..
+  612  ls
+  613  ls TERRA/
+  614  ll */*.nc
+  615  ll aet
+  616  pwd
+  617  ls
+  618  cd TERRA/
+  619  ll */*.nc
+  620  ll */*.nc | wc l
+  621  ll */*.nc | wc -l
+  622  alias
+  623  errlless
+  624  errlmore
+  625  alias
+  626  errl
+  627  sbatch /gpfs/gibbs/pi/hydro/hydro/scripts/CHELSA/sc01_CHELSA_wget_jarray_bios.sh
+  628  myq
+  629  pwd
+  630  cd ..
+  631  cd CHELSA/
+  632  ls
+  633  ll */*.tif
+  634  ll swe/*.tif
+  635  gdalinfo swe/CHELSA_swe_1979_V1.2.1.tif
+  636  gdal
+  637  gdalinfo swe/CHELSA_swe_1979_V1.2.1.tif
+  638  gdalinfo -mm swe/CHELSA_swe_1979_V1.2.1.tif
+  639  openev swe/CHELSA_swe_1979_V1.2.1.tif
+  640  exit
+  641  ll'
+  642  ll 
+  643  cd /gpfs/gibbs/pi/hydro/jg2657
+  644  ll
+  645  cd ..
+  646  ll 
+  647  cd  hydro
+  648  ll
+  649  cd dataproces/
+  650  ll
+  651  ll CHELSA/
+  652  cd CHELSA/
+  653  ll
+  654  for VAR in prec tmax tmin tmean; do for YEAR in {1979..2013} ; do for MES in {01..12} ; do echo $VAR  ${YEAR} ${MES} ; done ; done 
+  655  for VAR in prec tmax tmin tmean; do for YEAR in {1979..2013} ; do for MES in {01..12} ; do echo $VAR  ${YEAR} ${MES} ; done ; done ; done 
+  656  pwd 
+  657  mkdir prec tmax tmin tmean 
+  658  myq
+  659  ll ../../../
+  660  ll ../../
+  661  ll ../../scripts/
+  662  ll ../../scripts/TERRA/
+  663  more  ../../scripts/TERRA/sc01_terraclimate_wget.sh
+  664  ll
+  665  pwd 
+  666   for VAR in prec tmax tmin tmean; do for YEAR in {1979..2013} ; do for MES in {01..12} ; do echo ${YEAR}_${MES} ; done ; done ; done > /gpfs/gibbs/pi/hydro/hydro/dataproces/CHELSA/job_array_list.txt 
+  667  ll
+  668  more job_array_list.txt
+  669  for VAR in prec tmax tmin tmean; do for YEAR in {1979..2013} ; do for MES in {01..12} ; do echo $VAR ${YEAR} ${MES} ; done ; done ; done > /gpfs/gibbs/pi/hydro/hydro/dataproces/CHELSA/job_array_list.txt 
+  670  ll
+  671  more job_array_list.txt
+  672  wc -l  job_array_list.txt
+  673  rl job_array_list.txt
+  674  sbatch /gpfs/gibbs/pi/hydro/hydro/scripts/CHELSA/sc01_CHELSA_wget_jarray.sh 
+  675  myq 
+  676  ll *
+  677  myq 
+  678  ll */CHELSA_prec_1979_01_V1.2.1.tif
+  679  gdalinfo  */CHELSA_prec_1979_01_V1.2.1.tif
+  680  gdal
+  681  gdalinfo  */CHELSA_prec_1979_01_V1.2.1.tif
+  682  ll
+  683  rm */*.tif 
+  684  ll
+  685  ll *
+  686  sbatch /gpfs/gibbs/pi/hydro/hydro/scripts/CHELSA/sc01_CHELSA_wget_jarray.sh 
+  687  myq
+  688  ll */
+  689  myq
+  690  ll */
+  691  myq
+  692  errlmore 
+  693  outlmore 
+  694  myq
+  695  ll *
+  696  gdalinfo  */CHELSA_prec_1979_01_V1.2.1.tif
+  697  gdal_translate 
+  698  ll
+  699  gdalinfo  */CHELSA_prec_1979_01_V1.2.1.tif
+  700  gdalinfo   */CHELSA_prec_1979_01_V1.2.1.tif
+  701  openev    */CHELSA_prec_1979_01_V1.2.1.tif
+  702  gdal_translate 
+  703  ll */
+  704  ll */*
+  705  rm  */*
+  706  sbatch /gpfs/gibbs/pi/hydro/hydro/scripts/CHELSA/sc01_CHELSA_wget_jarray.sh 
+  707  myq
+  708  ll */* 
+  709  errlmore 
+  710  errl 
+  711  tail /gpfs/scratch60/fas/sbsc/jg2657/stderr/sc01_CHELSA_wget_jarray.sh.46782916_1.err
+  712  rm  */*
+  713  sbatch /gpfs/gibbs/pi/hydro/hydro/scripts/CHELSA/sc01_CHELSA_wget_jarray.sh 
+  714  ll  */*
+  715  myq
+  716  ll  */*
+  717  gdalinfo prec/CHELSA_prec_1979_01_V1.2.1.tif
+  718  rm  */*
+  719  sbatch /gpfs/gibbs/pi/hydro/hydro/scripts/CHELSA/sc01_CHELSA_wget_jarray.sh 
+  720  ll
+  721  ll *
+  722  myq
+  723  errl 
+  724  gdalinfo  */CHELSA_prec_1979_01_V1.2.1.tif
+  725  errl 
+  726  tail /gpfs/scratch60/fas/sbsc/jg2657/stderr/sc01_CHELSA_wget_jarray.sh.46783398_1.err
+  727  gdal_edit.py 
+  728  errl 
+  729  outlmore 
+  730  rm  */*
+  731  sbatch /gpfs/gibbs/pi/hydro/hydro/scripts/CHELSA/sc01_CHELSA_wget_jarray.sh 
+  732  ll   */*
+  733  myq
+  734  ll   */*
+  735  gdalinfo prec/CHELSA_prec_1979_01_V1.2.1.tif
+  736  openev  prec/CHELSA_prec_1979_01_V1.2.1.tif
+  737  ll
+  738  tail job_array_list.txt
+  739  sbatch /gpfs/gibbs/pi/hydro/hydro/scripts/CHELSA/sc01_CHELSA_wget_jarray.sh 
+  740  myq
+  741  ll
+  742  ll *
+  743  myq 
+  744  ll *
+  745  gdalinfo  */CHELSA_tmean_2013_12_V1.2.1.tif
+  746  openev   */CHELSA_tmean_2013_12_V1.2.1.tif
+  747  ll
+  748  ll *
+  749  gdalinfo  */CHELSA_prec_1979_01_V1.2.1.tif
+  750  err
+  751  rmerr jarray.sh 
+  752  err
+  753  ll 
+  754  ll  */*
+  755  rm   */*
+  756  sbatch /gpfs/gibbs/pi/hydro/hydro/scripts/CHELSA/sc01_CHELSA_wget_jarray.sh 
+  757  myq
+  758  ll   */*
+  759  ll   */* | wc -l 
+  760  myq 
+  761  ll   */* | wc -l 
+  762  err 
+  763  errl
+  764  more /gpfs/scratch60/fas/sbsc/jg2657/stderr/sc01_CHELSA_wget_jarray.sh.46784526_644.err
+  765  ll   */* | wc -l 
+  766  tail  /gpfs/scratch60/fas/sbsc/jg2657/stderr/sc01_CHELSA_wget_jarray.sh.46784526_644.err
+  767  tail -40   /gpfs/scratch60/fas/sbsc/jg2657/stderr/sc01_CHELSA_wget_jarray.sh.46784526_644.err
+  768  myq
+  769  scancelgrep sc01_CHELSA_wget_jarray.sh 
+  770  myq
+  771  rmerr sc01_CHELSA_wget_jarray.sh 
+  772  ll
+  773  ll */* | wc -l 
+  774  ll */* 
+  775  rm  */* 
+  776  sbatch /gpfs/gibbs/pi/hydro/hydro/scripts/CHELSA/sc01_CHELSA_wget_jarray.sh 
+  777  myq
+  778  ll */* | wc -l 
+  779  ll 
+  780  cd /gpfs/gibbs/pi/hydro/hydro/
+  781  ll
+  782  cd dataproces/
+  783  more  ~/.bashrc
+  784  more  ~/bin/scancelgrep 
+  785  alias rmerr 
+  786  more  ~/bin/rmerr 
+  787  emacs -nw   ~/bin/rmerr 
+  788  rmerr sc 
+  789  err
+  790  cd TERRA/
+  791  ll
+  792  ll *
+  793  ll */*
+  794  ll  */*
+  795  rm   */*
+  796  ll
+  797  ll ../../scripts/
+  798  ll ../../scripts/TERRA/
+  799  more  ../../scripts/TERRA/sc01_terraclimate_wget.sh
+  800  myq 
+  801  emacs -nw   ../../scripts/TERRA/sc01_terraclimate_wget.sh
+  802  err
+  803  out
+  804  ll 
+  805  ll *
+  806   sbatch /gpfs/gibbs/pi/hydro/hydro/scripts/TERRA/sc01_terraclimate_wget.sh 
+  807  myq 
+  808  cd ../../
+  809  ll
+  810  cd scripts/CHELSA/
+  811  ll
+  812  more sc01_CHELSA_wget.sh  
+  813  for YEAR in {1979..2013} ; do for MES in {01..12} ; do echo ${YEAR}_${MES} ; done ; done
+  814  for YEAR in {1979..2013} ; do for MES in {01..12} ; do echo ${YEAR} ${MES} ; done ; done
+  815  cp  sc01_CHELSA_wget.sh    sc01_CHELSA_wget_jarray.sh  
+  816  ll sc01_CHELSA_wget_jarray.sh
+  817  pwd 
+  818  emacs -nw  sc01_CHELSA_wget_jarray.sh
+  819  rl   sc01_CHELSA_wget_jarray.sh
+  820  emacs -nw  sc01_CHELSA_wget_jarray.sh
+  821  rl   sc01_CHELSA_wget_jarray.sh
+  822  emacs -nw  sc01_CHELSA_wget_jarray.sh
+  823  myq
+  824  clear
+  825  pwd
+  826  ll
+  827  cd /gpfs/gibbs/pi/hydro/hydro
+  828  ls
+  829  cd dataproces/
+  830  ls
+  831  cd TERRA
+  832  ls
+  833  ll aet
+  834  ll aet/*.tif
+  835  alias
+  836  outlmore
+  837  errlmore
+  838  exit
+  839  ll
+  840  cd /gpfs/gibbs/pi/hydro/hydro
+  841  cd scripts/
+  842  cd CHELSA/
+  843  ll
+  844  clear
+  845  ll
+  846  mv sc01_CHELSA_wget_jarray.sh sc01_CHELSA_wget_jarray_TempPrec.sh
+  847  ll
+  848  rm sc01_CHELSA_wget_jarray.sh~ 
+  849  ll
+  850  pwd
+  851  cd ../../
+  852  ls
+  853  cd dataproces/CHELSA/
+  854  ll
+  855  ll prec/*.tif
+  856  ll tmax/*.tif
+  857  ll tmin/*.tif
+  858  ll tmean/*.tif
+  859  ll
+  860  for VAR in swe fcf swe gts0 gts5 gts10 gts30 gdd0 gdd5 gdd10 gdd30 fcf end0 end5 end10 end30 bio01 bio02 bio03 bio04 bio05 bio06 bio07 bio08 bio09 bio10 bio11 bio12 bio13 bio14 bio15 bio16 bio17 bio18 bio19 1st0 1st5 1st10 1st30 lgd gst gsl fgd ; do for YEAR in {1979..2013} ; do echo ${VAR} ${YEAR} ; done ; done  > /gpfs/gibbs/pi/hydro/hydro/dataproces/CHELSA/job_array_bios_list.txt
+  861  cat job_array_bios_list.txt | wc .l
+  862  cat job_array_bios_list.txt | wc -l
+  863  ll
+  864  cd ..
+  865  ls
+  866  cd TERRA/
+  867  ls
+  868  ll
+  869  more hystory4datacheck_final_test.txt 
+  870  less hystory4datacheck_final_test.txt 
+  871  cd ..
+  872  ls
+  873  cd CHELSA/
+  874  ls
+  875  cd ..
+  876  ls
+  877  mk TEST
+  878  mkdir TEST
+  879  cd TEST/
+  880  ls
+  881  mkdir swe gts0 gts5 gts10 gts30 gdd0 gdd5 gdd10 gdd30 fcf end0 end5 end10 end30 bio01 bio02 bio03 bio04 bio05 bio06 bio07 bio08 bio09 bio10 bio11 bio12 bio13 bio14 bio15 bio16 bio17 bio18 bio19 1st0 1st5 1st10 1st30 lgd gst gsl fgd
+  882  ls
+  883  ll
+  884  ll | wc -l
+  885  for i in swe fcf gts0 gts5 gts10 gts30 gdd0 gdd5 gdd10 gdd30 fcf end0 end5 end10 end30 bio01 bio02 bio03 bio04 bio05 bio06 bio07 bio08 bio09 bio10 bio11 bio12 bio13 bio14 bio15 bio16 bio17 bio18 bio19 1st0 1st5 1st10 1st30 lgd gst gsl fgd; do VAR=$(i); YEAR=2013;  if [ $VAR = "lgd" ] || [ $VAR = "gst" ] || [ $VAR = "gsl" ] || [ $VAR = "fgd" ] ; then     wget https://www.wsl.ch/lud/chelsa/data/timeseries/${VAR}/CHELSA_${VAR}_${YEAR}_V1.2.1.sdat.tif     mv $INDIR/$VAR/CHELSA_${VAR}_${YEAR}_.sdat.V1.2.1.tif $INDIR/$VAR/CHELSA_${VAR}_${YEAR}_V1.2.1.tif;  else     wget https://www.wsl.ch/lud/chelsa/data/timeseries/${VAR}/CHELSA_${VAR}_${YEAR}_V1.2.1.tif fi; done
+  886  for VAR in swe fcf gts0 gts5 gts10 gts30 gdd0 gdd5 gdd10 gdd30 fcf end0 end5 end10 end30 bio01 bio02 bio03 bio04 bio05 bio06 bio07 bio08 bio09 bio10 bio11 bio12 bio13 bio14 bio15 bio16 bio17 bio18 bio19 1st0 1st5 1st10 1st30 lgd gst gsl fgd; do                                                                                                                                                                                                                                                   YEAR=2013                                                                                                                                                         ;                                                                                                                                                                    if [ $VAR = "lgd" ] || [ $VAR = "gst" ] || [ $VAR = "gsl" ] || [ $VAR = "fgd" ] ; then                                                                                                                                                                                                                                                    wget https://www.wsl.ch/lud/chelsa/data/timeseries/${VAR}/CHELSA_${VAR}_${YEAR}_V1.2.1.sdat.tif                                                                    mv $INDIR/$VAR/CHELSA_${VAR}_${YEAR}_.sdat.V1.2.1.tif $INDIR/$VAR/CHELSA_${VAR}_${YEAR}_V1.2.1.tif                                                            ;                                                                                                                                                                    else                                                                                                                                                                                                                                                                                                                                      wget https://www.wsl.ch/lud/chelsa/data/timeseries/${VAR}/CHELSA_${VAR}_${YEAR}_V1.2.1.tif                                                                                                                                                                                                                                        fi                                                                                                                                                                ; done
+  887  ll
+  888  rm *.tif
+  889  ll
+  890  rm CHELSA_fcf_2013_V1.2.1.tif.1 
+  891  ll
+  892  ls
+  893  rm -r
+  894  rm -r */
+  895  ls
+  896  echo swe fcf gts0 gts5 gts10 gts30 gdd0 gdd5 gdd10 gdd30 fcf end0 end5 end10 end30 bio01 bio02 bio03 bio04 bio05 bio06 bio07 bio08 bio09 bio10 bio11 bio12 bio13 bio14 bio15 bio16 bio17 bio18 bio19 1st0 1st5 1st10 1st30 lgd gst gsl fgd | xargs -n 1 -P 5 bash -c $'                                                            
+  897                                                                                                                                                                    
+  898  VAR=$1                                                                                                                                                            
+  899                                                                                                                                                                    
+  900  if [ $VAR = "lgd" ] || [ $VAR = "gst" ] || [ $VAR = "gsl" ] || [ $VAR = "fgd" ] ; then                                                                            
+  901                                                                                                                                                                    
+  902      wget https://www.wsl.ch/lud/chelsa/data/timeseries/${VAR}/CHELSA_${VAR}_2013_V1.2.1.sdat.tif                                                                  
+  903  #    gdal_edit.py -a_nodata 65535 -a_ullr -180 84 180 -90 -a_srs EPSG:4326  $INDIR/$VAR/CHELSA_${VAR}_2013_V1.2.1.sdat.tif                                        
+  904      mv CHELSA_${VAR}_2013_V1.2.1.sdat.tif CHELSA_${VAR}_2013_V1.2.1.tif                                                                                           
+  905                                                                                                                                                                    
+  906  else                                                                                                                                                              
+  907                                                                                                                                                                    
+  908      wget https://www.wsl.ch/lud/chelsa/data/timeseries/${VAR}/CHELSA_${VAR}_2013_V1.2.1.tif                                                                       
+  909   #   gdal_edit.py -a_nodata 65535 -a_ullr -180 84 180 -90 -a_srs EPSG:4326  $INDIR/$VAR/CHELSA_${VAR}_2013_V1.2.1.tif                                             
+  910                                                                                                                                                                    
+  911  fi                                                                                                                                                                
+  912  ' _
+  913  ll
+  914  ll | ws -l
+  915  ll | wc -l
+  916  echo swe fcf gts0 gts5 gts10 gts30 gdd0 gdd5 gdd10 gdd30 fcf end0 end5 end10 end30 bio01 bio02 bio03 bio04 bio05 bio06 bio07 bio08 bio09 bio10 bio11 bio12 bio13 bio14 bio15 bio16 bio17 bio18 bio19 1st0 1st5 1st10 1st30 lgd gst gsl fgd | xargs -n 1 -P 5 bash -c $'                                                            
+  917                                                                                                                                                                    
+  918  VAR=$1                                                                                                                                                            
+  919                                                                                                                                                                    
+  920  if [ $VAR = "lgd" ] || [ $VAR = "gst" ] || [ $VAR = "gsl" ] || [ $VAR = "fgd" ] ; then                                                                            
+  921                                                                                                                                                                    
+  922      wget -nc -c -nd https://www.wsl.ch/lud/chelsa/data/timeseries/${VAR}/CHELSA_${VAR}_2013_V1.2.1.sdat.tif                                                       
+  923      mv CHELSA_${VAR}_2013_V1.2.1.sdat.tif CHELSA_${VAR}_2013_V1.2.1.tif                                                                                           
+  924                                                                                                                                                                    
+  925  else                                                                                                                                                              
+  926                                                                                                                                                                    
+  927  if [ $VAR = "bio*" ] ; then                                                                                                                                       
+  928                                                                                                                                                                    
+  929      wget -nc -c -nd https://www.wsl.ch/lud/chelsa/data/timeseries/bio/CHELSA_${VAR}_2013_V1.2.1.tif                                                               
+  930                                                                                                                                                                    
+  931  else                                                                                                                                                              
+  932                                                                                                                                                                    
+  933      wget -nc -c -nd https://www.wsl.ch/lud/chelsa/data/timeseries/${VAR}/CHELSA_${VAR}_2013_V1.2.1.tif                                                            
+  934                                                                                                                                                                    
+  935  fi                                                                                                                                                                
+  936  fi                                                                                                                                                                
+  937                                                                                                                                                                    
+  938  ' _
+  939  ll
+  940  echo bio01 bio02 bio03 bio04 bio05 bio06 bio07 bio08 bio09 bio10 bio11 bio12 bio13 bio14 bio15 bio16 bio17 bio18 bio19 | xargs -n 1 -P 5 bash -c $'               
+  941  VAR=$1                                                                                                                                                            
+  942  wget -nc -c -nd https://www.wsl.ch/lud/chelsa/data/timeseries/bio/CHELSA_${VAR}_2013_V1.2.1.tif                                                                   
+  943  ' _
+  944  ll
+  945  ll | wc -l
+  946  rm CHELSA_fcf_2013_V1.2.1.tif.1
+  947  ll | wc -l
+  948  ll
+  949  ll ..
+  950  cd ../CHELSA/
+  951  ll
+  952  cd ..
+  953  ll
+  954  cd TERRA/
+  955  ll
+  956  tail -n10 hystory4datacheck_final_test.txt 
+  957  cd ../
+  958  ll
+  959  cd TEST
+  960  ll
+  961  for file  in  */*.tif ; do  gdalinfo $file  | grep NoData  ; done
+  962  gdal
+  963  for file  in  */*.tif ; do  gdalinfo $file  | grep NoData  ; done
+  964  for file  in  *.tif ; do  gdalinfo $file  | grep NoData  ; done
+  965  openev CHELSA_swe_2013_V1.2.1.tif
+  966  ll
+  967  gdalinfo CHELSA_swe_2013_V1.2.1.tif
+  968  gdalinfo CHELSA_lgd_2013_V1.2.1.tif
+  969  ll
+  970  for file  in  *.tif ; do  gdalinfo $file  | grep Data  ; done
+  971  for file  in  *.tif ; do  gdalinfo $file    ; done
+  972  for file  in  *.tif ; do  gdalinfo $file  | grep Type  ; done
+  973  ll
+  974  for file  in  *.tif ; do  gdalinfo $file  | grep Type  ; done
+  975  ll
+  976  openev CHELSA_lgd_2013_V1.2.1.tif CHELSA_swe_2013_V1.2.1.tif
+  977  ll
+  978  for file  in  *.tif ; do  gdalinfo $file  | grep Type  ; done
+  979  ll
+  980  openev CHELSA_gts5_2013_V1.2.1.tif
+  981  for file  in  *.tif ; do  gdalinfo $file  | grep Type  ; done
+  982  ll
+  983  openev CHELSA_gts30_2013_V1.2.1.tif
+  984  ll
+  985  openev CHELSA_gst_2013_V1.2.1.tif
+  986  openev CHELSA_bio14_2013_V1.2.1.tif
+  987  ll
+  988  gdal_translate   CHELSA_swe_2013_V1.2.1.tif    CHELSA_swe_2013_V1.2.1_t.tif  
+  989  gdal_translate  -co COMPRESS=LWZ  CHELSA_swe_2013_V1.2.1.tif    CHELSA_swe_2013_V1.2.1_t.tif  
+  990  gdal_translate  -co COMPRESS=LZW  CHELSA_swe_2013_V1.2.1.tif    CHELSA_swe_2013_V1.2.1_t.tif  
+  991  interactivex 
+  992  ll
+  993  cd /gpfs/gibbs/pi/hydro/hydro
+  994  ls
+  995  emacs -nw scripts/TERRA/sc01_terraclimate_wget.sh
+  996  emacs -nw scripts/CHELSA/sc01_CHELSA_wget_jarray.sh
+  997  emacs -nw scripts/CHELSA/sc01_CHELSA_wget_jarray_TempPrec.sh
+  998  emacs -nw scripts/CHELSA/sc01_CHELSA_wget_jarray_bios.sh
+  999  ll
+ 1000  cd /gpfs/gibbs/pi/hydro/hydro
+ 1001  ll
+ 1002  cd dataproces/TEST/
+ 1003  ll
+ 1004  cat zzz.txt 
+ 1005  cd ..
+ 1006  ls
+ 1007  cd ..
+ 1008  ls
+ 1009  cd scripts/
+ 1010  cd CHELSA/
+ 1011  ll
+ 1012  cp sc01_CHELSA_wget_jarray_bios.sh sc01_CHELSA_wget_jarray_sweOT.sh
+ 1013  ll
+ 1014  emacs sc01_CHELSA_wget_jarray_sweOT.sh 
+ 1015  ll
+ 1016  emacs -nw sc01_CHELSA_wget_jarray_bios.sh
+ 1017  emacs -nw sc01_CHELSA_wget_jarray_bios.sh~
+ 1018  history
+ 1019  history > recollecting.txt
