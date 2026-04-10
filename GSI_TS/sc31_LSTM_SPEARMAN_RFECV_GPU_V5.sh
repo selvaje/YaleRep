@@ -159,8 +159,8 @@ print(f"  Final epochs: {FINAL_EPOCHS}")
 print(f"{'='*100}")
 
 # Data Files
-DATA_X = 'stationID_x_y_valueALL_predictors_X1_floredSFD.txt'  # ← Use sample for testing
-DATA_Y = 'stationID_x_y_valueALL_predictors_Y1_floredSFD.txt'
+DATA_X = 'stationID_x_y_valueALL_predictors_X11_floredSFD.txt'  # ← Use sample for testing
+DATA_Y = 'stationID_x_y_valueALL_predictors_Y11_floredSFD.txt'
 
 # Variable definitions
 static_var = [
